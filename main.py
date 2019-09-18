@@ -14,7 +14,7 @@ def make_dict_from_content(content):
 
 if __name__ == '__main__':
     url = "https://download.sj.qq.com/upload/QQphonemanger/5-8-1/QQPhoneManager_990420.5239.exe"
-    headers = {}
+    headers = make_dict_from_content('')
     cookies = make_dict_from_content('')
-    download_helper = DownloadHelper(url, os.getcwd(), headers, {})
+    download_helper = DownloadHelper(url, os.getcwd(), headers, cookies)
     download_helper.start_mission()
