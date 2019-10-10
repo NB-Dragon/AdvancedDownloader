@@ -249,7 +249,7 @@ class DownloadHelper(object):
     @staticmethod
     def _analyse_file_name(response):
         content_disposition = response.headers.get('Content-disposition')
-        if content_disposition:
+        if content_disposition and "filename=" in content_disposition:
             content_list = content_disposition.split(";")
             content_list = [content.strip() for content in content_list[:]]
             filename_content = [content for content in content_list if content.startswith("filename=")][0]
