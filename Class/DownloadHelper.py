@@ -309,7 +309,7 @@ class DownloadHelper(object):
 
     @staticmethod
     def _get_format_file_size(size):
-        units = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "BB", "NB", "DB"]
+        units = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "BB", "NB", "DB", "CB"]
         unit_step = 0
         while size >= 1024:
             size /= 1024
