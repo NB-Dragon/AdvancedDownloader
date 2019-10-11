@@ -22,7 +22,7 @@ class DownloadThread(threading.Thread):
         self._main_queue = main_queue
         self._headers = headers.copy()
         self._cookies = cookies.copy()
-        self._download_step_size = 4 * 1024 * 1024
+        self._download_step_size = 2 ** 22
 
     """
     message [queue_index, state_code]
@@ -68,14 +68,14 @@ class DownloadThread(threading.Thread):
 
     def _write_file_from_stream(self, stream_response, save_file_name):
         current_size = self._get_file_size(save_file_name)
-        writer = open(save_file_name, 'ab+')
+        writer = open(save_file_name, 'a+b')
         try:
-            writer.seek(current_size)
-            writer.truncate(current_size)
+            self._seek_and_truncate_file(writer, current_size)
             for content in stream_response.iter_content(self._download_step_size):
                 writer.write(content)
+                writer.flush()
         except Exception:
-            writer.truncate(current_size)
+            self._seek_and_truncate_file(writer, current_size)
         finally:
             writer.close()
 
@@ -102,6 +102,12 @@ class DownloadThread(threading.Thread):
         else:
             return 0
 
+    @staticmethod
+    def _seek_and_truncate_file(writer, position):
+        if position != 0:
+            writer.seek(position)
+            writer.truncate()
+
 
 class DownloadHelper(object):
     def __init__(self, link, save_path, headers: dict = None, cookies: dict = None):
@@ -119,20 +125,29 @@ class DownloadHelper(object):
         self.known_file_size = None
 
     def start_mission(self):
-        if self._link_info is None:
-            print("任务连接超时，请重试")
-            return
-        self._download_path = self._get_download_directory()
-        self._make_download_queue()
-        self._create_mission()
-        self._listen_mission()
-        self._splice_all_part()
+        if self._check_download_mission_can_run():
+            self._download_path = self._get_download_directory()
+            self._make_download_queue()
+            self._create_mission()
+            self._listen_mission()
+            self._splice_all_part()
 
     def pause_mission(self):
         pass
 
     def delete_mission(self):
         shutil.rmtree(self._download_path)
+
+    def _check_download_mission_can_run(self):
+        if self._link_info and self._link_info['file-name']:
+            return True
+        else:
+            print("任务连接超时，请重试")
+            return False
+
+    def _get_download_directory(self):
+        file_name_no_postfix = os.path.splitext(self._link_info['file-name'])[0]
+        return os.path.join(self._save_path, file_name_no_postfix)
 
     def _make_download_queue(self):
         self._init_download_directory()
@@ -151,10 +166,6 @@ class DownloadHelper(object):
                 self._download_queue["1"] = ["1", 0, 0, False, 0]
         else:
             self._download_queue["1"] = ["1", 0, 0, False, 0]
-
-    def _get_download_directory(self):
-        file_name_no_postfix = os.path.splitext(self._link_info['file-name'])[0]
-        return os.path.join(self._save_path, file_name_no_postfix)
 
     def _init_download_directory(self):
         if not os.path.exists(self._download_path):
@@ -209,7 +220,7 @@ class DownloadHelper(object):
                 file_list.remove(file_name)
         if len(file_list) != 0:
             final_save_name = os.path.join(self._save_path, self._link_info['file-name'])
-            file_writer = open(final_save_name, 'wb+')
+            file_writer = open(final_save_name, 'w+b')
             for index in range(1, len(file_list) + 1):
                 part_file_name = "{}.part{}".format(self._link_info['file-name'], index)
                 part_file_path = os.path.join(self._download_path, part_file_name)
@@ -239,6 +250,8 @@ class DownloadHelper(object):
         if not self._recursive_update_link():
             return None
         stream_response = self._make_response(self._headers, self._cookies)
+        if not stream_response:
+            return None
         file_name = self._analyse_file_name(stream_response)
         content_length = stream_response.headers.get('content-length')
         stream_response.close()
