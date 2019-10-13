@@ -22,7 +22,7 @@ class DownloadThread(threading.Thread):
         self._main_queue = main_queue
         self._headers = headers.copy()
         self._cookies = cookies.copy()
-        self._download_step_size = 2 ** 22
+        self._download_step_size = 2 ** 20
 
     """
     message [queue_index, state_code]
@@ -40,7 +40,6 @@ class DownloadThread(threading.Thread):
                 self._main_queue.put([self._download_range[0], 0])
             elif stream_response.status_code in [200, 206]:
                 self._write_file_from_stream(stream_response, save_file_name)
-                stream_response.close()
                 if self._check_part_file_normal_finish(save_file_name):
                     self._main_queue.put([self._download_range[0], 1])
                 else:
@@ -78,6 +77,7 @@ class DownloadThread(threading.Thread):
             self._seek_and_truncate_file(writer, current_size)
         finally:
             writer.close()
+            stream_response.close()
 
     def _make_part_file_range(self, save_file_name):
         current_size = self._get_file_size(save_file_name)
