@@ -20,10 +20,7 @@ class MessageHandler(threading.Thread):
         while self._run_status:
             if not self._message_queue.empty():
                 message = self._message_queue.get()
-                try:
-                    print(json.dumps(message))
-                except Exception:
-                    print(message)
+                print(json.dumps(message))
 
     def send_stop_state(self):
         self._run_status = False
