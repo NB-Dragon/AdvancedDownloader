@@ -23,12 +23,13 @@ class SpeedListener(threading.Thread):
         start_position = self._calculate_current_download_size()
         while self._run_status:
             end_time = time.time()
-            if end_time - start_time >= 1:
-                end_position = self._calculate_current_download_size()
-                speed_size = (end_position - start_position) // (end_time - start_time)
+            sum_time = end_time - start_time
+            if sum_time >= 1:
                 start_time = end_time
-                start_position = end_position
+                end_position = self._calculate_current_download_size()
+                speed_size = (end_position - start_position) // sum_time
                 speed_description = self._get_format_file_size(speed_size)
+                start_position = end_position
                 self._make_message_and_send(speed_description)
 
     def send_stop_state(self):
