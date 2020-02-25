@@ -175,16 +175,17 @@ class HTTPHelper(object):
         while len(self._download_queue) != 0:
             if not self._download_thread_communicate.empty():
                 message = self._download_thread_communicate.get()
+                download_queue_key = str(message["index"])
                 if message["state_code"] == 1:
-                    if self._check_file_in_normal_region(str(message["index"])):
-                        self._download_queue.pop(str(message["index"]))
+                    if self._check_file_in_normal_region(download_queue_key):
+                        self._download_queue.pop(download_queue_key)
                     else:
-                        self._start_thread_by_identity(str(message["index"]))
+                        self._start_thread_by_identity(download_queue_key)
                 elif message["state_code"] == 0:
-                    self._start_thread_by_identity(str(message["index"]))
+                    self._start_thread_by_identity(download_queue_key)
                 elif message["state_code"] == -1:
-                    self._update_file_correct_size(str(message["index"]))
-                    self._start_thread_by_identity(str(message["index"]))
+                    self._update_file_correct_size(download_queue_key)
+                    self._start_thread_by_identity(download_queue_key)
                 elif message["state_code"] == -2:
                     self._make_message_and_send("资源禁止访问，请确认验证信息")
                     self._speed_listener.send_stop_state()
