@@ -1,1 +1,1 @@
-这里放置Qt Creator的ui布局文件
+这里放置Qt Creator的布局文件
