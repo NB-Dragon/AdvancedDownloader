@@ -30,7 +30,7 @@ def start_message_listener():
 
 
 if __name__ == '__main__':
-    url = "https://imtt.dd.qq.com/16891/apk/9FA87E23E71792BF755FDC8733EBF8BB.apk?fsname=ctrip.android.view_8.19.0_1269.apk&csr=1bbd"
+    url = "https://lipn.univ-paris13.fr/~dam/tool/androidTool/MADLIRA_.7z"
     headers = make_dict_from_headers('')
     cookies = make_dict_from_cookies('')
     message_listener = start_message_listener()
