@@ -1,4 +1,4 @@
-from InterfacePython.HTTPHelper import HTTPHelper
+from InterfaceScheme.HTTPHelper import HTTPHelper
 import urllib.parse
 
 
