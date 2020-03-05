@@ -111,7 +111,7 @@ class DownloadThread(threading.Thread):
             return writer
 
 
-class HTTPHelper(object):
+class HTTPDownloader(object):
     def __init__(self, message_receiver, download_link, work_directory, headers: dict = None, cookies: dict = None):
         self._headers = headers if headers is not None else {}
         self._cookies = cookies if cookies is not None else {}
