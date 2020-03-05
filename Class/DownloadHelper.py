@@ -1,4 +1,4 @@
-from InterfaceScheme.HTTPDownloader import HTTPHelper
+from InterfaceScheme.HTTPDownloader import HTTPDownloader
 import urllib.parse
 
 
@@ -14,9 +14,9 @@ class DownloadHelper(object):
     def _create_download_mission(self):
         link_parse_result = urllib.parse.urlparse(self._download_link)
         scheme = link_parse_result.scheme
-        if scheme == "https" or scheme == "http":
-            heep_helper = HTTPHelper(self._message_receiver, self._download_link,
-                                     self._save_path, self._headers, self._cookies)
+        if scheme in ["https", "http"]:
+            heep_helper = HTTPDownloader(self._message_receiver, self._download_link, self._save_path,
+                                         self._headers, self._cookies)
             heep_helper.start_download_mission()
         else:
             self._make_message_and_send("unknown scheme, please wait to support!")
