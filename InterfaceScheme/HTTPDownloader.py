@@ -129,7 +129,7 @@ class HTTPDownloader(object):
         self._speed_listener = None
 
     def start_download_mission(self):
-        if self._download_link_info is not None:
+        if self._check_can_download():
             self._download_path = self._get_download_directory()
             self._init_download_directory()
             self._init_download_part_file()
@@ -141,6 +141,12 @@ class HTTPDownloader(object):
             self._splice_all_part_file()
         else:
             self._make_message_and_send("资源禁止访问，请确认验证信息")
+
+    def _check_can_download(self):
+        if self._download_link_info is not None:
+            return self._download_link_info["file-name"] != ""
+        else:
+            return False
 
     def _make_download_queue(self):
         if len(self._download_part_file_name) > 1:
@@ -261,16 +267,26 @@ class HTTPDownloader(object):
         if not self._recursive_update_link():
             return None
         stream_response = self._make_response(self._headers, self._cookies)
-        if not stream_response:
+        if self._check_response_can_access(stream_response):
+            file_name = self._analyse_file_name(stream_response)
+            accept_ranges = self._judge_can_range_file() is not None
+            content_length = stream_response.headers.get('content-length')
+            content_length = int(content_length) if content_length is not None else None
+            range_download = content_length is not None and accept_ranges
             stream_response.close()
+            return {"file-name": file_name, "content-length": content_length, "range-download": range_download}
+        else:
             return None
-        file_name = self._analyse_file_name(stream_response)
-        content_length = stream_response.headers.get('content-length')
-        content_length = int(content_length) if content_length is not None else None
-        accept_ranges = self._judge_can_range_file() is not None
-        range_download = content_length is not None and accept_ranges
-        stream_response.close()
-        return {"file-name": file_name, "content-length": content_length, "range-download": range_download}
+
+    @staticmethod
+    def _check_response_can_access(stream_response):
+        if stream_response is None:
+            return False
+        if stream_response.status_code not in [200, 206]:
+            stream_response.close()
+            return False
+        else:
+            return True
 
     @staticmethod
     def _analyse_file_name(response):
