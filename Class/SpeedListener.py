@@ -32,7 +32,6 @@ class SpeedListener(threading.Thread):
     def send_stop_state(self):
         self._run_status = False
 
-    # noinspection PyBroadException
     def _calculate_download_size_change(self, time_stamp):
         size_change_in_per_second = 0
         for file_name_item in self._file_info_register:
@@ -43,8 +42,10 @@ class SpeedListener(threading.Thread):
                 size_change_in_per_second += size_length // time_length
                 file_name_item["size"] = current_size
                 file_name_item["update_time"] = time_stamp
-            except Exception:
+            except FileNotFoundError:
                 self._make_message_and_send({"type": "文件出现读写冲突:{}".format(file_name_item["file_name"])})
+            except Exception as e:
+                self._make_message_and_send({"type": "文件异常", "info": e})
         return size_change_in_per_second
 
     @staticmethod
