@@ -269,27 +269,17 @@ class HTTPDownloader(object):
             return None
         stream_response = self._make_response(self._headers, self._cookies)
         if self._check_response_can_access(stream_response):
-            file_name = self._get_download_file_name()
+            file_name = self._get_download_file_name(stream_response)
             accept_ranges = self._judge_can_range_file() is not None
             content_length = self._get_download_file_size(10 if accept_ranges else 1)
             range_download = accept_ranges and content_length is not None
+            stream_response.close()
             return {"file-name": file_name, "range-download": range_download, "content-length": content_length}
         else:
             return None
 
     @staticmethod
-    def _check_response_can_access(stream_response):
-        if stream_response is None:
-            return False
-        if stream_response.status_code not in [200, 206]:
-            stream_response.close()
-            return False
-        else:
-            stream_response.close()
-            return True
-
-    def _get_download_file_name(self):
-        stream_response = self._make_response(self._headers, self._cookies)
+    def _get_download_file_name(stream_response):
         content_disposition = stream_response.headers.get('Content-disposition')
         if content_disposition and "filename=" in content_disposition:
             content_list = content_disposition.split(";")
@@ -300,27 +290,30 @@ class HTTPDownloader(object):
                 filename = eval(filename)
         else:
             filename = os.path.split(stream_response.url)[-1].split("?")[0]
-        stream_response.close()
         return filename
 
     def _judge_can_range_file(self):
         temp_agent = self._headers.copy()
         temp_agent['Range'] = "bytes=0-19"
         stream_response = self._make_response(temp_agent, self._cookies)
-        content_range = stream_response.headers.get('content-range')
-        accept_range = stream_response.headers.get('accept-ranges')
-        stream_response.close()
-        return content_range or accept_range
+        if self._check_response_can_access(stream_response):
+            content_range = stream_response.headers.get('content-range')
+            accept_range = stream_response.headers.get('accept-ranges')
+            stream_response.close()
+            return content_range or accept_range
+        else:
+            return None
 
     def _get_download_file_size(self, retry_count):
         while retry_count > 0:
             stream_response = self._make_response(self._headers, self._cookies)
-            content_length = stream_response.headers.get('content-length')
-            stream_response.close()
-            if content_length is not None:
-                return int(content_length)
-            else:
-                retry_count -= 1
+            if self._check_response_can_access(stream_response):
+                content_length = stream_response.headers.get('content-length')
+                stream_response.close()
+                if content_length is not None:
+                    return int(content_length)
+                else:
+                    retry_count -= 1
         return None
 
     @staticmethod
@@ -334,14 +327,26 @@ class HTTPDownloader(object):
     def _recursive_update_link(self):
         while True:
             stream_response = self._make_response(self._headers, self._cookies)
-            if stream_response is None: return False
-            temp_link = stream_response.url
-            if temp_link == self._download_link:
-                stream_response.close()
-                return True
+            if self._check_response_can_access(stream_response):
+                temp_link = stream_response.url
+                if temp_link == self._download_link:
+                    stream_response.close()
+                    return True
+                else:
+                    self._download_link = temp_link
+                    stream_response.close()
             else:
-                self._download_link = temp_link
-                stream_response.close()
+                return False
+
+    @staticmethod
+    def _check_response_can_access(stream_response):
+        if stream_response is None:
+            return False
+        if stream_response.status_code in [200, 206]:
+            return True
+        else:
+            stream_response.close()
+            return False
 
     def _make_response(self, headers, cookies):
         try:
