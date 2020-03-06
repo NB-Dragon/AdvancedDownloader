@@ -8,6 +8,7 @@ import queue
 import shutil
 import threading
 import requests
+
 from Class.SpeedListener import SpeedListener
 
 
@@ -268,13 +269,11 @@ class HTTPDownloader(object):
             return None
         stream_response = self._make_response(self._headers, self._cookies)
         if self._check_response_can_access(stream_response):
-            file_name = self._analyse_file_name(stream_response)
+            file_name = self._get_download_file_name()
             accept_ranges = self._judge_can_range_file() is not None
-            content_length = stream_response.headers.get('content-length')
-            content_length = int(content_length) if content_length is not None else None
-            range_download = content_length is not None and accept_ranges
-            stream_response.close()
-            return {"file-name": file_name, "content-length": content_length, "range-download": range_download}
+            content_length = self._get_download_file_size(10 if accept_ranges else 1)
+            range_download = accept_ranges and content_length is not None
+            return {"file-name": file_name, "range-download": range_download, "content-length": content_length}
         else:
             return None
 
@@ -286,11 +285,12 @@ class HTTPDownloader(object):
             stream_response.close()
             return False
         else:
+            stream_response.close()
             return True
 
-    @staticmethod
-    def _analyse_file_name(response):
-        content_disposition = response.headers.get('Content-disposition')
+    def _get_download_file_name(self):
+        stream_response = self._make_response(self._headers, self._cookies)
+        content_disposition = stream_response.headers.get('Content-disposition')
         if content_disposition and "filename=" in content_disposition:
             content_list = content_disposition.split(";")
             content_list = [content.strip() for content in content_list[:]]
@@ -299,7 +299,8 @@ class HTTPDownloader(object):
             if re.findall("^[\"].*?[\"]$", filename):
                 filename = eval(filename)
         else:
-            filename = os.path.split(response.url)[-1].split("?")[0]
+            filename = os.path.split(stream_response.url)[-1].split("?")[0]
+        stream_response.close()
         return filename
 
     def _judge_can_range_file(self):
@@ -310,6 +311,17 @@ class HTTPDownloader(object):
         accept_range = stream_response.headers.get('accept-ranges')
         stream_response.close()
         return content_range or accept_range
+
+    def _get_download_file_size(self, retry_count):
+        while retry_count > 0:
+            stream_response = self._make_response(self._headers, self._cookies)
+            content_length = stream_response.headers.get('content-length')
+            stream_response.close()
+            if content_length is not None:
+                return int(content_length)
+            else:
+                retry_count -= 1
+        return None
 
     @staticmethod
     def _make_each_thread_size(content_size, thread_count):
