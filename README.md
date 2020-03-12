@@ -4,6 +4,7 @@ Advanced Downloader can download limit resources with high speed.
 # Project Schedule
 - [ ] Operation page design.
 - [ ] Application icon design.
+- [ ] Replace request by pycurl to speed up doanloads.
 - [ ] HTTP(s) protocol need to save download config.
 - [ ] FTP protocol support.
 - [ ] Maganet protocol support.
