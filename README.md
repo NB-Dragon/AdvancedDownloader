@@ -17,3 +17,8 @@ All systems which support Python3.
 - [ ] HTTP(s) protocol need to save download config.
 - [ ] FTP protocol support.
 - [ ] Maganet protocol support.
+
+# Donate
+If you have spare crash, welcome to buy a cup of coffee for me.<br>
+And for response, I will make this project better.<br>
+![支付宝付款码](Image/ALiPay.png)
