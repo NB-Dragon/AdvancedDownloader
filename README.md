@@ -7,6 +7,9 @@ Advanced Downloader can download limit resources with high speed.
 3: Download project from **Github** with high speed.<br>
 4: Download files from **Baidu Net Disk** with high speed.
 
+# System support
+All systems which support Python3.
+
 # Project Schedule
 - [ ] Operation page design.
 - [ ] Application icon design.
@@ -14,6 +17,3 @@ Advanced Downloader can download limit resources with high speed.
 - [ ] HTTP(s) protocol need to save download config.
 - [ ] FTP protocol support.
 - [ ] Maganet protocol support.
-
-# System support
-All systems which support Python3.
