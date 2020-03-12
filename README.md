@@ -2,10 +2,10 @@
 Advanced Downloader can download limit resources with high speed.
 
 # Characteristic
-1: Faster than Aria2, Thunder and Browser.
-2: Unlimited number of threads, default 128.
-3: Download project from *Github* with high speed.
-4: Download files from *Baidu Net Disk* with high speed.
+1: Faster than Aria2, Thunder and Browser.<br>
+2: Unlimited number of threads, default 128.<br>
+3: Download project from **Github** with high speed.<br>
+4: Download files from **Baidu Net Disk** with high speed.
 
 # Project Schedule
 - [ ] Operation page design.
