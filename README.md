@@ -1,6 +1,3 @@
-# AdvancedDownloader
-Advanced Downloader can download limit resources with high speed.
-
 # Characteristic
 1: Faster than Aria2, Thunder and Browser.<br>
 2: Unlimited number of threads, default 128.<br>
