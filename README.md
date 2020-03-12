@@ -18,7 +18,7 @@ All systems which support Python3.
 - [ ] FTP protocol support.
 - [ ] Maganet protocol support.
 
-#License
+# License
 GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
 
 # Donate
