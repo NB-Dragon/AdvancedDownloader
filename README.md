@@ -1,3 +1,6 @@
+# AdvancedDownloader
+Download everything with high speed, include limit sources.
+
 # Characteristic
 1: Faster than Aria2, Thunder and Browser.<br>
 2: Unlimited number of threads, default 128.<br>
