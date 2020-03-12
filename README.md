@@ -19,6 +19,5 @@ All systems which support Python3.
 - [ ] Maganet protocol support.
 
 # Donate
-If you have spare crash, welcome to buy a cup of coffee for me.<br>
-And for response, I will make this project better.<br>
+If you have spare crash, welcome to buy a cup of coffee for me. And for response, I will make this project better.
 ![支付宝付款码](Image/ALiPay.png)
