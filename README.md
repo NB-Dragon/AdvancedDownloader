@@ -22,5 +22,5 @@ All systems which support Python3.
 GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
 
 # Donate
-If you have spare crash, welcome to buy a cup of coffee for me. And for response, I will make this project better.<br>
+If you have spare cash, welcome to buy a cup of coffee for me. And for response, I will make this project better.<br>
 ![支付宝付款码](Image/ALiPay.png)
