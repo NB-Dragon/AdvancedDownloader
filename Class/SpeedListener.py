@@ -2,20 +2,26 @@
 # -*- coding: utf-8 -*-
 # Create Time: 2020/2/20 17:10
 # Create User: hya-machine
-import queue
 import os
-import threading
+import math
 import time
+import queue
+import threading
 
 
 class SpeedListener(threading.Thread):
-    def __init__(self, mission_name, file_list, message_receiver: queue.Queue):
+    def __init__(self, message_receiver: queue.Queue):
         super().__init__()
-        self._mission_name = mission_name
-        self._file_list = file_list
         self._message_receiver = message_receiver
+        self._mission_name = ""
+        self._file_info_list = []
         self._run_status = True
-        self._file_info_register = self._init_file_info_register()
+
+    def set_mission_name(self, mission_name):
+        self._mission_name = mission_name
+
+    def set_listen_file_list(self, file_list):
+        self._file_info_list = [{"file_name": file_name, "size": 0, "update_time": 0} for file_name in file_list]
 
     def run(self) -> None:
         start_time = time.time()
@@ -34,7 +40,7 @@ class SpeedListener(threading.Thread):
 
     def _calculate_download_size_change(self, time_stamp):
         size_change_in_per_second = 0
-        for file_name_item in self._file_info_register:
+        for file_name_item in self._file_info_list:
             try:
                 current_size = os.path.getsize(file_name_item["file_name"])
                 time_length = self._calculate_time_length(file_name_item["update_time"], time_stamp)
@@ -52,22 +58,13 @@ class SpeedListener(threading.Thread):
     def _calculate_time_length(pre_time, now_time):
         return 1 if pre_time == 0 else now_time - pre_time
 
-    def _init_file_info_register(self):
-        file_info_list = []
-        for file_name in self._file_list:
-            temp_dict = {"file_name": file_name, "size": 0, "update_time": 0}
-            file_info_list.append(temp_dict)
-        return file_info_list
+    @staticmethod
+    def _get_format_file_size(size):
+        units = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "BB", "NB", "DB", "CB"]
+        unit_step = int(math.log2(size) // 10)
+        format_size = size / (1 << unit_step * 10)
+        return "{:.2f}{}/s".format(format_size, units[unit_step])
 
     def _make_message_and_send(self, content):
         message = {"sender": "SpeedListener", "title": self._mission_name, "result": content}
         self._message_receiver.put(message)
-
-    @staticmethod
-    def _get_format_file_size(size):
-        units = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "BB", "NB", "DB", "CB"]
-        unit_step = 0
-        while size >= 1024:
-            size /= 1024
-            unit_step += 1
-        return "{:.2f}{}/s".format(size, units[unit_step])
