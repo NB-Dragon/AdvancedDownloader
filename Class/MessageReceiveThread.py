@@ -1,26 +1,23 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# Create Time: 2020/2/20 18:02
-# Create User: hya-machine
+import json
 import queue
 import threading
-import json
 
 
-class MessageHandler(threading.Thread):
+class MessageReceiveThread(threading.Thread):
     def __init__(self):
         super().__init__()
         self._message_queue = queue.Queue()
         self._run_status = True
 
-    def get_message_queue(self):
-        return self._message_queue
-
     def run(self) -> None:
-        while self._run_status:
+        while self._run_status or self._message_queue.qsize():
             if not self._message_queue.empty():
                 message = self._message_queue.get()
-                print(json.dumps(message))
+                print(json.dumps(message, ensure_ascii=False))
+
+    def get_message_queue(self):
+        return self._message_queue
 
     def send_stop_state(self):
         self._run_status = False
