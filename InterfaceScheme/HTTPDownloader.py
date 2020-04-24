@@ -9,8 +9,8 @@ import queue
 import shutil
 import threading
 import requests
-
 from Class.SpeedListener import SpeedListener
+from Class.CurlHelper import CurlHelper
 
 
 class DownloadThread(threading.Thread):
@@ -119,41 +119,126 @@ class HTTPDownloader(object):
         self._cookies = cookies if cookies is not None else {}
         self._message_receiver = message_receiver
         self._download_link = download_link
-        self._work_directory = work_directory
 
-        self._download_link_info = self._analyse_link_info()
+        self._speed_listener = SpeedListener(message_receiver)
+        self._curl_helper = CurlHelper(download_link, message_receiver, headers, cookies)
+        self._work_directory = work_directory
         self._max_thread_count = 128  # 每个任务最多同时128个线程下载
 
+        self._target_file_info = None
         self._download_path = ""
         self._download_part_file_name = []
         self._download_queue = {}
         self._download_thread_communicate = queue.Queue()
-        self._speed_listener = None
 
     def start_download_mission(self):
-        if self._check_can_download():
-            self._download_path = self._get_download_directory()
-            self._init_download_directory()
-            self._init_download_part_file()
-            self._make_download_queue()
-            self._start_speed_listener()
-            self._create_download_mission()
-            self._listen_download_message()
-            self._speed_listener.send_stop_state()
-            self._splice_all_part_file()
+        final_download_link = self._curl_helper.get_final_location()
+        if final_download_link:
+            self._target_file_info = self._analyse_link_info(final_download_link)
+            if self._check_can_download():
+                self._download_path = self._get_download_directory()
+                self._init_download_directory()
+                self._init_download_part_file()
+                self._make_download_queue()
+                self._start_speed_listener()
+                self._create_download_mission()
+                self._listen_download_message()
+                self._speed_listener.send_stop_state()
+                self._splice_all_part_file()
+            else:
+                self._make_message_and_send("资源禁止访问，请确认验证信息")
         else:
-            self._make_message_and_send("资源禁止访问，请确认验证信息")
+            self._make_message_and_send("资源连接失败，请检查网络连接")
+
+    def _analyse_link_info(self, final_download_link):
+        temp_agent = self._headers.copy()
+        temp_agent["Range"] = "bytes=0-1"
+        for try_time in range(3):
+            stream_response = self._make_response(final_download_link, temp_agent, self._cookies)
+            if self._check_response_can_access(stream_response):
+                headers = {key.lower(): value for key, value in dict(stream_response.headers).items()}
+                stream_response.close()
+                file_name = self._get_download_file_name(headers, final_download_link)
+                accept_ranges = self._judge_can_range_file(headers)
+                content_length = self._get_download_file_size(headers)
+                range_download = accept_ranges and content_length is not None
+                if range_download:
+                    return {"file-name": file_name, "range-download": range_download, "content-length": content_length}
+                elif try_time == 2:
+                    return {"file-name": file_name, "range-download": range_download, "content-length": content_length}
+        return None
+
+    @staticmethod
+    def _get_download_file_name(headers, link):
+        content_disposition = headers.get("content-disposition")
+        if content_disposition and "filename=" in content_disposition:
+            content_list = content_disposition.split(";")
+            content_list = [content.strip() for content in content_list[:]]
+            filename_content = [content for content in content_list if content.startswith("filename=")][0]
+            filename = re.findall("(?<=filename=).*", filename_content)[0]
+            if re.findall("^[\"].*?[\"]$", filename):
+                filename = eval(filename)
+        else:
+            filename = os.path.split(link)[-1].split("?")[0]
+        return filename
+
+    @staticmethod
+    def _judge_can_range_file(headers):
+        return "content-range" in headers or "accept-ranges" in headers
+
+    @staticmethod
+    def _get_download_file_size(headers):
+        if "content-range" in headers:
+            return int(re.findall("bytes \\d+-\\d+/(\\d+)", headers["content-range"])[0])
+        elif "content-length" in headers:
+            return int(headers.get("content-length"))
+        else:
+            return None
 
     def _check_can_download(self):
-        if self._download_link_info is not None:
-            return self._download_link_info["file-name"] != ""
+        if self._target_file_info is not None:
+            return self._target_file_info["file-name"] != ""
         else:
             return False
+
+    def _get_download_directory(self):
+        file_name_no_postfix = os.path.splitext(self._target_file_info["file-name"])[0]
+        return os.path.join(self._work_directory, file_name_no_postfix)
+
+    def _init_download_directory(self):
+        if not os.path.exists(self._download_path):
+            os.mkdir(self._download_path)
+
+    def _init_download_part_file(self):
+        file_name = self._target_file_info["file-name"]
+        if self._target_file_info["range-download"]:
+            mission_content_size = self._target_file_info["content-length"]
+            if mission_content_size >= self._max_thread_count:
+                for index in range(1, self._max_thread_count + 1):
+                    self._download_part_file_name.append(self._create_part_file_with_index(file_name, index))
+            else:
+                self._download_part_file_name.append(self._create_part_file_with_index(file_name, 1))
+        else:
+            self._download_part_file_name.append(self._create_part_file_with_index(file_name, 1))
+
+    def _create_part_file_with_index(self, filename, part_index):
+        file_name = "{}.part{}".format(filename, part_index)
+        absolute_file_path = os.path.join(self._download_path, file_name)
+        open(absolute_file_path, 'a+b').close()
+        return absolute_file_path
+
+    @staticmethod
+    def _make_each_thread_size(content_size, thread_count):
+        low_base_size = content_size // thread_count
+        content_size_list = [low_base_size] * thread_count
+        height_size_count = content_size - low_base_size * thread_count
+        content_size_list[0:height_size_count] = [low_base_size + 1] * height_size_count
+        return content_size_list
 
     def _make_download_queue(self):
         if len(self._download_part_file_name) > 1:
             current_sum_size = 0
-            mission_content_size = self._download_link_info['content-length']
+            mission_content_size = self._target_file_info["content-length"]
             each_thread_size = self._make_each_thread_size(mission_content_size, self._max_thread_count)
             for index in range(1, self._max_thread_count + 1):
                 file_name = self._download_part_file_name[index - 1]
@@ -167,13 +252,39 @@ class HTTPDownloader(object):
 
     def _make_one_thread_mission(self):
         self._download_queue.clear()
-        file_name = self._make_file_name_for_each_part(1)
-        self._download_queue["1"] = self._make_each_mission_config(1, file_name, 0, 0)
+        file_name = self._download_part_file_name[0]
+        mission_config = self._make_each_mission_config(1, file_name, 0, 0)
+        self._download_queue["1"] = mission_config
+        self._update_mission_correct_size("1")
+
+    def _update_mission_correct_size(self, queue_key):
+        if self._target_file_info["range-download"]:
+            mission = self._download_queue[queue_key]
+            mission_name = mission["filename"]
+            mission["correct_size"] = os.path.getsize(mission_name)
+
+    @staticmethod
+    def _make_each_mission_config(index, file_name, start, end):
+        mission_template = {"index": index, "filename": file_name, "start": start, "end": end}
+        file_size = os.path.getsize(file_name)
+        mission_template["correct_size"] = file_size
+        return mission_template
 
     def _start_speed_listener(self):
-        file_name = self._download_link_info['file-name']
-        self._speed_listener = SpeedListener(file_name, self._download_part_file_name, self._message_receiver)
+        self._speed_listener.set_mission_name(self._target_file_info["file-name"])
+        self._speed_listener.set_listen_file_list(self._download_part_file_name)
         self._speed_listener.start()
+
+    def _splice_all_part_file(self):
+        final_save_name = os.path.join(self._work_directory, self._target_file_info["file-name"])
+        file_writer = open(final_save_name, 'w+b')
+        for each_part_file_name in self._download_part_file_name:
+            part_file_reader = open(each_part_file_name, 'rb')
+            file_writer.write(part_file_reader.read())
+            part_file_reader.close()
+            os.remove(each_part_file_name)
+        file_writer.close()
+        shutil.rmtree(self._download_path)
 
     def _create_download_mission(self):
         for each_mission_key in self._download_queue.keys():
@@ -192,17 +303,11 @@ class HTTPDownloader(object):
                 elif message["state_code"] == 0:
                     self._start_thread_by_identity(download_queue_key)
                 elif message["state_code"] == -1:
-                    self._update_file_correct_size(download_queue_key)
+                    self._update_mission_correct_size(download_queue_key)
                     self._start_thread_by_identity(download_queue_key)
                 elif message["state_code"] == -2:
                     self._make_message_and_send("资源禁止访问，请确认验证信息")
-                    self._speed_listener.send_stop_state()
                     break
-
-    def _update_file_correct_size(self, index):
-        each_download_queue = self._download_queue[index]
-        file_name = each_download_queue["filename"]
-        each_download_queue["correct_size"] = os.path.getsize(file_name)
 
     def _check_file_in_normal_region(self, index):
         each_download_queue = self._download_queue[index]
@@ -215,129 +320,12 @@ class HTTPDownloader(object):
         else:
             return True
 
-    def _splice_all_part_file(self):
-        final_save_name = os.path.join(self._work_directory, self._download_link_info['file-name'])
-        file_writer = open(final_save_name, 'w+b')
-        for each_part_file_name in self._download_part_file_name:
-            part_file_reader = open(each_part_file_name, 'rb')
-            file_writer.write(part_file_reader.read())
-            part_file_reader.close()
-            os.remove(each_part_file_name)
-        file_writer.close()
-        shutil.rmtree(self._download_path)
-
     def _start_thread_by_identity(self, thread_id: str):
         mission_info = self._download_queue[thread_id]
         new_thread = DownloadThread(self._download_link, self._download_path, mission_info,
                                     self._headers, self._cookies,
                                     self._message_receiver, self._download_thread_communicate)
         new_thread.start()
-
-    def _init_download_part_file(self):
-        if self._download_link_info['range-download']:
-            mission_content_size = self._download_link_info['content-length']
-            if mission_content_size >= self._max_thread_count:
-                for index in range(1, self._max_thread_count + 1):
-                    self._download_part_file_name.append(self._make_file_name_for_each_part(index))
-            else:
-                self._download_part_file_name.append(self._make_file_name_for_each_part(1))
-        else:
-            self._download_part_file_name.append(self._make_file_name_for_each_part(1))
-
-    @staticmethod
-    def _make_each_mission_config(index, file_name, start, end):
-        mission_template = {"index": index, "filename": file_name, "start": start, "end": end}
-        file_size = os.path.getsize(file_name)
-        mission_template["correct_size"] = file_size
-        return mission_template
-
-    def _make_file_name_for_each_part(self, part_index):
-        file_name = "{}.part{}".format(self._download_link_info['file-name'], part_index)
-        absolute_file_path = os.path.join(self._download_path, file_name)
-        open(absolute_file_path, 'a+b').close()
-        return absolute_file_path
-
-    def _get_download_directory(self):
-        file_name_no_postfix = os.path.splitext(self._download_link_info['file-name'])[0]
-        return os.path.join(self._work_directory, file_name_no_postfix)
-
-    def _init_download_directory(self):
-        if not os.path.exists(self._download_path):
-            os.mkdir(self._download_path)
-
-    def _analyse_link_info(self):
-        if not self._recursive_update_link():
-            return None
-        stream_response = self._make_response(self._headers, self._cookies)
-        if self._check_response_can_access(stream_response):
-            file_name = self._get_download_file_name(stream_response)
-            accept_ranges = self._judge_can_range_file() is not None
-            content_length = self._get_download_file_size(10 if accept_ranges else 1)
-            range_download = accept_ranges and content_length is not None
-            stream_response.close()
-            return {"file-name": file_name, "range-download": range_download, "content-length": content_length}
-        else:
-            return None
-
-    @staticmethod
-    def _get_download_file_name(stream_response):
-        content_disposition = stream_response.headers.get('Content-disposition')
-        if content_disposition and "filename=" in content_disposition:
-            content_list = content_disposition.split(";")
-            content_list = [content.strip() for content in content_list[:]]
-            filename_content = [content for content in content_list if content.startswith("filename=")][0]
-            filename = re.findall("(?<=filename=).*", filename_content)[0]
-            if re.findall("^[\"].*?[\"]$", filename):
-                filename = eval(filename)
-        else:
-            filename = os.path.split(stream_response.url)[-1].split("?")[0]
-        return filename
-
-    def _judge_can_range_file(self):
-        temp_agent = self._headers.copy()
-        temp_agent['Range'] = "bytes=0-19"
-        stream_response = self._make_response(temp_agent, self._cookies)
-        if self._check_response_can_access(stream_response):
-            content_range = stream_response.headers.get('content-range')
-            accept_range = stream_response.headers.get('accept-ranges')
-            stream_response.close()
-            return content_range or accept_range
-        else:
-            return None
-
-    def _get_download_file_size(self, retry_count):
-        while retry_count > 0:
-            stream_response = self._make_response(self._headers, self._cookies)
-            if self._check_response_can_access(stream_response):
-                content_length = stream_response.headers.get('content-length')
-                stream_response.close()
-                if content_length is not None:
-                    return int(content_length)
-                else:
-                    retry_count -= 1
-        return None
-
-    @staticmethod
-    def _make_each_thread_size(content_size, thread_count):
-        low_base_size = content_size // thread_count
-        content_size_list = [low_base_size] * thread_count
-        height_size_count = content_size - low_base_size * thread_count
-        content_size_list[0:height_size_count] = [low_base_size + 1] * height_size_count
-        return content_size_list
-
-    def _recursive_update_link(self):
-        while True:
-            stream_response = self._make_response(self._headers, self._cookies)
-            if self._check_response_can_access(stream_response):
-                temp_link = stream_response.url
-                if temp_link == self._download_link:
-                    stream_response.close()
-                    return True
-                else:
-                    self._download_link = temp_link
-                    stream_response.close()
-            else:
-                return False
 
     @staticmethod
     def _check_response_can_access(stream_response):
@@ -349,17 +337,17 @@ class HTTPDownloader(object):
             stream_response.close()
             return False
 
-    def _make_response(self, headers, cookies):
+    def _make_response(self, download_link, headers, cookies):
         try:
-            return requests.get(self._download_link, stream=True, timeout=10, headers=headers, cookies=cookies)
+            return requests.get(download_link, stream=True, timeout=10, headers=headers, cookies=cookies)
         except Exception as e:
             self._make_message_and_send(str(e))
             return None
 
     def _make_message_and_send(self, content):
-        if not hasattr(self, '_download_link_info') or self._download_link_info is None:
+        if self._target_file_info is None:
             title = "未知文件名"
         else:
-            title = self._download_link_info['file-name']
+            title = self._target_file_info['file-name']
         message = {"sender": "HTTPHelper", "title": title, "result": content}
         self._message_receiver.put(message)
