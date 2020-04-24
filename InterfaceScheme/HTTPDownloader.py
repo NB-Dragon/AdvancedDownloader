@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 # Create Time: 2020/2/21 09:27
 # Create User: hya-machine
-# 目前针对不满足片段下载的资源，会出现BUG，请慎重使用
 import re
 import os
 import queue
