@@ -1,6 +1,6 @@
-from Class.DownloadHelper import DownloadHelper
-from Class.MessageHandler import MessageHandler
 import os
+from Class.DownloadHelper import DownloadHelper
+from Class.MessageReceiveThread import MessageReceiveThread
 
 
 def make_dict_from_cookies(content):
@@ -24,15 +24,16 @@ def make_dict_from_headers(content):
 
 
 def start_message_listener():
-    message_handler = MessageHandler()
-    message_handler.start()
-    return message_handler
+    message_receiver = MessageReceiveThread()
+    message_receiver.start()
+    return message_receiver
 
 
 if __name__ == '__main__':
-    url = "https://github.com/tensorflow/tensorflow/archive/master.zip"
     headers = make_dict_from_headers('')
     cookies = make_dict_from_cookies('')
-    message_listener = start_message_listener()
-    download_helper = DownloadHelper(message_listener.get_message_queue(), url, os.getcwd(), headers, cookies)
-    message_listener.send_stop_state()
+    url = "https://github.com/tensorflow/tensorflow/archive/master.zip"
+    message_receiver = start_message_listener()
+    message_queue = message_receiver.get_message_queue()
+    download_helper = DownloadHelper(message_queue, url, os.getcwd(), headers, cookies)
+    message_receiver.send_stop_state()
