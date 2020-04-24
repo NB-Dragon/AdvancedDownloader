@@ -52,7 +52,7 @@ class SpeedListener(threading.Thread):
                 self._make_message_and_send({"type": "文件出现读写冲突:{}".format(file_name_item["file_name"])})
             except Exception as e:
                 self._make_message_and_send({"type": "文件异常", "info": e})
-        return size_change_in_per_second
+        return int(size_change_in_per_second)
 
     @staticmethod
     def _calculate_time_length(pre_time, now_time):
@@ -61,9 +61,12 @@ class SpeedListener(threading.Thread):
     @staticmethod
     def _get_format_file_size(size):
         units = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "BB", "NB", "DB", "CB"]
-        unit_step = int(math.log2(size) // 10)
-        format_size = size / (1 << unit_step * 10)
-        return "{:.2f}{}/s".format(format_size, units[unit_step])
+        if size > 0:
+            unit_step = int(math.log2(size) // 10)
+            format_size = size / (1 << unit_step * 10)
+            return "{:.2f}{}/s".format(format_size, units[unit_step])
+        else:
+            return "{:.2f}{}/s".format(size, units[0])
 
     def _make_message_and_send(self, content):
         message = {"sender": "SpeedListener", "title": self._mission_name, "result": content}
