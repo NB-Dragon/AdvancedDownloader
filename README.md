@@ -13,8 +13,8 @@ All systems which support Python3.
 # Project Schedule
 - [ ] Operation page design.
 - [ ] Application icon design.
-- [x] Use _request_ to get information.
-- [ ] Use _pycurl_ to download target file.
+- [x] Get the target file information by using **request**.
+- [ ] Download the target file by using **pycurl**.
 - [ ] HTTP(s) protocol need to save download config.
 - [ ] FTP protocol support.
 - [ ] Maganet protocol support.
