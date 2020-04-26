@@ -13,7 +13,8 @@ All systems which support Python3.
 # Project Schedule
 - [ ] Operation page design.
 - [ ] Application icon design.
-- [ ] Replace request by pycurl to speed up doanloads.
+- [x] Use _request_ to get information.
+- [ ] Use _pycurl_ to download target file.
 - [ ] HTTP(s) protocol need to save download config.
 - [ ] FTP protocol support.
 - [ ] Maganet protocol support.
