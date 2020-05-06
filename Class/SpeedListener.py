@@ -13,12 +13,16 @@ class SpeedListener(threading.Thread):
     def __init__(self, message_receiver: queue.Queue):
         super().__init__()
         self._message_receiver = message_receiver
-        self._mission_name = ""
+        self._download_index = ""
+        self._download_mode = ""
         self._file_info_list = []
         self._run_status = True
 
-    def set_mission_name(self, mission_name):
-        self._mission_name = mission_name
+    def set_download_index(self, download_index):
+        self._download_index = download_index
+
+    def set_download_mode(self, multi_support: bool):
+        self._download_mode = "multi" if multi_support else "single"
 
     def set_listen_file_list(self, file_list):
         self._file_info_list = [{"file_name": file_name, "size": 0, "update_time": 0} for file_name in file_list]
@@ -33,7 +37,7 @@ class SpeedListener(threading.Thread):
                 start_time = end_time
                 speed_size = self._calculate_download_size_change(start_time)
                 speed_description = self._get_format_file_size(speed_size)
-                self._make_message_and_send(speed_description)
+                self._make_message_and_send(speed_description, False)
 
     def send_stop_state(self):
         self._run_status = False
@@ -49,9 +53,9 @@ class SpeedListener(threading.Thread):
                 file_name_item["size"] = current_size
                 file_name_item["update_time"] = time_stamp
             except FileNotFoundError:
-                self._make_message_and_send({"type": "文件出现读写冲突:{}".format(file_name_item["file_name"])})
+                self._make_message_and_send({"type": "读写冲突", "info": file_name_item["file_name"]}, True)
             except Exception as e:
-                self._make_message_and_send({"type": "文件异常", "info": e})
+                self._make_message_and_send({"type": "文件异常", "info": str(e)}, True)
         return int(size_change_in_per_second)
 
     @staticmethod
@@ -68,6 +72,8 @@ class SpeedListener(threading.Thread):
         else:
             return "{:.2f}{}/s".format(size, units[0])
 
-    def _make_message_and_send(self, content):
-        message = {"sender": "SpeedListener", "title": self._mission_name, "result": content}
-        self._message_receiver.put(message)
+    def _make_message_and_send(self, content, exception):
+        index = self._download_index
+        mode = self._download_mode
+        message = {"sender": "SpeedListener", "title": index, "mode": mode, "content": content}
+        self._message_receiver.put({"message": message, "exception": exception})
