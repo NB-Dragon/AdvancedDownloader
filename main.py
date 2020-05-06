@@ -1,4 +1,5 @@
 import os
+import time
 from Class.DownloadHelper import DownloadHelper
 from Class.MessageReceiveThread import MessageReceiveThread
 
@@ -35,5 +36,9 @@ if __name__ == '__main__':
     url = "https://github.com/tensorflow/tensorflow/archive/master.zip"
     message_receiver = start_message_listener()
     message_queue = message_receiver.get_message_queue()
-    download_helper = DownloadHelper(message_queue, url, os.getcwd(), headers, cookies)
+
+    save_path = os.getcwd()
+    download_index = int(time.time() * 1000000)
+
+    download_helper = DownloadHelper(message_queue, url, save_path, download_index, headers, cookies)
     message_receiver.send_stop_state()
