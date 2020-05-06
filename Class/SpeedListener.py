@@ -72,7 +72,7 @@ class SpeedListener(threading.Thread):
         else:
             return "{:.2f}{}/s".format(size, units[0])
 
-    def _make_message_and_send(self, content, exception):
+    def _make_message_and_send(self, content, exception: bool):
         index = self._download_index
         mode = self._download_mode
         message = {"sender": "SpeedListener", "title": index, "mode": mode, "content": content}

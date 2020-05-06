@@ -109,6 +109,6 @@ class CurlHelper(object):
         self._curl.close()
         self._curl = None
 
-    def _make_message_and_send(self, content, exception):
+    def _make_message_and_send(self, content, exception: bool):
         message = {"sender": "CurlHelper", "title": "Network Connect Fail", "content": content}
         self._message_sender.put({"message": message, "exception": exception})

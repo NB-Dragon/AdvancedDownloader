@@ -23,6 +23,6 @@ class DownloadHelper(object):
         else:
             self._make_message_and_send("unknown scheme, please wait to support!", False)
 
-    def _make_message_and_send(self, content, exception):
+    def _make_message_and_send(self, content, exception: bool):
         message = {"sender": "DownloadHelper", "title": self._download_index, "content": content}
         self._message_receiver.put({"message": message, "exception": exception})
