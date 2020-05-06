@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 # Create Time: 2020/3/12 14:16
 # Create User: hya-machine
-import io
 import re
 import queue
 import pycurl
@@ -69,7 +68,7 @@ class CurlHelper(object):
             self._release_self_curl()
             return True
         except Exception as e:
-            self._make_message_and_send(str(e))
+            self._make_message_and_send(str(e), True)
             return False
 
     def get_final_location(self):
@@ -79,7 +78,7 @@ class CurlHelper(object):
             self._perform_curl()
             return self._curl.getinfo(pycurl.EFFECTIVE_URL)
         except Exception as e:
-            self._make_message_and_send(str(e))
+            self._make_message_and_send(str(e), True)
             return None
 
     def only_request_headers(self):
@@ -90,9 +89,9 @@ class CurlHelper(object):
                 self._perform_curl()
                 self._release_self_curl()
             else:
-                self._make_message_and_send("获取有效下载链接失败，请检查网络后重试")
+                self._make_message_and_send("获取有效下载链接失败，请检查网络后重试", False)
         except Exception as e:
-            self._make_message_and_send(str(e))
+            self._make_message_and_send(str(e), True)
 
     def analyse_response_header(self):
         headers = {"link": self._link,
@@ -110,6 +109,6 @@ class CurlHelper(object):
         self._curl.close()
         self._curl = None
 
-    def _make_message_and_send(self, content):
-        message = {"sender": "CurlHelper", "title": "Network Connect Fail", "result": content}
-        self._message_sender.put(message)
+    def _make_message_and_send(self, content, exception):
+        message = {"sender": "CurlHelper", "title": "Network Connect Fail", "content": content}
+        self._message_sender.put({"message": message, "exception": exception})
