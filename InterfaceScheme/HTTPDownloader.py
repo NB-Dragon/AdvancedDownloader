@@ -45,8 +45,6 @@ class DownloadThread(threading.Thread):
                 self._download_thread_communicate.put({"index": mission_index, "state_code": result_code})
             elif stream_response.status_code == 416:
                 self._download_thread_communicate.put({"index": mission_index, "state_code": 1})
-            elif stream_response.status_code == 403:
-                self._download_thread_communicate.put({"index": mission_index, "state_code": -2})
             else:
                 self._download_thread_communicate.put({"index": mission_index, "state_code": 0})
         else:
@@ -61,7 +59,7 @@ class DownloadThread(threading.Thread):
                 writer.flush()
             result_code = 1
         except Exception as e:
-            self._make_message_and_send(str(e))
+            self._make_message_and_send(str(e), True)
             result_code = -1
         finally:
             writer.close()
@@ -82,7 +80,7 @@ class DownloadThread(threading.Thread):
             response = requests.get(self._download_link, stream=True, headers=headers, cookies=cookies, timeout=10)
             return response if self._check_response_region_correct(response) else None
         except Exception as e:
-            self._make_message_and_send(str(e))
+            self._make_message_and_send(str(e), True)
             return None
 
     def _check_response_region_correct(self, response):
@@ -96,9 +94,9 @@ class DownloadThread(threading.Thread):
         else:
             return False
 
-    def _make_message_and_send(self, content):
-        message = {"sender": "DownloadThread", "title": self._mission_info, "result": content}
-        self._message_receiver.put(message)
+    def _make_message_and_send(self, content, exception: bool):
+        message = {"sender": "DownloadThread", "title": self._mission_info, "content": content}
+        self._message_receiver.put({"message": message, "exception": exception})
 
     @staticmethod
     def _get_writer_after_seek_and_truncate(file_name, position):
@@ -113,7 +111,8 @@ class DownloadThread(threading.Thread):
 
 
 class HTTPDownloader(object):
-    def __init__(self, message_receiver, download_link, work_directory, headers: dict = None, cookies: dict = None):
+    def __init__(self, message_receiver, download_link, work_directory, download_index,
+                 headers: dict = None, cookies: dict = None):
         self._headers = headers if headers is not None else {}
         self._cookies = cookies if cookies is not None else {}
         self._message_receiver = message_receiver
@@ -125,6 +124,7 @@ class HTTPDownloader(object):
         self._max_thread_count = 128  # 每个任务最多同时128个线程下载
 
         self._target_file_info = None
+        self._download_index = download_index
         self._download_path = ""
         self._download_part_file_name = []
         self._download_queue = {}
@@ -145,9 +145,9 @@ class HTTPDownloader(object):
                 self._speed_listener.send_stop_state()
                 self._splice_all_part_file()
             else:
-                self._make_message_and_send("资源禁止访问，请确认验证信息")
+                self._make_message_and_send("资源禁止访问，请确认验证信息", False)
         else:
-            self._make_message_and_send("资源连接失败，请检查网络连接")
+            self._make_message_and_send("资源连接失败，请检查网络连接", False)
 
     def _analyse_link_info(self, final_download_link):
         temp_agent = self._headers.copy()
@@ -270,7 +270,8 @@ class HTTPDownloader(object):
         return mission_template
 
     def _start_speed_listener(self):
-        self._speed_listener.set_mission_name(self._target_file_info["file-name"])
+        self._speed_listener.set_download_index(self._download_index)
+        self._speed_listener.set_download_mode(self._target_file_info["range-download"])
         self._speed_listener.set_listen_file_list(self._download_part_file_name)
         self._speed_listener.start()
 
@@ -304,9 +305,6 @@ class HTTPDownloader(object):
                 elif message["state_code"] == -1:
                     self._update_mission_correct_size(download_queue_key)
                     self._start_thread_by_identity(download_queue_key)
-                elif message["state_code"] == -2:
-                    self._make_message_and_send("资源禁止访问，请确认验证信息")
-                    break
 
     def _check_file_in_normal_region(self, index):
         each_download_queue = self._download_queue[index]
@@ -340,13 +338,9 @@ class HTTPDownloader(object):
         try:
             return requests.get(download_link, stream=True, timeout=10, headers=headers, cookies=cookies)
         except Exception as e:
-            self._make_message_and_send(str(e))
+            self._make_message_and_send(str(e), True)
             return None
 
-    def _make_message_and_send(self, content):
-        if self._target_file_info is None:
-            title = "未知文件名"
-        else:
-            title = self._target_file_info['file-name']
-        message = {"sender": "HTTPHelper", "title": title, "result": content}
-        self._message_receiver.put(message)
+    def _make_message_and_send(self, content, exception: bool):
+        message = {"sender": "HTTPHelper", "title": self._download_index, "content": content}
+        self._message_receiver.put({"message": message, "exception": exception})
