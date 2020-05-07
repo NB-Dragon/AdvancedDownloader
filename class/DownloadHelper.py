@@ -1,4 +1,4 @@
-from InterfaceScheme.HTTPDownloader import HTTPDownloader
+from schema.HTTPDownloader import HTTPDownloader
 import urllib.parse
 
 
