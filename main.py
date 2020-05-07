@@ -1,7 +1,7 @@
 import os
 import time
-from Class.DownloadHelper import DownloadHelper
-from Class.MessageReceiveThread import MessageReceiveThread
+from tool.DownloadHelper import DownloadHelper
+from tool.MessageReceiveThread import MessageReceiveThread
 
 
 def make_dict_from_cookies(content):

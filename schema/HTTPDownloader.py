@@ -8,8 +8,8 @@ import queue
 import shutil
 import threading
 import requests
-from Class.SpeedListener import SpeedListener
-from Class.CurlHelper import CurlHelper
+from tool.SpeedListener import SpeedListener
+from tool.CurlHelper import CurlHelper
 
 
 class DownloadThread(threading.Thread):
