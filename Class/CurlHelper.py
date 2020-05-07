@@ -43,6 +43,7 @@ class CurlHelper(object):
         self._curl.setopt(pycurl.TIMEOUT, 30)
         self._curl.setopt(pycurl.HTTPHEADER, format_header)
         self._curl.setopt(pycurl.COOKIE, format_cookie)
+        self._curl.setopt(pycurl.CAINFO, "Cert/ca-cert.pem")
 
     def _follow_location_and_auto_referer(self):
         self._curl.setopt(pycurl.FOLLOWLOCATION, True)
