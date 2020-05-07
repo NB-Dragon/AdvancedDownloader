@@ -91,6 +91,8 @@ class DownloadThread(threading.Thread):
                 return re.findall("{}\\d+/\\d+".format(request_region), region)
             else:
                 return re.findall("{}/\\d+".format(request_region), region)
+        elif self._mission_info["start"] == 0 and self._mission_info["end"] == 0:
+            return True
         else:
             return False
 
