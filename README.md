@@ -1,5 +1,5 @@
 # AdvancedDownloader
-Download everything with high speed, include limit sources.
+Download everything with high speed, and the resources which need to be verified.
 
 # Characteristic
 1: Faster than **Aria2**, **Thunder** and **Browser**.<br>
