@@ -152,6 +152,7 @@ class HTTPDownloader(object):
             self._make_message_and_send("资源连接失败，请检查网络连接", False)
 
     def _analyse_link_info(self, final_download_link):
+        self._make_message_and_send("目标资源连接中", False)
         temp_agent = self._headers.copy()
         temp_agent["Range"] = "bytes=0-1"
         for try_time in range(3):
@@ -211,6 +212,7 @@ class HTTPDownloader(object):
             os.mkdir(self._download_path)
 
     def _init_download_part_file(self):
+        self._make_message_and_send("任务正在初始化", False)
         file_name = self._target_file_info["file-name"]
         if self._target_file_info["range-download"]:
             mission_content_size = self._target_file_info["content-length"]
