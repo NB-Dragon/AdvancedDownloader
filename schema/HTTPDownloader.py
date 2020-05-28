@@ -254,11 +254,10 @@ class HTTPDownloader(object):
             self._make_one_thread_mission()
 
     def _make_one_thread_mission(self):
-        self._download_queue.clear()
         file_name = self._download_part_file_name[0]
         mission_config = self._make_each_mission_config(1, file_name, 0, 0)
+        mission_config["correct_size"] = 0
         self._download_queue["1"] = mission_config
-        self._update_mission_correct_size("1")
 
     def _update_mission_correct_size(self, queue_key):
         if self._target_file_info["range-download"]:
