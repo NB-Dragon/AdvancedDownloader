@@ -7,6 +7,9 @@ Download everything with high speed, and the resources which need to be verified
 3: Download project from **Github** with high speed.<br>
 4: Download files from **Baidu Net Disk** with high speed.
 
+# Download Test
+![下载速度测试](image/SpeedListener.png)
+
 # System support
 All systems which support Python3.
 
