@@ -8,7 +8,7 @@ Download everything with high speed, and the resources which need to be verified
 4: Download files from **Baidu Net Disk** with high speed.
 
 # Download Test
-![下载速度测试](image/SpeedListener.png)
+<p align=center><img alt="下载速度测试" src="image/SpeedListener.png"></p>
 
 # System support
 All systems which support Python3.
@@ -27,4 +27,4 @@ GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
 
 # Donate
 If you have spare cash, welcome to buy a cup of coffee for me. And for response, I will make this project better.<br>
-![支付宝付款码](image/ALiPay.png)
+<p align=center><img alt="支付宝付款码" src="image/ALiPay.png"></p>
