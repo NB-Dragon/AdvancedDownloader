@@ -8,7 +8,7 @@ Download everything with high speed, and the resources which need to be verified
 4: Download files from **Baidu Net Disk** with high speed.
 
 # Download Test
-<p style="text-align: center"><img alt="下载速度测试" src="image/SpeedListener.png"></p>
+<p align=center><img alt="下载速度测试" src="image/SpeedListener.png"></p>
 
 # System support
 All systems which support Python3.
