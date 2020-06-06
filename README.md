@@ -7,6 +7,11 @@ Download everything with high speed, and the resources which need to be verified
 3: Download project from **Github** with high speed.<br>
 4: Download files from **Baidu Net Disk** with high speed.
 
+# Skill
+1: Effectively solve the problem of slow download speed.<br>
+2: Effectively solve the problem of frequent resource interruption.<br>
+3: Effectively solve the problem of resource download verification.
+
 # Download Test
 <p align=center><img alt="下载速度测试" src="image/SpeedListener.png"></p>
 
