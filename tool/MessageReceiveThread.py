@@ -16,12 +16,13 @@ class MessageReceiveThread(threading.Thread):
 
     def run(self) -> None:
         while self._run_status or self._message_queue.qsize():
-            if not self._message_queue.empty():
-                message_dict = self._message_queue.get()
-                if not message_dict["exception"]:
-                    print(json.dumps(message_dict["message"], ensure_ascii=False))
-                else:
-                    self._append_log_message("{}\n".format(message_dict["message"]))
+            message_dict = self._message_queue.get()
+            if message_dict is None:
+                continue
+            if not message_dict["exception"]:
+                print(json.dumps(message_dict["message"], ensure_ascii=False))
+            else:
+                self._append_log_message("{}\n".format(message_dict["message"]))
 
     def _append_log_message(self, message):
         try:
@@ -36,3 +37,4 @@ class MessageReceiveThread(threading.Thread):
 
     def send_stop_state(self):
         self._run_status = False
+        self._message_queue.put(None)
