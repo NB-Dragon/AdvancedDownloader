@@ -51,8 +51,7 @@ class DownloadThread(threading.Thread):
             self._download_thread_communicate.put({"index": mission_index, "state_code": 1})
 
     def _write_file_from_stream(self, stream_response):
-        current_size = self._mission_info["correct_size"]
-        writer = self._get_writer_after_seek_and_truncate(self._mission_info["filename"], current_size)
+        writer = self._get_writer_with_position(self._mission_info["filename"], self._mission_info["correct_size"])
         try:
             for content in stream_response.iter_content(self._download_step_size):
                 writer.write(content)
@@ -101,7 +100,7 @@ class DownloadThread(threading.Thread):
         self._message_receiver.put({"message": message, "exception": exception})
 
     @staticmethod
-    def _get_writer_after_seek_and_truncate(file_name, position):
+    def _get_writer_with_position(file_name, position):
         if position == 0:
             os.remove(file_name)
             return open(file_name, 'a+b')
@@ -257,6 +256,8 @@ class HTTPDownloader(object):
         file_name = self._download_part_file_name[0]
         mission_config = self._make_each_mission_config(1, file_name, 0, 0)
         mission_config["correct_size"] = 0
+        os.remove(file_name)
+        open(file_name, 'a+b').close()
         self._download_queue["1"] = mission_config
 
     def _update_mission_correct_size(self, queue_key):
