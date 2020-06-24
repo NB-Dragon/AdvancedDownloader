@@ -203,8 +203,11 @@ class HTTPDownloader(object):
             return False
 
     def _get_download_directory(self):
-        file_name_no_postfix = os.path.splitext(self._target_file_info["file-name"])[0]
-        return os.path.join(self._work_directory, file_name_no_postfix)
+        filename, postfix = os.path.splitext(self._target_file_info["file-name"])
+        if postfix:
+            return os.path.join(self._work_directory, filename)
+        else:
+            return os.path.join(self._work_directory, "{}-unknown".format(filename))
 
     def _init_download_directory(self):
         if not os.path.exists(self._download_path):
