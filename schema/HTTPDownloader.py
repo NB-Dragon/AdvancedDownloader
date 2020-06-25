@@ -132,6 +132,7 @@ class HTTPDownloader(object):
         self._download_thread_communicate = queue.Queue()
 
     def start_download_mission(self):
+        self._make_message_and_send("目标资源分析中", False)
         final_download_link = self._curl_helper.get_final_location()
         if final_download_link:
             self._target_file_info = self._analyse_link_info(final_download_link)
