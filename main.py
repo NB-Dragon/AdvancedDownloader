@@ -33,6 +33,7 @@ def start_message_listener():
 if __name__ == '__main__':
     headers = make_dict_from_headers('')
     cookies = make_dict_from_cookies('')
+    # url = "https://speedtest3.gd.chinamobile.com.prod.hosts.ooklaserver.net:8080/download?size=1073741824"
     url = "https://github.com/tensorflow/tensorflow/archive/master.zip"
     message_receiver = start_message_listener()
     message_queue = message_receiver.get_message_queue()
