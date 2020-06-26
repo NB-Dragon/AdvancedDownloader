@@ -30,7 +30,6 @@ class DownloadThread(threading.Thread):
     state_code=1 : download success
     state_code=0 : download failed
     state_code=-1: download time out
-    state_code=-2: download forbidden
     """
 
     def run(self) -> None:
@@ -243,16 +242,9 @@ class HTTPDownloader(object):
 
     def _make_download_queue(self):
         if len(self._download_part_file_name) > 1:
-            current_sum_size = 0
             mission_content_size = self._target_file_info["content-length"]
             each_thread_size = self._make_each_thread_size(mission_content_size, self._max_thread_count)
-            for index in range(1, self._max_thread_count + 1):
-                file_name = self._download_part_file_name[index - 1]
-                start_position = current_sum_size
-                end_position = current_sum_size + each_thread_size[index - 1] - 1
-                current_sum_size += each_thread_size[index - 1]
-                mission_config = self._make_each_mission_config(index, file_name, start_position, end_position)
-                self._download_queue[str(index)] = mission_config
+            self._make_multi_thread_mission(each_thread_size)
         else:
             self._make_one_thread_mission()
 
@@ -263,6 +255,16 @@ class HTTPDownloader(object):
         os.remove(file_name)
         open(file_name, 'a+b').close()
         self._download_queue["1"] = mission_config
+
+    def _make_multi_thread_mission(self, thread_size_list):
+        current_sum_size = 0
+        for index in range(len(self._download_part_file_name)):
+            file_name = self._download_part_file_name[index]
+            start_position = current_sum_size
+            end_position = current_sum_size + thread_size_list[index] - 1
+            current_sum_size += thread_size_list[index]
+            mission_config = self._make_each_mission_config(index + 1, file_name, start_position, end_position)
+            self._download_queue[str(index + 1)] = mission_config
 
     def _update_mission_correct_size(self, queue_key):
         if self._target_file_info["range-download"]:
@@ -300,19 +302,18 @@ class HTTPDownloader(object):
 
     def _listen_download_message(self):
         while len(self._download_queue) != 0:
-            if not self._download_thread_communicate.empty():
-                message = self._download_thread_communicate.get()
-                download_queue_key = str(message["index"])
-                if message["state_code"] == 1:
-                    if self._check_file_in_normal_region(download_queue_key):
-                        self._download_queue.pop(download_queue_key)
-                    else:
-                        self._start_thread_by_identity(download_queue_key)
-                elif message["state_code"] == 0:
+            message = self._download_thread_communicate.get()
+            download_queue_key = str(message["index"])
+            if message["state_code"] == 1:
+                if self._check_file_in_normal_region(download_queue_key):
+                    self._download_queue.pop(download_queue_key)
+                else:
                     self._start_thread_by_identity(download_queue_key)
-                elif message["state_code"] == -1:
-                    self._update_mission_correct_size(download_queue_key)
-                    self._start_thread_by_identity(download_queue_key)
+            elif message["state_code"] == 0:
+                self._start_thread_by_identity(download_queue_key)
+            elif message["state_code"] == -1:
+                self._update_mission_correct_size(download_queue_key)
+                self._start_thread_by_identity(download_queue_key)
 
     def _check_file_in_normal_region(self, index):
         each_download_queue = self._download_queue[index]
