@@ -38,6 +38,8 @@ class SpeedListener(threading.Thread):
                 speed_size = self._calculate_download_size_change(start_time)
                 speed_description = self._get_format_file_size(speed_size)
                 self._make_message_and_send(speed_description, False)
+            else:
+                time.sleep(0.1)
 
     def send_stop_state(self):
         self._run_status = False
