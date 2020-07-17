@@ -41,5 +41,5 @@ if __name__ == '__main__':
     save_path = os.getcwd()
     download_index = int(time.time() * 1000000)
 
-    download_helper = DownloadHelper(message_queue, url, save_path, download_index, headers, cookies)
+    DownloadHelper(message_queue, url, save_path, download_index, headers, cookies)
     message_receiver.send_stop_state()
