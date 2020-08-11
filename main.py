@@ -33,13 +33,13 @@ def start_message_listener():
 if __name__ == '__main__':
     headers = make_dict_from_headers('')
     cookies = make_dict_from_cookies('')
-    # url = "https://speedtest3.gd.chinamobile.com.prod.hosts.ooklaserver.net:8080/download?size=1073741824"
-    url = "https://github.com/tensorflow/tensorflow/archive/master.zip"
     message_receiver = start_message_listener()
     message_queue = message_receiver.get_message_queue()
 
+    # url = "https://speedtest3.gd.chinamobile.com.prod.hosts.ooklaserver.net:8080/download?size=1073741824"
+    url = "https://github.com/tensorflow/tensorflow/archive/master.zip"
     save_path = os.getcwd()
     download_index = int(time.time() * 1000000)
-
     DownloadHelper(message_queue, url, save_path, download_index, headers, cookies)
+
     message_receiver.send_stop_state()
