@@ -1,0 +1,1 @@
+|Timestamp|User|Money|
