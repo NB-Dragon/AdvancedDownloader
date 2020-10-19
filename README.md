@@ -31,5 +31,5 @@ GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
 
 # Donate
 If you have spare cash, welcome to buy a cup of coffee for me. And for response, I will make this project better.<br>
-All donations will be displayed on the donation list. Please note "GitHub-001-Username" for donation, such as "GitHub-001-Anonymous"<br>
-<p align=center><img alt="支付宝付款码" src="static/image/ALiPay.png"></p>
+All donations will be displayed on the donation list. Please note "GitHub-001-Username" for donation, such as "GH-001-Anonymous"<br>
+<p align=center><img alt="支付宝付款码" src="image/ALiPay.png"></p>
