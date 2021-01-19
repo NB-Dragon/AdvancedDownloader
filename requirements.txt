@@ -1,2 +1,2 @@
-pycurl~=7.43.0.5
 requests~=2.22.0
+chardet~=3.0.4
