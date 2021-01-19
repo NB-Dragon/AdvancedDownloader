@@ -13,7 +13,7 @@ Download everything with high speed, and the resources which need to be verified
 3: Effectively solve the problem of resource download verification.
 
 # Download Test
-<p align=center><img alt="下载速度测试" src="image/SpeedListener.png"></p>
+<p align=center><img alt="下载速度测试" src="static/image/SpeedListener.png"></p>
 
 # System support
 All systems which support Python3.
@@ -32,4 +32,4 @@ GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
 
 # Donate
 If you have spare cash, welcome to buy a cup of coffee for me. And for response, I will make this project better.<br>
-<p align=center><img alt="支付宝付款码" src="image/ALiPay.png"></p>
+<p align=center><img alt="支付宝付款码" src="static/image/ALiPay.png"></p>
