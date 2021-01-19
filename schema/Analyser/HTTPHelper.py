@@ -13,11 +13,11 @@ class HTTPHelper(object):
         return {"filename": filename, "filesize": filesize, "range": range_skill}
 
     @staticmethod
-    def get_download_region(current_region_list: list, count):
-        assert_content = "The length of `current_region_list` needs to be less than or equal to `count`"
-        assert len(current_region_list) <= count, assert_content
+    def get_download_region(current_region_list: list, spare_worker_count: int):
+        assert_content = "The length of `current_region_list` needs to be less than or equal to `spare_worker_count`"
+        assert len(current_region_list) <= spare_worker_count, assert_content
         mission_distributor = MissionDistributor()
-        grant_region_dict = mission_distributor.get_granted_num_by_region_list(current_region_list, count)
+        grant_region_dict = mission_distributor.get_granted_num_by_region_list(current_region_list, spare_worker_count)
         result_list = list()
         for index in range(len(current_region_list)):
             operate_item = grant_region_dict["sorted_list"][index]
