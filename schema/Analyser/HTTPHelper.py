@@ -1,9 +1,17 @@
+import os
 import re
+import json
+import queue
 import urllib.parse
 from math import ceil
+from tool.FileOperator import FileOperator
 
 
 class HTTPHelper(object):
+    def __init__(self,  mission_uuid, thread_message: queue.Queue):
+        self._mission_uuid = mission_uuid
+        self._thread_message = thread_message
+
     @staticmethod
     def get_download_file_requirement(headers, link):
         filename = HeaderAnalyser.get_download_file_name(headers, link)
@@ -24,6 +32,13 @@ class HTTPHelper(object):
             operate_count = grant_region_dict["granted_list"][index]
             result_list.extend(mission_distributor.split_download_region(operate_item, operate_count))
         return sorted(result_list, key=lambda x: x[0])
+
+    def load_download_config(self, config_file_path):
+        if os.path.exists(config_file_path):
+            file_content = FileOperator(config_file_path, self._mission_uuid, self._thread_message).get_file_content()
+            return json.loads(file_content)
+        else:
+            return None
 
 
 class HeaderAnalyser(object):
