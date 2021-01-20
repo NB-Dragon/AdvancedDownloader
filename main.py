@@ -1,45 +1,18 @@
 import os
-import time
 from tool.DownloadHelper import DownloadHelper
-from tool.MessageReceiveThread import MessageReceiveThread
-
-
-def make_dict_from_cookies(content):
-    each_value_list = content.split(";")
-    result_dict = {}
-    for key_value in each_value_list:
-        if key_value == "": continue
-        key, value = key_value.split("=", 1)
-        result_dict[key.strip()] = value.strip()
-    return result_dict
-
-
-def make_dict_from_headers(content):
-    each_value_list = content.split("\n")
-    result_dict = {}
-    for key_value in each_value_list:
-        if key_value == "": continue
-        key, value = key_value.split(":", 1)
-        result_dict[key.strip()] = value.strip()
-    return result_dict
-
-
-def start_message_listener():
-    message_receiver = MessageReceiveThread()
-    message_receiver.start()
-    return message_receiver
+from schema.RequestDictionary import RequestDictionary
+from listener.ThreadMessageDistributor import ThreadMessageDistributor
 
 
 if __name__ == '__main__':
-    headers = make_dict_from_headers('')
-    cookies = make_dict_from_cookies('')
-    message_receiver = start_message_listener()
-    message_queue = message_receiver.get_message_queue()
+    thread_message_distributor = ThreadMessageDistributor()
+    thread_message_queue = thread_message_distributor.get_message_queue()
+    thread_message_distributor.start()
 
+    headers = RequestDictionary.make_dict_from_headers("")
+    cookies = RequestDictionary.make_dict_from_cookies("")
     # url = "https://speedtest3.gd.chinamobile.com.prod.hosts.ooklaserver.net:8080/download?size=1073741824"
-    url = "https://github.com/tensorflow/tensorflow/archive/master.zip"
-    save_path = os.getcwd()
-    download_index = int(time.time() * 1000000)
-    DownloadHelper(message_queue, url, save_path, download_index, headers, cookies)
+    url = "https://github.com/iBotPeaches/Apktool/releases/download/v2.5.0/apktool_2.5.0.jar"
+    DownloadHelper(thread_message_queue, url, os.getcwd(), headers, cookies)
 
-    message_receiver.send_stop_state()
+    thread_message_distributor.send_stop_state()
