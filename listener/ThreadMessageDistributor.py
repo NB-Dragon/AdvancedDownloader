@@ -1,15 +1,14 @@
-import os
-import sys
 import queue
 import threading
-
 from listener.ActionPrintReceiver import ActionPrintReceiver
+from listener.FileWriterReceiver import FileWriterReceiver
+from tool.RuntimeOperator import RuntimeOperator
 
 
 class ThreadMessageDistributor(threading.Thread):
-    def __init__(self):
+    def __init__(self, runtime_operator: RuntimeOperator):
         super().__init__()
-        self._code_entrance_path = os.path.split(os.path.abspath(sys.argv[0]))[0]
+        self._runtime_operator = runtime_operator
         self._all_listener = self._init_all_listener()
         self._message_queue = queue.Queue()
         self._run_status = True
@@ -38,13 +37,16 @@ class ThreadMessageDistributor(threading.Thread):
     def _init_all_listener(self):
         """
         print : handle all message which need to print
+        file  : handle all file register and writing
         config: 1
-        file  : 1
         """
         result_dict = dict()
-        action_print_receiver = ActionPrintReceiver(self._code_entrance_path)
+        action_print_receiver = ActionPrintReceiver(self._runtime_operator)
         action_print_queue = action_print_receiver.get_message_queue()
         result_dict["print"] = {"receiver": action_print_receiver, "queue": action_print_queue}
+        file_writer_receiver = FileWriterReceiver(self._runtime_operator)
+        file_writer_queue = file_writer_receiver.get_message_queue()
+        result_dict["file"] = {"receiver": file_writer_receiver, "queue": file_writer_queue}
         return result_dict
 
     def _start_all_listener(self):
