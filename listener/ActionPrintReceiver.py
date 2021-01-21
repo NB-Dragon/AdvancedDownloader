@@ -2,6 +2,7 @@ import os
 import json
 import queue
 import threading
+import time
 
 
 class ActionPrintReceiver(threading.Thread):
@@ -16,7 +17,8 @@ class ActionPrintReceiver(threading.Thread):
             message_dict = self._message_queue.get()
             if message_dict is None: continue
             message_exception = message_dict.pop("exception")
-            message_content = json.dumps(message_dict, ensure_ascii=False)
+            time_description = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+            message_content = json.dumps({time_description: message_dict}, ensure_ascii=False)
             if not message_exception:
                 print(message_content)
             else:
