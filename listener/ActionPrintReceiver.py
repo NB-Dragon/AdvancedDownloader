@@ -15,6 +15,7 @@ class ActionPrintReceiver(threading.Thread):
     def run(self) -> None:
         while self._run_status or self._message_queue.qsize():
             message_dict = self._message_queue.get()
+            # {"mission_uuid": str, "detail": {"sender": str, "content": str, "exception": bool}}
             if message_dict is None: continue
             message_exception = message_dict["detail"].pop("exception")
             time_description = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
