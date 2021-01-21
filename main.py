@@ -7,9 +7,12 @@ import os
 from tool.DownloadHelper import DownloadHelper
 from schema.RequestDictionary import RequestDictionary
 from listener.ThreadMessageDistributor import ThreadMessageDistributor
+from tool.RuntimeOperator import RuntimeOperator
 
 if __name__ == '__main__':
-    thread_message_distributor = ThreadMessageDistributor()
+    runtime_operator = RuntimeOperator()
+
+    thread_message_distributor = ThreadMessageDistributor(runtime_operator)
     thread_message_queue = thread_message_distributor.get_message_queue()
     thread_message_distributor.start()
 
