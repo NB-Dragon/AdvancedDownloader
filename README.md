@@ -12,6 +12,10 @@ Download everything with high speed, and the resources which need to be verified
 2: Effectively solve the problem of frequent resource interruption.<br>
 3: Effectively solve the problem of resource download verification.
 
+# Usage
+1: Modify URL, headers and cookies in main.py if you need.<br>
+2: run path/to/your/project/main.py in terminal.
+
 # Download Test
 <p align=center><img alt="下载速度测试" src="static/image/SpeedListener.png"></p>
 

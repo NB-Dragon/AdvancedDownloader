@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Create Time: 2021/1/20 10:00
+# Create User: anonymous
+
 import os
 from tool.DownloadHelper import DownloadHelper
 from schema.RequestDictionary import RequestDictionary
