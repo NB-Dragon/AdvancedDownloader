@@ -3,7 +3,6 @@ from tool.DownloadHelper import DownloadHelper
 from schema.RequestDictionary import RequestDictionary
 from listener.ThreadMessageDistributor import ThreadMessageDistributor
 
-
 if __name__ == '__main__':
     thread_message_distributor = ThreadMessageDistributor()
     thread_message_queue = thread_message_distributor.get_message_queue()
