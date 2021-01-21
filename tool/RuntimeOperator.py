@@ -10,17 +10,17 @@ class RuntimeOperator(object):
         self._check_cache_directory()
         self._setup_cache_inner_file()
 
-    def get_mission_dict(self):
+    def get_mission_state(self):
         if os.path.isfile(self._cache_inner_file["mission"]):
             file_content = self._get_file_content(self._cache_inner_file["mission"])
             if len(file_content):
                 return json.loads(file_content)
             else:
-                return None
+                return {}
         else:
-            return None
+            return {}
 
-    def set_mission_file(self, mission_dict):
+    def set_mission_state(self, mission_dict: dict):
         json_content = json.dumps(mission_dict)
         writer = open(self._cache_inner_file["mission"], 'w')
         writer.write(json_content)
