@@ -20,8 +20,13 @@ class DownloadHelper(object):
             http_helper = HTTPDownloader(self._download_link, self._save_path, self._uuid_description,
                                          self._message_receiver, self._headers, self._cookies)
             http_helper.start_download_mission(128)
+            self._do_final_tips()
         else:
             self._make_message_and_send("unknown scheme, please wait to support!", False)
+
+    def _do_final_tips(self):
+        self._make_message_and_send("下载完成", False)
+        self._make_message_and_send("如有帮助，请前往项目主页赞助，感谢各位：https://github.com/NB-Dragon/AdvancedDownloader", False)
 
     def _make_message_and_send(self, content, exception: bool):
         message_dict = dict()
