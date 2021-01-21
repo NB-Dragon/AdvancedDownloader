@@ -39,7 +39,7 @@ class ThreadMessageDistributor(threading.Thread):
         """
         print : handle all message which need to print
         write : handle all file register and writing
-        config: 1
+        speed : handle all the changes in file size
         """
         result_dict = dict()
         action_print_receiver = ActionPrintReceiver(self._runtime_operator)
