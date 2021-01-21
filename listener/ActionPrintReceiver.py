@@ -1,15 +1,15 @@
-import os
+import time
 import json
 import queue
 import threading
-import time
+from tool.RuntimeOperator import RuntimeOperator
 
 
 class ActionPrintReceiver(threading.Thread):
-    def __init__(self, runtime_entrance_path):
+    def __init__(self, runtime_operator: RuntimeOperator):
         super().__init__()
+        self._runtime_operator = runtime_operator
         self._message_queue = queue.Queue()
-        self._log_file = os.path.join(runtime_entrance_path, "log.txt")
         self._run_status = True
 
     def run(self) -> None:
@@ -33,7 +33,8 @@ class ActionPrintReceiver(threading.Thread):
 
     def _append_log_message(self, message):
         try:
-            writer = open(self._log_file, "a")
+            log_file = self._runtime_operator.get_cache_file("log")
+            writer = open(log_file, "a")
             writer.write(message)
             writer.close()
         except Exception as e:
