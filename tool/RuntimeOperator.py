@@ -26,9 +26,6 @@ class RuntimeOperator(object):
         writer.write(json_content)
         writer.close()
 
-    def get_code_entrance_path(self):
-        return self._code_entrance_path
-
     def get_cache_file(self, file_type: str):
         return self._cache_inner_file[file_type]
 
