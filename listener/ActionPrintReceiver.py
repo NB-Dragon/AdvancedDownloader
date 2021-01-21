@@ -1,5 +1,5 @@
-import json
 import os
+import json
 import queue
 import threading
 
@@ -22,6 +22,13 @@ class ActionPrintReceiver(threading.Thread):
             else:
                 self._append_log_message("{}\n".format(message_content))
 
+    def get_message_queue(self):
+        return self._message_queue
+
+    def send_stop_state(self):
+        self._run_status = False
+        self._message_queue.put(None)
+
     def _append_log_message(self, message):
         try:
             writer = open(self._log_file, "a")
@@ -29,10 +36,3 @@ class ActionPrintReceiver(threading.Thread):
             writer.close()
         except Exception as e:
             print(str(e))
-
-    def get_message_queue(self):
-        return self._message_queue
-
-    def send_stop_state(self):
-        self._run_status = False
-        self._message_queue.put(None)
