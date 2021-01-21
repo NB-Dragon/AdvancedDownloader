@@ -31,6 +31,6 @@ class DownloadHelper(object):
     def _make_message_and_send(self, content, exception: bool):
         message_dict = dict()
         message_dict["action"] = "print"
-        message_dict["value"] = {"sender": "DownloadHelper", "mission_uuid": self._uuid_description,
-                                 "content": content, "exception": exception}
+        detail_info = {"sender": "DownloadHelper", "content": content, "exception": exception}
+        message_dict["value"] = {"mission_uuid": self._uuid_description, "detail": detail_info}
         self._message_receiver.put(message_dict)

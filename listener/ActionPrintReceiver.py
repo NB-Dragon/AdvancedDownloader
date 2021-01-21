@@ -16,7 +16,7 @@ class ActionPrintReceiver(threading.Thread):
         while self._run_status or self._message_queue.qsize():
             message_dict = self._message_queue.get()
             if message_dict is None: continue
-            message_exception = message_dict.pop("exception")
+            message_exception = message_dict["detail"].pop("exception")
             time_description = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
             message_content = json.dumps({time_description: message_dict}, ensure_ascii=False)
             if not message_exception:

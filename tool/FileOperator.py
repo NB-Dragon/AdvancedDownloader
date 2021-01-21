@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# Create Time: 2020/4/3 16:55
 import re
 import queue
 import chardet
@@ -49,6 +46,6 @@ class FileOperator(object):
     def _make_message_and_send(self, content, exception: bool):
         message_dict = dict()
         message_dict["action"] = "print"
-        message_dict["value"] = {"sender": "FileOperator", "mission_uuid": self._mission_uuid,
-                                 "content": content, "exception": exception}
+        detail_info = {"sender": "FileOperator", "content": content, "exception": exception}
+        message_dict["value"] = {"mission_uuid": self._mission_uuid, "detail": detail_info}
         self._thread_message.put(message_dict)
