@@ -65,7 +65,7 @@ class MissionDistributor(object):
         result_list = self._average_distribute_by_capacity(sum_of_region_list, average_of_full_size, maximum)
         return {"sorted_list": sorted_by_region_length, "granted_list": result_list}
 
-    def split_download_region(self, current_region: tuple, thread_count: int):
+    def split_download_region(self, current_region: list, thread_count: int):
         """
             @:param current_region: (min, max); 0 <= min, max
             @:param count: 0 < count
@@ -76,7 +76,7 @@ class MissionDistributor(object):
         result_list = list()
         for item in each_small_region_size:
             end_position = current_position + item
-            result_list.append((current_position, end_position - 1))
+            result_list.append([current_position, end_position - 1])
             current_position = end_position
         return result_list
 

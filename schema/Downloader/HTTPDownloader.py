@@ -58,9 +58,9 @@ class HTTPDownloader(object):
 
     def _generate_file_all_region(self, file_info):
         if file_info and file_info["range"]:
-            return HTTPHelper.get_download_region([(0, file_info["filesize"])], self._mission_info["thread_num"])
+            return HTTPHelper.get_download_region([[0, file_info["filesize"]]], self._mission_info["thread_num"])
         else:
-            return [(0,)]
+            return [[0]]
 
     def _generate_tmp_file_path(self, file_info):
         if file_info:
