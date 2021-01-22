@@ -38,6 +38,7 @@ class HTTPDownloader(object):
         writer.close()
 
     def _rename_final_save_file(self):
+        # Must wait for the write receiver to actually process everything
         self._make_message_and_send("文件正在进行整合", False)
         file_info = self._download_config["file_info"]
         save_file = os.path.join(self._mission_info["save_path"], file_info["filename"])
