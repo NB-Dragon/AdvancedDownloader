@@ -17,6 +17,7 @@ class HTTPDownloader(object):
         self._try_to_update_mission_info()
         if self._download_config["file_info"]:
             self._create_download_tmp_file()
+            self._send_download_mission_register()
             # do something here
             self._rename_final_save_file()
         else:
@@ -93,6 +94,13 @@ class HTTPDownloader(object):
         except Exception as e:
             self._make_message_and_send(str(e), True)
             return None
+
+    def _send_download_mission_register(self):
+        message_dict = dict()
+        message_dict["action"] = "write"
+        detail_info = {"type": "register", "mission_info": self._mission_info, "download_info": self._download_config}
+        message_dict["value"] = {"mission_uuid": self._mission_uuid, "detail": detail_info}
+        self._thread_message.put(message_dict)
 
     def _make_message_and_send(self, content, exception: bool):
         message_dict = dict()
