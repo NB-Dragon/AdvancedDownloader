@@ -17,9 +17,10 @@ class DownloadHelper(object):
         link_parse_result = urllib.parse.urlparse(self._download_link)
         scheme = link_parse_result.scheme
         if scheme in ["https", "http"]:
-            http_helper = HTTPDownloader(self._download_link, self._save_path, self._uuid_description,
-                                         self._message_receiver, self._headers, self._cookies)
-            http_helper.start_download_mission(128)
+            base_info = {"download_link": self._download_link, "save_path": self._save_path, "thread_num": 128,
+                         "headers": self._headers, "cookies": self._cookies}
+            http_helper = HTTPDownloader(self._uuid_description, base_info, self._message_receiver)
+            http_helper.start_download_mission()
             self._do_final_tips()
         else:
             self._make_message_and_send("unknown scheme, please wait to support!", False)
