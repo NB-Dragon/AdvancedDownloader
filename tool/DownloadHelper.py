@@ -12,7 +12,7 @@ class DownloadHelper(object):
         link_parse_result = urllib.parse.urlparse(base_info["download_link"])
         scheme = link_parse_result.scheme
         if scheme in ["https", "http"]:
-            http_helper = HTTPDownloader(uuid_description, base_info, self._message_receiver)
+            http_helper = HTTPDownloader(uuid_description, base_info, dict(), self._message_receiver)
             http_helper.start_download_mission()
         else:
             self._make_message_and_send(uuid_description, "unknown scheme, please wait to support!", False)
