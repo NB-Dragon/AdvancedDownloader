@@ -9,9 +9,9 @@ class ThreadMessageDistributor(threading.Thread):
     def __init__(self, runtime_operator: RuntimeOperator):
         super().__init__()
         self._runtime_operator = runtime_operator
-        self._all_listener = self._init_all_listener()
         self._message_queue = queue.Queue()
         self._run_status = True
+        self._init_all_listener()
 
     def run(self) -> None:
         self._start_all_listener()
@@ -41,14 +41,13 @@ class ThreadMessageDistributor(threading.Thread):
         write : handle all file register and writing
         speed : handle all the changes in file size
         """
-        result_dict = dict()
+        self._all_listener = dict()
         action_print_receiver = ActionPrintReceiver(self._runtime_operator)
         action_print_queue = action_print_receiver.get_message_queue()
-        result_dict["print"] = {"receiver": action_print_receiver, "queue": action_print_queue}
-        action_writer_receiver = ActionWriterReceiver(self._runtime_operator, self._message_queue)
-        action_writer_queue = action_writer_receiver.get_message_queue()
-        result_dict["write"] = {"receiver": action_writer_receiver, "queue": action_writer_queue}
-        return result_dict
+        self._all_listener["print"] = {"receiver": action_print_receiver, "queue": action_print_queue}
+        action_write_receiver = ActionWriterReceiver(self._runtime_operator, self._message_queue)
+        action_write_queue = action_write_receiver.get_message_queue()
+        self._all_listener["write"] = {"receiver": action_write_receiver, "queue": action_write_queue}
 
     def _start_all_listener(self):
         for listener in self._all_listener.values():
