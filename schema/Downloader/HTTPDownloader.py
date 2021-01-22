@@ -11,7 +11,7 @@ class HTTPDownloader(object):
         # mission_info = {"download_link": str, "save_path": str, "thread_num": 128, "headers": dict, "cookies": dict}
         self._thread_message = thread_message
         self._download_config = download_info
-        # download_info = {"file_info": dict, "all_region": list[tuple], "tmp_path": str}
+        # download_info = {"file_info": dict, "all_region": list[list], "tmp_path": str}
 
     def start_download_mission(self):
         self._try_to_update_mission_info()
@@ -19,6 +19,9 @@ class HTTPDownloader(object):
             self._create_download_tmp_file()
             self._send_download_mission_register()
             # do something here
+
+            # Must wait for the write receiver to actually process everything
+            self._send_download_mission_finish()
             self._rename_final_save_file()
         else:
             self._make_message_and_send("资源禁止访问，请确认验证信息", False)
@@ -38,7 +41,6 @@ class HTTPDownloader(object):
         writer.close()
 
     def _rename_final_save_file(self):
-        # Must wait for the write receiver to actually process everything
         self._make_message_and_send("文件正在进行整合", False)
         file_info = self._download_config["file_info"]
         save_file = os.path.join(self._mission_info["save_path"], file_info["filename"])
@@ -100,6 +102,13 @@ class HTTPDownloader(object):
         message_dict = dict()
         message_dict["action"] = "write"
         detail_info = {"type": "register", "mission_info": self._mission_info, "download_info": self._download_config}
+        message_dict["value"] = {"mission_uuid": self._mission_uuid, "detail": detail_info}
+        self._thread_message.put(message_dict)
+
+    def _send_download_mission_finish(self):
+        message_dict = dict()
+        message_dict["action"] = "write"
+        detail_info = {"type": "finish"}
         message_dict["value"] = {"mission_uuid": self._mission_uuid, "detail": detail_info}
         self._thread_message.put(message_dict)
 
