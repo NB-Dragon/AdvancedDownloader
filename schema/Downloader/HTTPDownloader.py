@@ -31,13 +31,14 @@ class HTTPDownloader(object):
             self._make_message_and_send("资源禁止访问，请确认验证信息", False)
 
     def _try_to_update_mission_info(self):
+        self._make_message_and_send("资源连接中", False)
         if len(self._download_config) == 0:
             self._download_config["file_info"] = self._analyse_target_file_info()
             self._download_config["all_region"] = self._generate_file_all_region(self._download_config["file_info"])
             self._download_config["tmp_path"] = self._generate_tmp_file_path(self._download_config["file_info"])
 
     def _create_download_tmp_file(self):
-        self._make_message_and_send("文件正在初始化", False)
+        self._make_message_and_send("正在初始化", False)
         writer = open(self._download_config["tmp_path"], 'a+b')
         file_size = self._download_config["file_info"]["filesize"]
         file_buff = self._get_empty_byte_array(self._download_config["tmp_path"], file_size)
@@ -45,7 +46,7 @@ class HTTPDownloader(object):
         writer.close()
 
     def _rename_final_save_file(self):
-        self._make_message_and_send("文件正在进行整合", False)
+        self._make_message_and_send("文件整合中", False)
         file_info = self._download_config["file_info"]
         save_file = os.path.join(self._mission_info["save_path"], file_info["filename"])
         os.rename(self._download_config["tmp_path"], save_file)
