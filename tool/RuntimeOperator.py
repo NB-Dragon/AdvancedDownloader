@@ -11,23 +11,6 @@ class RuntimeOperator(object):
         self._setup_cache_inner_file()
 
     def get_mission_state(self):
-        mission_dict = self._get_mission_dict()
-        for mission_key in mission_dict.keys():
-            tmp_path = mission_dict[mission_key]["download_info"]["tmp_path"]
-            mission_dict[mission_key]["writer"] = open(tmp_path, 'a+b')
-        return mission_dict
-
-    def set_mission_state(self, mission_dict: dict):
-        result_dict = dict()
-        for mission_key in mission_dict.keys():
-            result_dict[mission_key] = mission_dict[mission_key].copy()
-            result_dict[mission_key].pop("writer")
-        json_content = json.dumps(result_dict)
-        writer = open(self._cache_inner_file["mission"], 'w')
-        writer.write(json_content)
-        writer.close()
-
-    def _get_mission_dict(self):
         if os.path.isfile(self._cache_inner_file["mission"]):
             file_content = self._get_file_content(self._cache_inner_file["mission"])
             if len(file_content):
@@ -36,6 +19,12 @@ class RuntimeOperator(object):
                 return {}
         else:
             return {}
+
+    def set_mission_state(self, mission_dict: dict):
+        json_content = json.dumps(mission_dict)
+        writer = open(self._cache_inner_file["mission"], 'w')
+        writer.write(json_content)
+        writer.close()
 
     def get_cache_file(self, file_type: str):
         return self._cache_inner_file[file_type]
