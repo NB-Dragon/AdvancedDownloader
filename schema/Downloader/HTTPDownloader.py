@@ -1,6 +1,7 @@
 import os
 import queue
 import requests
+import threading
 from schema.Analyser.HTTPHelper import HTTPHelper
 
 
@@ -12,6 +13,8 @@ class HTTPDownloader(object):
         self._thread_message = thread_message
         self._download_config = download_info
         # download_info = {"file_info": dict, "all_region": list[list], "tmp_path": str}
+        self._mission_lock = threading.Lock()
+        self._mission_lock.acquire()
 
     def start_download_mission(self):
         self._try_to_update_mission_info()
@@ -20,9 +23,10 @@ class HTTPDownloader(object):
             self._send_download_mission_register()
             # do something here
 
-            # Must wait for the write receiver to actually process everything
             self._send_download_mission_finish()
+            self._mission_lock.acquire()
             self._rename_final_save_file()
+            self._mission_lock.release()
         else:
             self._make_message_and_send("资源禁止访问，请确认验证信息", False)
 
@@ -101,7 +105,8 @@ class HTTPDownloader(object):
     def _send_download_mission_register(self):
         message_dict = dict()
         message_dict["action"] = "write"
-        detail_info = {"type": "register", "mission_info": self._mission_info, "download_info": self._download_config}
+        detail_info = {"type": "register", "lock": self._mission_lock}
+        detail_info.update({"mission_info": self._mission_info, "download_info": self._download_config})
         message_dict["value"] = {"mission_uuid": self._mission_uuid, "detail": detail_info}
         self._thread_message.put(message_dict)
 
