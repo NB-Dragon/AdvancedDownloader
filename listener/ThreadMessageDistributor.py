@@ -1,8 +1,8 @@
 import queue
 import threading
+from tool.RuntimeOperator import RuntimeOperator
 from listener.ActionPrintReceiver import ActionPrintReceiver
 from listener.ActionWriterReceiver import ActionWriterReceiver
-from tool.RuntimeOperator import RuntimeOperator
 
 
 class ThreadMessageDistributor(threading.Thread):
@@ -25,13 +25,12 @@ class ThreadMessageDistributor(threading.Thread):
             else:
                 value = {"exception": False, "content": "action `{}` not defined".format(action)}
                 self._all_listener["print"]["queue"].put(value)
+        self._stop_all_listener()
 
     def get_message_queue(self):
         return self._message_queue
 
     def send_stop_state(self):
-        for listener in self._all_listener.values():
-            listener["receiver"].send_stop_state()
         self._run_status = False
         self._message_queue.put(None)
 
@@ -52,3 +51,7 @@ class ThreadMessageDistributor(threading.Thread):
     def _start_all_listener(self):
         for listener in self._all_listener.values():
             listener["receiver"].start()
+
+    def _stop_all_listener(self):
+        for listener in self._all_listener.values():
+            listener["receiver"].send_stop_state()
