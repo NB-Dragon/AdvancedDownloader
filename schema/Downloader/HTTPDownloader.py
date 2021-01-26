@@ -106,7 +106,7 @@ class HTTPDownloader(object):
 
     def _get_simple_response(self, target_url, headers):
         try:
-            return self._request_pool.request("GET", target_url, headers=headers, preload_content=False, timeout=1)
+            return self._request_pool.request("GET", target_url, headers=headers, preload_content=False, timeout=10)
         except Exception as e:
             self._make_message_and_send(str(e), True)
             return None
