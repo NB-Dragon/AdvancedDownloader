@@ -33,6 +33,7 @@ class HeaderAnalyser(object):
     @staticmethod
     def get_download_file_name(headers, link):
         content_disposition = headers.get("content-disposition")
+        content_type = headers.get("content-type")
         if content_disposition and "filename=" in content_disposition:
             first_disposition = content_disposition.split(",")[0]
             filename = re.findall("(?<=filename=).*", first_disposition)[0]
@@ -41,6 +42,8 @@ class HeaderAnalyser(object):
         else:
             link_parse_result = urllib.parse.urlparse(link)
             filename = link_parse_result.path.split("/")[-1]
+        if content_type and "text/html" in headers.get("content-type"):
+            filename = "index.html" if filename == "" else filename
         return urllib.parse.unquote(filename)
 
     @staticmethod
