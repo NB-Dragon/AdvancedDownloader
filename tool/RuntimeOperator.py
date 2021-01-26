@@ -29,6 +29,9 @@ class RuntimeOperator(object):
     def get_cache_file(self, file_type: str):
         return self._cache_inner_file[file_type]
 
+    def get_code_entrance_path(self):
+        return self._code_entrance_path
+
     def _check_cache_directory(self):
         if not os.path.exists(self._cache_directory):
             os.mkdir(self._cache_directory)
