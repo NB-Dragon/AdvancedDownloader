@@ -1,6 +1,9 @@
+import os
 import re
 import urllib.parse
+import urllib3
 from math import ceil
+from tool.RuntimeOperator import RuntimeOperator
 
 
 class HTTPHelper(object):
@@ -27,6 +30,12 @@ class HTTPHelper(object):
             operate_count = grant_region_dict["granted_list"][index]
             result_list.extend(mission_distributor.split_download_region(operate_item, operate_count))
         return sorted(result_list, key=lambda x: x[0])
+
+    @staticmethod
+    def get_request_pool_manager(alive_count):
+        code_entrance_path = RuntimeOperator().get_code_entrance_path()
+        cert_pem_file = os.path.join(code_entrance_path, "static", "cert", "ca-cert.pem")
+        return urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=cert_pem_file, maxsize=alive_count)
 
 
 class HeaderAnalyser(object):
