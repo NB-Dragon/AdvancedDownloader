@@ -1,3 +1,7 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Create Time: 2021/1/25 10:00
+# Create User: NB-Dragon
 import queue
 import threading
 from tool.RuntimeOperator import RuntimeOperator
