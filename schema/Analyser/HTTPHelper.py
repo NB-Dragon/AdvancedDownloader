@@ -101,7 +101,7 @@ class MissionDistributor(object):
         sum_of_number = sum(times_of_weight_list)
         while sum_of_number > total_distribution:
             number_appearance_dict = self._make_appearance_dict(times_of_weight_list)
-            two_max_number = tuple(sorted(set(times_of_weight_list), reverse=True)[0:2])
+            two_max_number = sorted(set(times_of_weight_list), reverse=True)[0:2]
             sub_between_list = two_max_number[0] - two_max_number[1]
             sub_between_num = sum_of_number - total_distribution
             real_to_sub = min(sub_between_list, sub_between_num)
