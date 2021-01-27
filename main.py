@@ -19,8 +19,7 @@ if __name__ == '__main__':
     headers = RequestDictionary.make_dict_from_headers("")
     # url = "https://gdspeedtest.com.prod.hosts.ooklaserver.net:8080/download?size=25000000"
     url = "https://github.com/iBotPeaches/Apktool/releases/download/v2.5.0/apktool_2.5.0.jar"
-    base_info = {"download_link": url, "save_path": os.getcwd(), "thread_num": 128}
-    base_info.update({"headers": headers})
+    base_info = {"download_link": url, "save_path": os.getcwd(), "thread_num": 128, "headers": headers}
     download_helper.create_new_download_mission(base_info)
 
     thread_message_distributor.send_stop_state()
