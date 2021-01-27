@@ -39,7 +39,7 @@ class HTTPHelper(object):
     def get_request_pool_manager(alive_count):
         code_entrance_path = RuntimeOperator().get_code_entrance_path()
         cert_pem_file = os.path.join(code_entrance_path, "static", "cert", "ca-cert.pem")
-        return urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=cert_pem_file, maxsize=alive_count)
+        return urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=cert_pem_file, maxsize=alive_count, timeout=10)
 
 
 class HeaderAnalyser(object):
