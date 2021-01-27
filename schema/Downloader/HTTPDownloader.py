@@ -4,6 +4,7 @@
 # Create User: NB-Dragon
 import os
 import queue
+import urllib3
 import threading
 from schema.Analyser.HTTPHelper import HTTPHelper
 
@@ -19,14 +20,16 @@ class HTTPDownloader(object):
         self._request_pool = self._init_request_pool()
         self._mission_lock = self._init_mission_lock()
 
+        self._free_worker_count = self._mission_info["thread_num"]
+        self._download_thread_message = queue.Queue()
+
     def start_download_mission(self):
         self._try_to_update_mission_info()
         if self._download_info["file_info"]:
             self._create_download_tmp_file()
             self._send_download_mission_register()
-            # do something here
-
-            self._send_download_mission_finish()
+            self._create_download_mission(self._download_info["all_region"])
+            self._listen_download_message()
             self._mission_lock.acquire()
             self._rename_final_save_file()
             self._mission_lock.release()
@@ -53,10 +56,40 @@ class HTTPDownloader(object):
     def _create_download_tmp_file(self):
         self._make_message_and_send("正在初始化", False)
         writer = open(self._download_info["tmp_path"], 'a+b')
-        file_size = self._download_info["file_info"]["filesize"]
-        file_buff = self._get_empty_byte_array(self._download_info["tmp_path"], file_size)
-        writer.write(file_buff)
+        expect_size = self._download_info["file_info"]["filesize"]
+        if isinstance(expect_size, int):
+            current_size = os.path.getsize(self._download_info["tmp_path"])
+            byte_buffer_4096 = bytearray(4096)
+            for index in range((expect_size - current_size) // 4096):
+                writer.write(byte_buffer_4096)
+            writer.write(bytearray((expect_size - current_size) % 4096))
         writer.close()
+
+    def _create_download_mission(self, region_list):
+        for each_region in region_list:
+            download_thread = DownloadThread(self._mission_uuid, self._mission_info, each_region, self._request_pool,
+                                             self._download_thread_message, self._thread_message)
+            download_thread.start()
+            self._free_worker_count -= 1
+
+    def _listen_download_message(self):
+        while self._free_worker_count != self._mission_info["thread_num"]:
+            message = self._download_thread_message.get()
+            self._free_worker_count += 1
+            if message["state_code"] == 1:
+                if len(message["current_region"]) == 1:
+                    self._send_download_mission_finish()
+            elif message["state_code"] == 0:
+                self._create_download_mission([message["current_region"]])
+            elif message["state_code"] == -1:
+                if len(message["current_region"]) == 2:
+                    start_position = message["current_region"][0] + message["content_length"]
+                    end_position = message["current_region"][1]
+                    tmp_region_list = [[start_position, end_position]]
+                    distribute_list = HTTPHelper.get_download_region(tmp_region_list, self._free_worker_count)
+                    self._create_download_mission(distribute_list)
+                else:
+                    self._create_download_mission([message["current_region"]])
 
     def _rename_final_save_file(self):
         self._make_message_and_send("文件整合中", False)
@@ -91,14 +124,6 @@ class HTTPDownloader(object):
             return None
 
     @staticmethod
-    def _get_empty_byte_array(file_path, expect_size):
-        if isinstance(expect_size, int):
-            current_file_size = os.path.getsize(file_path)
-            return bytearray(expect_size - current_file_size)
-        else:
-            return bytearray(0)
-
-    @staticmethod
     def _check_response_can_access(stream_response):
         if stream_response is None:
             return False
@@ -110,7 +135,7 @@ class HTTPDownloader(object):
 
     def _get_simple_response(self, target_url, headers):
         try:
-            return self._request_pool.request("GET", target_url, headers=headers, preload_content=False, timeout=10)
+            return self._request_pool.request("GET", target_url, headers=headers, preload_content=False)
         except Exception as e:
             self._make_message_and_send(str(e), True)
             return None
@@ -134,5 +159,97 @@ class HTTPDownloader(object):
         message_dict = dict()
         message_dict["action"] = "print"
         detail_info = {"sender": "HTTPDownloader", "content": content, "exception": exception}
+        message_dict["value"] = {"mission_uuid": self._mission_uuid, "detail": detail_info}
+        self._thread_message.put(message_dict)
+
+
+class DownloadThread(threading.Thread):
+    def __init__(self, mission_uuid, mission_info: dict, current_region: list, request_pool,
+                 parent_message: queue.Queue, thread_message: queue.Queue):
+        super().__init__()
+        self._mission_uuid = mission_uuid
+        self._mission_info = mission_info
+        self._current_region = current_region
+        self._request_pool = request_pool
+        self._download_step_size = 4 << 10
+
+        self._parent_message = parent_message
+        self._thread_message = thread_message
+
+    def run(self) -> None:
+        request_headers = self._generate_request_headers()
+        stream_response = self._get_simple_response(request_headers)
+        if stream_response is None:
+            self._send_mission_finish_message(0, 0)
+        elif stream_response.status in [200, 206]:
+            result = self._request_final_content(stream_response)
+            self._send_mission_finish_message(result["state_code"], result["content_length"])
+        else:
+            self._send_mission_finish_message(0, 0)
+
+    def _generate_request_headers(self):
+        base_headers = self._mission_info["headers"].copy()
+        base_headers["Range"] = self._make_download_range_headers()
+        return base_headers
+
+    def _make_download_range_headers(self):
+        if len(self._current_region) == 2:
+            return "bytes={}-{}".format(self._current_region[0], self._current_region[1])
+        else:
+            return "bytes={}-".format(self._current_region[0])
+
+    def _get_simple_response(self, headers):
+        try:
+            target_url = self._mission_info["download_link"]
+            response = self._request_pool.request("GET", target_url, headers=headers, preload_content=False)
+            return response if self._check_response_region_correct(response) else None
+        except Exception as e:
+            self._make_message_and_send(str(e), True)
+            return None
+
+    def _check_response_region_correct(self, response):
+        if len(self._current_region) == 2:
+            expect_range = "bytes {}-{}".format(self._current_region[0], self._current_region[1])
+            content_range = response.headers.get("content-range")
+            return expect_range in content_range
+        else:
+            return True
+
+    def _request_final_content(self, stream_response: urllib3.response.HTTPResponse):
+        content_length = 0
+        try:
+            for cache in stream_response.stream(self._download_step_size):
+                content_length += len(cache)
+                self._send_write_content_message(cache)
+            return {"state_code": 1, "content_length": content_length}
+        except Exception as e:
+            self._make_message_and_send(str(e), True)
+            stream_response.close()
+            return {"state_code": -1, "content_length": content_length}
+
+    def _send_mission_finish_message(self, state_code, content_length):
+        """
+        :param state_code:
+            -1: download time out
+             0: download failed
+             1: download success
+        :param content_length:
+        :return: None
+        """
+        result_dict = {"state_code": state_code, "content_length": content_length}
+        result_dict.update({"current_region": self._current_region})
+        self._parent_message.put(result_dict)
+
+    def _send_write_content_message(self, content):
+        message_dict = dict()
+        message_dict["action"] = "write"
+        detail_info = {"type": "file", "current_region": self._current_region, "content": content}
+        message_dict["value"] = {"mission_uuid": self._mission_uuid, "detail": detail_info}
+        self._thread_message.put(message_dict)
+
+    def _make_message_and_send(self, content, exception: bool):
+        message_dict = dict()
+        message_dict["action"] = "print"
+        detail_info = {"sender": "HTTPDownloader.DownloadThread", "content": content, "exception": exception}
         message_dict["value"] = {"mission_uuid": self._mission_uuid, "detail": detail_info}
         self._thread_message.put(message_dict)
