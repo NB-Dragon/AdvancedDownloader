@@ -221,6 +221,7 @@ class DownloadThread(threading.Thread):
             for cache in stream_response.stream(self._download_step_size):
                 content_length += len(cache)
                 self._send_write_content_message(cache)
+            stream_response.close()
             return {"state_code": 1, "content_length": content_length}
         except Exception as e:
             self._make_message_and_send(str(e), True)
