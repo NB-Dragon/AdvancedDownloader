@@ -4,6 +4,7 @@
 # Create User: NB-Dragon
 import os
 import queue
+import urllib.parse
 import urllib3
 import threading
 from schema.Analyser.HTTPHelper import HTTPHelper
@@ -24,6 +25,7 @@ class HTTPDownloader(object):
         self._download_thread_message = queue.Queue()
 
     def start_download_mission(self):
+        self._encode_mission_info()
         self._try_to_update_mission_info()
         if self._download_info["file_info"]:
             self._create_download_tmp_file()
@@ -45,6 +47,10 @@ class HTTPDownloader(object):
         lock = threading.Lock()
         lock.acquire()
         return lock
+
+    def _encode_mission_info(self):
+        download_link = self._mission_info["download_link"]
+        self._mission_info["download_link"] = urllib.parse.quote(download_link, safe=";/?:@&=+$,~")
 
     def _try_to_update_mission_info(self):
         self._make_message_and_send("资源连接中", False)
