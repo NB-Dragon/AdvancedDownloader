@@ -57,7 +57,9 @@ class HeaderAnalyser(object):
             filename = link_parse_result.path.split("/")[-1]
         if content_type and "text/html" in headers.get("content-type"):
             filename = "index.html" if filename == "" else filename
-        return urllib.parse.unquote(filename)
+        while re.findall("%\\w{2}", filename):
+            filename = urllib.parse.unquote(filename)
+        return filename
 
     @staticmethod
     def get_download_file_size(headers):
