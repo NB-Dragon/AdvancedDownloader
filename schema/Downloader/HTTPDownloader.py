@@ -58,6 +58,7 @@ class HTTPDownloader(object):
             self._download_info["file_info"] = self._analyse_target_file_info()
             self._download_info["all_region"] = self._generate_file_all_region(self._download_info["file_info"])
             self._download_info["tmp_path"] = self._generate_tmp_file_path(self._download_info["file_info"])
+        self._make_message_and_send("资源解析完成", False)
 
     def _create_download_tmp_file(self):
         self._make_message_and_send("正在初始化", False)
