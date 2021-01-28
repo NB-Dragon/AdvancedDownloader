@@ -67,8 +67,8 @@ class HTTPDownloader(object):
 
     def _create_download_mission(self, region_list):
         for each_region in region_list:
-            download_thread = DownloadThread(self._mission_uuid, self._mission_info, each_region, self._request_pool,
-                                             self._download_thread_message, self._thread_message)
+            download_thread = DownloadThread(self._mission_uuid, self._mission_info, each_region,
+                                             self._request_pool, self._download_thread_message, self._thread_message)
             download_thread.start()
             self._free_worker_count -= 1
 
@@ -83,13 +83,11 @@ class HTTPDownloader(object):
                 self._create_download_mission([message["current_region"]])
             elif message["state_code"] == -1:
                 if len(message["current_region"]) == 2:
-                    start_position = message["current_region"][0] + message["content_length"]
-                    end_position = message["current_region"][1]
-                    tmp_region_list = [[start_position, end_position]]
+                    tmp_region_list = [message["current_region"]]
                     distribute_list = HTTPHelper.get_download_region(tmp_region_list, self._free_worker_count)
                     self._create_download_mission(distribute_list)
                 else:
-                    self._create_download_mission([message["current_region"]])
+                    self._create_download_mission([[0]])
 
     def _rename_final_save_file(self):
         self._make_message_and_send("文件整合中", False)
@@ -169,9 +167,9 @@ class DownloadThread(threading.Thread):
         super().__init__()
         self._mission_uuid = mission_uuid
         self._mission_info = mission_info
-        self._current_region = current_region
+        self._current_region = current_region.copy()
         self._request_pool = request_pool
-        self._download_step_size = 4 << 10
+        self._download_step_size = 64 << 10
 
         self._parent_message = parent_message
         self._thread_message = thread_message
@@ -219,8 +217,8 @@ class DownloadThread(threading.Thread):
         content_length = 0
         try:
             for cache in stream_response.stream(self._download_step_size):
+                self._send_write_content_message(content_length, cache)
                 content_length += len(cache)
-                self._send_write_content_message(cache)
             stream_response.close()
             return {"state_code": 1, "content_length": content_length}
         except Exception as e:
@@ -234,17 +232,18 @@ class DownloadThread(threading.Thread):
             -1: download time out
              0: download failed
              1: download success
-        :param content_length:
+        :param content_length: int
         :return: None
         """
-        result_dict = {"state_code": state_code, "content_length": content_length}
-        result_dict.update({"current_region": self._current_region})
+        self._current_region[0] += content_length
+        result_dict = {"state_code": state_code, "current_region": self._current_region}
         self._parent_message.put(result_dict)
 
-    def _send_write_content_message(self, content):
+    def _send_write_content_message(self, current_position, content):
         message_dict = dict()
         message_dict["action"] = "write"
-        detail_info = {"type": "file", "current_region": self._current_region, "content": content}
+        current_region = [self._current_region[0] + current_position, self._current_region[1]]
+        detail_info = {"type": "file", "current_region": current_region, "content": content}
         message_dict["value"] = {"mission_uuid": self._mission_uuid, "detail": detail_info}
         self._thread_message.put(message_dict)
 
