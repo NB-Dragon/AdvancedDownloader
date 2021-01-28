@@ -27,12 +27,17 @@ class ActionWriterReceiver(threading.Thread):
             mission_uuid = message_dict["mission_uuid"]
             message_detail = message_dict["detail"]
             handle_type = message_detail.pop("type")
-            if handle_type == "file":
+            if handle_type == "write":
                 # message_detail = {"type": "write", "current_region": list, "content": bytes}
                 content_info = {"content": message_detail["content"], "length": len(message_detail["content"])}
                 # self._send_speed_size_message(mission_uuid, content_info["length"])
                 self._write_bytes_into_file(mission_uuid, message_detail["current_region"], content_info["content"])
                 self._update_mission_region(mission_uuid, message_detail["current_region"], content_info["length"])
+            elif handle_type == "split":
+                # message_detail = {"type": "split", "current_region": list, "update_region": list}
+                current_region = message_detail["current_region"]
+                update_region = message_detail["update_region"]
+                self._do_with_mission_split(mission_uuid, current_region, update_region)
             elif handle_type == "register":
                 # message_detail = {"type": "register", "mission_info": dict, "download_info": dict, "lock": Any}
                 # self._send_speed_register_message(mission_uuid)
@@ -64,6 +69,13 @@ class ActionWriterReceiver(threading.Thread):
             # here to release thread lock if exists
             self._writer_and_lock_dict.pop(mission_key)
 
+    def _do_with_mission_split(self, mission_uuid, current_region, update_region):
+        all_region = self._mission_dict[mission_uuid]["download_info"]["all_region"]
+        correct_region_index = self._find_correct_region_index(all_region, current_region)
+        all_region.pop(correct_region_index)
+        all_region.extend(update_region)
+        all_region.sort(key=lambda x: x[0])
+
     def _do_with_mission_register(self, mission_uuid, mission_detail):
         self._writer_and_lock_dict[mission_uuid] = dict()
         tmp_file_path = mission_detail["download_info"]["tmp_path"]
@@ -81,7 +93,6 @@ class ActionWriterReceiver(threading.Thread):
         self._runtime_operator.set_mission_state(self._mission_dict)
 
     def _write_bytes_into_file(self, mission_uuid: str, current_region: list, content):
-        print("write -->", current_region)
         writer = self._writer_and_lock_dict[mission_uuid]["writer"]
         writer.seek(current_region[0])
         writer.write(content)
