@@ -250,7 +250,8 @@ class DownloadThread(threading.Thread):
     def _send_write_content_message(self, current_position, content):
         message_dict = dict()
         message_dict["action"] = "write"
-        current_region = [self._current_region[0] + current_position, self._current_region[1]]
+        current_region = self._current_region.copy()
+        current_region[0] += current_position
         detail_info = {"type": "write", "current_region": current_region, "content": content}
         message_dict["value"] = {"mission_uuid": self._mission_uuid, "detail": detail_info}
         self._thread_message.put(message_dict)

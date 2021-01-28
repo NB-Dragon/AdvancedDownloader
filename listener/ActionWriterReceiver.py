@@ -102,8 +102,8 @@ class ActionWriterReceiver(threading.Thread):
         correct_region_index = self._find_correct_region_index(all_region, current_region)
         if isinstance(correct_region_index, int):
             modify_region = all_region.pop(correct_region_index)
-            modify_region[0] = modify_region[0] + length
-            if modify_region[0] <= modify_region[1]:
+            modify_region[0] += length
+            if len(current_region) == 1 or modify_region[0] <= modify_region[1]:
                 all_region.insert(correct_region_index, modify_region)
         if len(all_region) == 0 and self._mission_dict[mission_uuid]["download_info"]["file_info"]["range"]:
             self._do_with_mission_finish(mission_uuid)
