@@ -71,9 +71,8 @@ class ActionWriterReceiver(threading.Thread):
 
     def _do_with_mission_split(self, mission_uuid, current_region, update_region):
         all_region = self._mission_dict[mission_uuid]["download_info"]["all_region"]
-        correct_region_index = self._find_correct_region_index(all_region, current_region)
-        all_region.pop(correct_region_index)
-        all_region.extend(update_region)
+        all_region.remove(current_region)
+        all_region.extend(json.loads(json.dumps(update_region)))
         all_region.sort(key=lambda x: x[0])
 
     def _do_with_mission_register(self, mission_uuid, mission_detail):
