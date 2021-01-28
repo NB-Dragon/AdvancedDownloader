@@ -85,6 +85,7 @@ class HTTPDownloader(object):
                 if len(message["current_region"]) == 2:
                     tmp_region_list = [message["current_region"]]
                     distribute_list = HTTPHelper.get_download_region(tmp_region_list, self._free_worker_count)
+                    self._send_download_mission_split(message["current_region"], distribute_list)
                     self._create_download_mission(distribute_list)
                 else:
                     self._create_download_mission([[0]])
@@ -137,6 +138,13 @@ class HTTPDownloader(object):
         except Exception as e:
             self._make_message_and_send(str(e), True)
             return None
+
+    def _send_download_mission_split(self, current_region, update_region):
+        message_dict = dict()
+        message_dict["action"] = "write"
+        detail_info = {"type": "split", "current_region": current_region, "update_region": update_region}
+        message_dict["value"] = {"mission_uuid": self._mission_uuid, "detail": detail_info}
+        self._thread_message.put(message_dict)
 
     def _send_download_mission_register(self):
         message_dict = dict()
@@ -243,7 +251,7 @@ class DownloadThread(threading.Thread):
         message_dict = dict()
         message_dict["action"] = "write"
         current_region = [self._current_region[0] + current_position, self._current_region[1]]
-        detail_info = {"type": "file", "current_region": current_region, "content": content}
+        detail_info = {"type": "write", "current_region": current_region, "content": content}
         message_dict["value"] = {"mission_uuid": self._mission_uuid, "detail": detail_info}
         self._thread_message.put(message_dict)
 
