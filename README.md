@@ -26,7 +26,7 @@ All systems which support Python3.
 # Project Schedule
 - [ ] Operation page design.
 - [ ] Application icon design.
-- [ ] Use **urllib3** to handle all http/https requests.
+- [x] Use **urllib3** to handle all http/https requests.
 - [ ] HTTP(s) protocol need to save download config.
 - [ ] FTP protocol support.
 - [ ] Maganet protocol support.
