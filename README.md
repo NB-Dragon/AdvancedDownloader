@@ -27,7 +27,7 @@ All systems which support Python3.
 - [ ] Operation page design.
 - [ ] Application icon design.
 - [x] Use **urllib3** to handle all http/https requests.
-- [ ] HTTP(s) protocol need to save download config.
+- [x] HTTP/HTTPS protocol protocol support.
 - [ ] FTP protocol support.
 - [ ] Maganet protocol support.
 
