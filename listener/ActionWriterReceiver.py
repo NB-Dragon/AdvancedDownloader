@@ -42,6 +42,10 @@ class ActionWriterReceiver(threading.Thread):
                 # message_detail = {"type": "register", "mission_info": dict, "download_info": dict, "lock": Any}
                 # self._send_speed_register_message(mission_uuid)
                 self._do_with_mission_register(mission_uuid, message_detail)
+            elif handle_type == "combine":
+                # message_detail = {"type": "register", "lock": Any}
+                # self._send_speed_register_message(mission_uuid)
+                self._do_with_mission_combine(mission_uuid, message_detail)
             elif handle_type == "finish":
                 # message_detail = {"type": "finish"}
                 # self._send_speed_finish_message(mission_uuid)
@@ -59,8 +63,7 @@ class ActionWriterReceiver(threading.Thread):
     def _init_writer_base_on_mission(self):
         for mission_key in self._mission_dict.keys():
             self._writer_and_lock_dict[mission_key] = dict()
-            tmp_file_path = self._mission_dict[mission_key]["download_info"]["tmp_path"]
-            self._writer_and_lock_dict[mission_key]["writer"] = open(tmp_file_path, 'r+b')
+            self._writer_and_lock_dict[mission_key]["writer"] = None
             self._writer_and_lock_dict[mission_key]["lock"] = None
 
     def _close_writer_base_on_mission(self):
@@ -82,6 +85,11 @@ class ActionWriterReceiver(threading.Thread):
         self._writer_and_lock_dict[mission_uuid]["lock"] = mission_detail.pop("lock")
         # Regenerate mission_detail to ensure the absolute difference of memory addresses.
         self._mission_dict[mission_uuid] = json.loads(json.dumps(mission_detail))
+
+    def _do_with_mission_combine(self, mission_uuid, mission_detail):
+        tmp_file_path = self._mission_dict[mission_uuid]["download_info"]["tmp_path"]
+        self._writer_and_lock_dict[mission_uuid]["writer"] = open(tmp_file_path, 'r+b')
+        self._writer_and_lock_dict[mission_uuid]["lock"] = mission_detail.pop("lock")
 
     def _do_with_mission_finish(self, mission_uuid):
         self._writer_and_lock_dict[mission_uuid]["writer"].close()
