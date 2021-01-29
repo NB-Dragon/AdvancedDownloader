@@ -54,7 +54,7 @@ class HTTPDownloader(object):
 
     def _try_to_update_mission_info(self):
         self._make_message_and_send("资源连接中", False)
-        if len(self._download_info) == 0:
+        if len(self._download_info) == 0 or self._download_info["file_info"]["range"] is False:
             self._download_info["file_info"] = self._analyse_target_file_info()
             self._download_info["all_region"] = self._generate_file_all_region(self._download_info["file_info"])
             self._download_info["tmp_path"] = self._generate_tmp_file_path(self._download_info["file_info"])
