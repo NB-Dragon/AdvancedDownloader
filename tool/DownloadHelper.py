@@ -11,16 +11,22 @@ class DownloadHelper(object):
     def __init__(self, message_receiver):
         self._message_receiver = message_receiver
 
-    def create_new_download_mission(self, base_info: dict):
+    def create_new_download_mission(self, mission_info: dict):
         uuid_description = "".join(str(uuid.uuid1()).split("-"))
-        link_parse_result = urllib.parse.urlparse(base_info["download_link"])
+        self._distribute_download_mission(uuid_description, mission_info, dict())
+
+    def load_history_download_mission(self, mission_uuid, mission_info, download_info):
+        self._distribute_download_mission(mission_uuid, mission_info, download_info)
+
+    def _distribute_download_mission(self, mission_uuid, mission_info, download_info):
+        link_parse_result = urllib.parse.urlparse(mission_info["download_link"])
         scheme = link_parse_result.scheme
         if scheme in ["https", "http"]:
-            http_helper = HTTPDownloader(uuid_description, base_info, dict(), self._message_receiver)
+            http_helper = HTTPDownloader(mission_uuid, mission_info, download_info, self._message_receiver)
             http_helper.start_download_mission()
         else:
-            self._make_message_and_send(uuid_description, "unknown scheme, please wait to support!", False)
-        self._do_final_tips(uuid_description)
+            self._make_message_and_send(mission_uuid, "unknown scheme, please wait to support!", False)
+        self._do_final_tips(mission_uuid)
 
     def _do_final_tips(self, uuid_description):
         final_donate_message = "如有帮助，请前往项目主页赞助，感谢各位：https://github.com/NB-Dragon/AdvancedDownloader"
