@@ -12,14 +12,13 @@ class ActionWriterReceiver(threading.Thread):
     def __init__(self, runtime_operator: RuntimeOperator, parent_queue: queue.Queue):
         super().__init__()
         self._runtime_operator = runtime_operator
-        self._mission_dict = self._runtime_operator.get_mission_state()
-        self._writer_and_lock_dict = dict()
         self._parent_queue = parent_queue
+        self._mission_dict = dict()
+        self._writer_and_lock_dict = dict()
         self._message_queue = queue.Queue()
         self._run_status = True
 
     def run(self) -> None:
-        self._init_writer_base_on_mission()
         while self._run_status or self._message_queue.qsize():
             message_dict = self._message_queue.get()
             # {"mission_uuid": str, "detail": Any}
@@ -42,16 +41,11 @@ class ActionWriterReceiver(threading.Thread):
                 # message_detail = {"type": "register", "mission_info": dict, "download_info": dict, "lock": Any}
                 # self._send_speed_register_message(mission_uuid)
                 self._do_with_mission_register(mission_uuid, message_detail)
-            elif handle_type == "combine":
-                # message_detail = {"type": "register", "lock": Any}
-                # self._send_speed_register_message(mission_uuid)
-                self._do_with_mission_combine(mission_uuid, message_detail)
             elif handle_type == "finish":
                 # message_detail = {"type": "finish"}
                 # self._send_speed_finish_message(mission_uuid)
                 self._do_with_mission_finish(mission_uuid)
             self._update_mission_progress()
-        self._close_writer_base_on_mission()
 
     def get_message_queue(self):
         return self._message_queue
@@ -59,18 +53,6 @@ class ActionWriterReceiver(threading.Thread):
     def send_stop_state(self):
         self._run_status = False
         self._message_queue.put(None)
-
-    def _init_writer_base_on_mission(self):
-        for mission_key in self._mission_dict.keys():
-            self._writer_and_lock_dict[mission_key] = dict()
-            self._writer_and_lock_dict[mission_key]["writer"] = None
-            self._writer_and_lock_dict[mission_key]["lock"] = None
-
-    def _close_writer_base_on_mission(self):
-        for mission_key in self._mission_dict.keys():
-            self._writer_and_lock_dict[mission_key]["writer"].close()
-            # here to release thread lock if exists
-            self._writer_and_lock_dict.pop(mission_key)
 
     def _do_with_mission_split(self, mission_uuid, current_region, update_region):
         all_region = self._mission_dict[mission_uuid]["download_info"]["all_region"]
