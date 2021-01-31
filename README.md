@@ -11,11 +11,12 @@ Project link: [https://github.com/NB-Dragon/AdvancedDownloader](https://github.c
 # Skill
 1: Effectively solve the problem of slow download speed.<br>
 2: Effectively solve the problem of frequent resource interruption.<br>
-3: Effectively solve the problem of resource download verification.
+3: Effectively solve the problem of verification while downloading.
 
 # Usage
-1: Modify URL, headers and cookies in main.py if you need.<br>
-2: run path/to/your/project/main.py in terminal.
+1: Run command `pip install -r requirements.txt`<br>
+2: Modify URL and headers in main.py if you need.<br>
+3: Run command `path/to/your/project/main.py` to start download.
 
 # Download Test
 <p align=center><img alt="下载速度测试" src="static/image/SpeedListener.png"></p>
@@ -26,8 +27,7 @@ All systems which support Python3.
 # Project Schedule
 - [ ] Operation page design.
 - [ ] Application icon design.
-- [x] Use **urllib3** to handle all http/https requests.
-- [x] HTTP/HTTPS protocol protocol support.
+- [x] HTTP/HTTPS protocol support.
 - [ ] FTP protocol support.
 - [ ] Maganet protocol support.
 
