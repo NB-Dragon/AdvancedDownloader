@@ -11,7 +11,7 @@ Project link: [https://github.com/NB-Dragon/AdvancedDownloader](https://github.c
 # Skill
 1: Effectively solve the problem of slow download speed.<br>
 2: Effectively solve the problem of frequent resource interruption.<br>
-3: Effectively solve the problem of verification while downloading.
+3: Effectively solve the problem of resources which need to be verified.
 
 # Usage
 1: Run command `pip install -r requirements.txt`<br>
