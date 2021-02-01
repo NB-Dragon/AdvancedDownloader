@@ -29,8 +29,8 @@ class DownloadHelper(object):
         self._do_final_tips(mission_uuid)
 
     def _do_final_tips(self, uuid_description):
-        final_donate_message = "如有帮助，请前往项目主页赞助，感谢各位：https://github.com/NB-Dragon/AdvancedDownloader"
-        self._make_message_and_send(uuid_description, "下载完成", False)
+        final_donate_message = "如有帮助，请扫码给予赞助，感谢各位：path/to/your/project/static/image/ALiPay.png"
+        self._make_message_and_send(uuid_description, "任务结束", False)
         self._make_message_and_send(uuid_description, final_donate_message, False)
 
     def _make_message_and_send(self, uuid_description, content, exception: bool):
