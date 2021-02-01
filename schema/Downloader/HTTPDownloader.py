@@ -61,7 +61,7 @@ class HTTPDownloader(object):
         self._make_message_and_send("资源解析完成", False)
 
     def _create_download_tmp_file(self):
-        self._make_message_and_send("正在初始化", False)
+        self._make_message_and_send("任务正在初始化", False)
         writer = open(self._download_info["tmp_path"], 'a+b')
         expect_size = self._download_info["file_info"]["filesize"]
         if isinstance(expect_size, int):
@@ -71,6 +71,7 @@ class HTTPDownloader(object):
                 writer.write(byte_buffer_4096)
             writer.write(bytearray((expect_size - current_size) % 4096))
         writer.close()
+        self._make_message_and_send("任务初始化结束", False)
 
     def _create_download_mission(self, region_list):
         for each_region in region_list:
