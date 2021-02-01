@@ -57,6 +57,8 @@ class ActionSpeedReceiver(threading.Thread):
         mission_item["current_size"] = self._calc_finish_file_size(download_info)
         mission_item["expect_size"] = download_info["file_info"]["filesize"]
         self._mission_dict[mission_uuid] = mission_item
+        if len(self._mission_dict) == 1:
+            self._start_time = time.time()
 
     def _do_with_mission_finish(self, mission_uuid):
         self._mission_dict.pop(mission_uuid)
