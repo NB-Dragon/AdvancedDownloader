@@ -6,6 +6,7 @@ import queue
 import threading
 from tool.RuntimeOperator import RuntimeOperator
 from listener.ActionPrintReceiver import ActionPrintReceiver
+from listener.ActionSpeedReceiver import ActionSpeedReceiver
 from listener.ActionWriterReceiver import ActionWriterReceiver
 
 
@@ -48,6 +49,9 @@ class ThreadMessageDistributor(threading.Thread):
         action_print_receiver = ActionPrintReceiver(self._runtime_operator)
         action_print_queue = action_print_receiver.get_message_queue()
         self._all_listener["print"] = {"receiver": action_print_receiver, "queue": action_print_queue}
+        action_speed_receiver = ActionSpeedReceiver(self._runtime_operator, self._message_queue)
+        action_speed_queue = action_speed_receiver.get_message_queue()
+        self._all_listener["speed"] = {"receiver": action_speed_receiver, "queue": action_speed_queue}
         action_write_receiver = ActionWriterReceiver(self._runtime_operator, self._message_queue)
         action_write_queue = action_write_receiver.get_message_queue()
         self._all_listener["write"] = {"receiver": action_write_receiver, "queue": action_write_queue}
