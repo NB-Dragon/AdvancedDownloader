@@ -11,11 +11,11 @@ class DownloadHelper(object):
     def __init__(self, message_receiver):
         self._message_receiver = message_receiver
 
-    def create_new_download_mission(self, mission_info: dict):
+    def create_download_mission(self, mission_info: dict):
         uuid_description = "".join(str(uuid.uuid1()).split("-"))
         self._distribute_download_mission(uuid_description, mission_info, dict())
 
-    def load_history_download_mission(self, mission_uuid, mission_info, download_info):
+    def load_download_mission(self, mission_uuid, mission_info, download_info):
         self._distribute_download_mission(mission_uuid, mission_info, download_info)
 
     def _distribute_download_mission(self, mission_uuid, mission_info, download_info):
