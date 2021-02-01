@@ -35,22 +35,22 @@ class ActionWriterReceiver(threading.Thread):
     def _handle_message_detail(self, mission_uuid, mission_detail):
         handle_type = mission_detail.pop("type")
         if handle_type == "write":
-            # message_detail = {"type": "write", "current_region": list, "content": bytes}
+            # mission_detail = {"type": "write", "current_region": list, "content": bytes}
             content_info = {"content": mission_detail["content"], "length": len(mission_detail["content"])}
             # self._send_speed_size_message(mission_uuid, content_info["length"])
             self._write_bytes_into_file(mission_uuid, mission_detail["current_region"], content_info["content"])
             self._update_mission_region(mission_uuid, mission_detail["current_region"], content_info["length"])
         elif handle_type == "split":
-            # message_detail = {"type": "split", "current_region": list, "update_region": list}
+            # mission_detail = {"type": "split", "current_region": list, "update_region": list}
             current_region = mission_detail["current_region"]
             update_region = mission_detail["update_region"]
             self._do_with_mission_split(mission_uuid, current_region, update_region)
         elif handle_type == "register":
-            # message_detail = {"type": "register", "mission_info": dict, "download_info": dict, "lock": Any}
+            # mission_detail = {"type": "register", "mission_info": dict, "download_info": dict, "lock": Any}
             # self._send_speed_register_message(mission_uuid)
             self._do_with_mission_register(mission_uuid, mission_detail)
         elif handle_type == "finish":
-            # message_detail = {"type": "finish"}
+            # mission_detail = {"type": "finish"}
             # self._send_speed_finish_message(mission_uuid)
             self._do_with_mission_finish(mission_uuid)
         self._update_mission_progress()
