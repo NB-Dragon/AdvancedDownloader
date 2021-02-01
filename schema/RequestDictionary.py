@@ -3,7 +3,7 @@ class RequestDictionary(object):
     def get_default_user_agent():
         user_agent_list = list()
         user_agent_list.append("Mozilla/5.0")
-        return "User-Agent: {}".format(" ".join(user_agent_list))
+        return {"User-Agent": " ".join(user_agent_list)}
 
     @staticmethod
     def make_dict_from_headers(content):
