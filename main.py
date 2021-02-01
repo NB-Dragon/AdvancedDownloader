@@ -20,6 +20,6 @@ if __name__ == '__main__':
     # url = "https://vipspeedtest1.wuhan.net.cn:8080/download?size=25000000&r=0.5588543787999258"
     url = "https://github.com/iBotPeaches/Apktool/releases/download/v2.5.0/apktool_2.5.0.jar"
     base_info = {"download_link": url, "save_path": os.getcwd(), "thread_num": 128, "headers": headers}
-    download_helper.create_new_download_mission(base_info)
+    download_helper.create_download_mission(base_info)
 
     thread_message_distributor.send_stop_state()
