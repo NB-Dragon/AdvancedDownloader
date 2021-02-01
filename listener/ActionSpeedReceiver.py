@@ -70,14 +70,13 @@ class ActionSpeedReceiver(threading.Thread):
             return download_info["file_info"]["filesize"] - incomplete_size
 
     def _broadcast_speed_content(self):
-        start_time = self._start_time
         end_time = time.time()
-        if end_time - start_time >= 1:
-            speed_and_progress_list = self._generate_mission_speed_and_progress(start_time, end_time)
+        if end_time - self._start_time >= 1:
+            speed_and_progress_list = self._generate_mission_speed_and_progress(self._start_time, end_time)
             for speed_info_item in speed_and_progress_list:
                 mission_uuid = speed_info_item.pop("mission_uuid")
                 self._send_speed_info(mission_uuid, speed_info_item)
-            self._start_time = end_time
+            self._start_time = time.time()
 
     def _generate_mission_speed_and_progress(self, start_time, end_time):
         speed_content_list = []
