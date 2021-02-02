@@ -77,6 +77,7 @@ class ActionWriterReceiver(threading.Thread):
     def _do_with_mission_finish(self, mission_uuid):
         self._writer_and_lock_dict[mission_uuid]["writer"].close()
         self._writer_and_lock_dict[mission_uuid]["lock"].release()
+        self._writer_and_lock_dict.pop(mission_uuid)
         self._mission_dict.pop(mission_uuid)
 
     def _update_mission_progress(self):
@@ -96,7 +97,9 @@ class ActionWriterReceiver(threading.Thread):
             modify_region[0] += length
             if len(current_region) == 1 or modify_region[0] <= modify_region[1]:
                 all_region.insert(correct_region_index, modify_region)
-        if len(all_region) == 0 and self._mission_dict[mission_uuid]["download_info"]["file_info"]["range"]:
+        mission_range_skill = self._mission_dict[mission_uuid]["download_info"]["file_info"]["range"]
+        if len(all_region) == 0 and mission_range_skill:
+            self._send_speed_finish_message(mission_uuid)
             self._do_with_mission_finish(mission_uuid)
 
     @staticmethod
