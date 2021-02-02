@@ -54,11 +54,10 @@ class ActionSpeedReceiver(threading.Thread):
     def _do_with_mission_register(self, mission_uuid, download_info):
         mission_item = dict()
         mission_item["update_size"] = 0
+        mission_item["start_time"] = time.time()
         mission_item["current_size"] = self._calc_finish_file_size(download_info)
         mission_item["expect_size"] = download_info["file_info"]["filesize"]
         self._mission_dict[mission_uuid] = mission_item
-        if len(self._mission_dict) == 1:
-            self._start_time = time.time()
 
     def _do_with_mission_finish(self, mission_uuid):
         self._mission_dict.pop(mission_uuid)
@@ -74,21 +73,23 @@ class ActionSpeedReceiver(threading.Thread):
     def _broadcast_speed_content(self):
         end_time = time.time()
         if end_time - self._start_time >= 1:
-            speed_and_progress_list = self._generate_mission_speed_and_progress(self._start_time, end_time)
+            speed_and_progress_list = self._generate_mission_speed_and_progress(end_time)
             for speed_info_item in speed_and_progress_list:
                 mission_uuid = speed_info_item.pop("mission_uuid")
                 self._send_speed_info(mission_uuid, speed_info_item)
             self._start_time = time.time()
+            for mission_uuid in self._mission_dict.keys():
+                self._mission_dict[mission_uuid]["update_size"] = 0
+                self._mission_dict[mission_uuid]["start_time"] = self._start_time
 
-    def _generate_mission_speed_and_progress(self, start_time, end_time):
+    def _generate_mission_speed_and_progress(self, end_time):
         speed_content_list = []
         for mission_uuid in self._mission_dict.keys():
             mission_item = self._mission_dict[mission_uuid]
             progress = self._get_progress_description(mission_item["current_size"], mission_item["expect_size"])
-            speed = self._get_speed_description(mission_item["update_size"], start_time, end_time)
+            speed = self._get_speed_description(mission_item["update_size"], mission_item["start_time"], end_time)
             result_item = {"mission_uuid": mission_uuid, "progress": progress, "speed": speed}
             speed_content_list.append(result_item)
-            mission_item["update_size"] = 0
         return speed_content_list
 
     @staticmethod
