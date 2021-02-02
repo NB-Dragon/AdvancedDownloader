@@ -66,10 +66,10 @@ class HTTPDownloader(object):
         expect_size = self._download_info["file_info"]["filesize"]
         if isinstance(expect_size, int):
             current_size = os.path.getsize(self._download_info["tmp_path"])
-            byte_buffer_4096 = bytearray(4096)
-            for index in range((expect_size - current_size) // 4096):
-                writer.write(byte_buffer_4096)
-            writer.write(bytearray((expect_size - current_size) % 4096))
+            byte_buffer_65536 = bytearray(65536)
+            for index in range((expect_size - current_size) // 65536):
+                writer.write(byte_buffer_65536)
+            writer.write(bytearray((expect_size - current_size) % 65536))
         writer.close()
         self._make_message_and_send("任务初始化结束", False)
 
