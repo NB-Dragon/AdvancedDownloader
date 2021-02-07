@@ -16,7 +16,7 @@ Project link: [https://github.com/NB-Dragon/AdvancedDownloader](https://github.c
 # Usage
 1: Run command `pip install -r requirements.txt`<br>
 2: Modify the values ​​of `headers` and `url` in `main.py`.<br>
-3: Run command `python path/to/your/project/main.py` to start download.
+3: Run command `python main.py` to start download.
 
 # Download Test
 <p align=center><img alt="下载速度测试" src="static/image/SpeedListener.png"></p>
@@ -35,6 +35,7 @@ All systems which support Python3.
 GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
 
 # Donate
-If you have spare cash, welcome to buy a cup of coffee for me. And for response, I will make this project better.<br>
-All donations will be displayed on the donation list. Please note "GitHub-001-Username" for donation, such as "GitHub-001-Anonymous"<br>
-<p align=center><img alt="支付宝付款码" src="image/ALiPay.png"></p>
+- Welcome to buy me a cup of coffee if you want. In return, I will make this project better.<br>
+- All donations will be written into the `donation.md`.<br>
+- Please note `GitHub-001-Username` for donation, such as `GitHub-001-Anonymous`<br>
+<p align=center><img alt="支付宝付款码" src="static/image/ALiPay.png"></p>
