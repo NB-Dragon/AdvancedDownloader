@@ -15,8 +15,8 @@ Project link: [https://github.com/NB-Dragon/AdvancedDownloader](https://github.c
 
 # Usage
 1: Run command `pip install -r requirements.txt`<br>
-2: Modify `url` and `headers` in main.py if you need.<br>
-3: Run command `path/to/your/project/main.py` to start download.
+2: Modify the values ​​of `headers` and `url` in `main.py`.<br>
+3: Run command `python path/to/your/project/main.py` to start download.
 
 # Download Test
 <p align=center><img alt="下载速度测试" src="static/image/SpeedListener.png"></p>
