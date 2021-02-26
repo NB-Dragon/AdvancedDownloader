@@ -48,7 +48,9 @@ class HeaderAnalyser(object):
         content_disposition = headers.get("content-disposition")
         content_type = headers.get("content-type")
         if content_disposition and "filename=" in content_disposition:
-            first_disposition = content_disposition.split(",")[0]
+            content_item_list = content_disposition.split(";")
+            filename_item_list = [item.strip() for item in content_item_list if "filename=" in item]
+            first_disposition = filename_item_list[0].split(",")[0]
             filename = re.findall("(?<=filename=).*", first_disposition)[0]
             if re.findall("^[\"].*?[\"]$", filename):
                 filename = eval(filename)
