@@ -38,4 +38,4 @@ GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
 - Welcome to buy me a cup of coffee if you want. In return, I will make this project better.<br>
 - All donations will be written into the `donation.md`.<br>
 - Please note `GitHub-001-Username` for donation, such as `GitHub-001-Anonymous`<br>
-<p align=center><img alt="支付宝付款码" src="static/image/ALiPay.png"></p>
+<p align=center><img alt="收款码" src="static/image/Payment.png"></p>

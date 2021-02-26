@@ -37,7 +37,7 @@ class RuntimeOperator(object):
         return self._code_entrance_path
 
     def get_donate_image_path(self):
-        return os.path.join(self._code_entrance_path, "static", "image", "ALiPay.png")
+        return os.path.join(self._code_entrance_path, "static", "image", "Payment.png")
 
     def _check_cache_directory(self):
         if not os.path.exists(self._cache_directory):

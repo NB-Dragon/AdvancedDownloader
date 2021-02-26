@@ -14,7 +14,7 @@ if __name__ == '__main__':
     thread_message_distributor = ThreadMessageDistributor(runtime_operator)
     thread_message_queue = thread_message_distributor.get_message_queue()
     thread_message_distributor.start()
-    download_helper = DownloadHelper(thread_message_queue)
+    download_helper = DownloadHelper(thread_message_queue, runtime_operator)
     file_open_helper = FileOpenHelper(thread_message_queue)
 
     headers = RequestDictionary.make_dict_from_headers("")
