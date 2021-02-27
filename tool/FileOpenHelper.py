@@ -35,11 +35,11 @@ class FileOpenHelper(object):
 
     @staticmethod
     def _open_in_linux(file_path):
-        subprocess.call(["xdg-open", file_path])
+        subprocess.call(["xdg-open", file_path], stderr=subprocess.DEVNULL)
 
     @staticmethod
     def _open_in_mac(file_path):
-        subprocess.call(["open", file_path])
+        subprocess.call(["open", file_path], stderr=subprocess.DEVNULL)
 
     @staticmethod
     def _open_in_windows(file_path):
