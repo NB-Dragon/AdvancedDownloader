@@ -1,3 +1,7 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Create Time: 2021/2/21 18:00
+# Create User: NB-Dragon
 import os
 import platform
 import subprocess
