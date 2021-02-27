@@ -15,7 +15,8 @@ class FileOpenHelper(object):
             else:
                 self._make_message_and_send("当前系统暂未适配，如有需要，请提交issue", False)
         except Exception as e:
-            self._make_message_and_send("文件打开失败，请自行检查是否为桌面版系统", False)
+            self._make_message_and_send(str(e), True)
+            self._make_message_and_send("自动打开文件失败，请自行检查是否为桌面版系统", False)
 
     def _find_default_system_open_method(self):
         current_platform = platform.system()
@@ -34,7 +35,7 @@ class FileOpenHelper(object):
 
     @staticmethod
     def _open_in_mac(file_path):
-        subprocess.call(["xdg", file_path])
+        subprocess.call(["open", file_path])
 
     @staticmethod
     def _open_in_windows(file_path):
