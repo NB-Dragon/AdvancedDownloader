@@ -20,7 +20,7 @@ class FileOpenHelper(object):
                 self._make_message_and_send("当前系统暂未适配，如有需要，请提交issue", False)
         except Exception as e:
             self._make_message_and_send(str(e), True)
-            self._make_message_and_send("自动打开文件失败，请自行检查是否为桌面版系统", False)
+            self._make_message_and_send("文件自动打开失败，请安装桌面版系统并设置默认程序", False)
 
     def _find_default_system_open_method(self):
         current_platform = platform.system()
