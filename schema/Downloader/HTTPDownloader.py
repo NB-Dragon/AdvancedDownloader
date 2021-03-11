@@ -223,9 +223,12 @@ class DownloadThread(threading.Thread):
 
     def _check_response_region_correct(self, response):
         if len(self._current_region) == 2:
-            expect_range = "bytes {}-{}".format(self._current_region[0], self._current_region[1])
-            content_range = response.headers.get("content-range")
-            return expect_range in content_range
+            if response is not None:
+                expect_range = "bytes {}-{}".format(self._current_region[0], self._current_region[1])
+                content_range = response.headers.get("content-range")
+                return expect_range in content_range if content_range else False
+            else:
+                return False
         else:
             return True
 
