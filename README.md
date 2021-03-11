@@ -36,6 +36,6 @@ GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
 
 # Donate
 - Welcome to buy me a cup of coffee if you want. In return, I will make this project better.<br>
-- All donations will be written into the `donation.md`.<br>
+- All donations will be written into the `DONATION.md`.<br>
 - Please note `GitHub-001-Username` for donation, such as `GitHub-001-Anonymous`<br>
 <p align=center><img alt="收款码" src="static/image/Payment.png"></p>
