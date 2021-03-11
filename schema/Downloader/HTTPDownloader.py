@@ -50,7 +50,7 @@ class HTTPDownloader(object):
 
     def _encode_mission_info(self):
         download_link = self._mission_info["download_link"]
-        self._mission_info["download_link"] = urllib.parse.quote(download_link, safe=";/?:@&=+$,~")
+        self._mission_info["download_link"] = urllib.parse.quote(download_link, safe=":/&=?%;@+$,~")
 
     def _try_to_update_mission_info(self):
         self._make_message_and_send("资源连接中", False)
