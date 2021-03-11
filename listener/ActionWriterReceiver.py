@@ -69,11 +69,6 @@ class ActionWriterReceiver(threading.Thread):
         # Regenerate mission_detail to ensure the absolute difference of memory addresses.
         self._mission_dict[mission_uuid] = json.loads(json.dumps(mission_detail))
 
-    def _do_with_mission_combine(self, mission_uuid, mission_detail):
-        tmp_file_path = self._mission_dict[mission_uuid]["download_info"]["tmp_path"]
-        self._writer_and_lock_dict[mission_uuid]["writer"] = open(tmp_file_path, 'r+b')
-        self._writer_and_lock_dict[mission_uuid]["lock"] = mission_detail.pop("lock")
-
     def _do_with_mission_finish(self, mission_uuid):
         self._writer_and_lock_dict[mission_uuid]["writer"].close()
         self._writer_and_lock_dict[mission_uuid]["lock"].release()
