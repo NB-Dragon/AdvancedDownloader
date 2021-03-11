@@ -49,10 +49,7 @@ class ActionPrintReceiver(threading.Thread):
         return output_detail
 
     def _append_log_message(self, message):
-        try:
-            log_file = self._runtime_operator.get_cache_file("log")
-            writer = open(log_file, 'a')
-            writer.write(message)
-            writer.close()
-        except Exception as e:
-            print(str(e))
+        file_path = self._runtime_operator.get_cache_file("log")
+        writer = open(file_path, 'a')
+        writer.write(message)
+        writer.close()

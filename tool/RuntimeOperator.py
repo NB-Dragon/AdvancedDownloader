@@ -26,9 +26,7 @@ class RuntimeOperator(object):
 
     def set_mission_state(self, mission_dict: dict):
         json_content = json.dumps(mission_dict)
-        writer = open(self._cache_inner_file["mission"], 'w')
-        writer.write(json_content)
-        writer.close()
+        self._set_file_content(self._cache_inner_file["mission"], json_content)
 
     def get_cache_file(self, file_type: str):
         return self._cache_inner_file[file_type]
@@ -54,3 +52,9 @@ class RuntimeOperator(object):
         content = reader.read()
         reader.close()
         return content
+
+    @staticmethod
+    def _set_file_content(file_path, content):
+        writer = open(file_path, 'w')
+        writer.write(content)
+        writer.close()
