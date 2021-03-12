@@ -8,8 +8,11 @@ class RequestDictionary(object):
         return {"User-Agent": " ".join(user_agent_list)}
 
     @staticmethod
-    def get_header_baidu_cookie(bduss: str):
-        return {"Cookie": "BDUSS={}".format(bduss)}
+    def get_header_baidu_verify(bduss: str, stoken: str):
+        headers = dict()
+        headers["User-Agent"] = "netdisk"
+        headers["Cookie"] = "BDUSS={}; STOKEN={}".format(bduss, stoken)
+        return headers
 
     @staticmethod
     def make_dict_from_headers(content):
