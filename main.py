@@ -6,7 +6,7 @@ import os
 from tool.DownloadHelper import DownloadHelper
 from tool.FileOpenHelper import FileOpenHelper
 from tool.RuntimeOperator import RuntimeOperator
-from schema.RequestDictionary import RequestDictionary
+from schema.Analyser.HTTPHelper import RequestDictionary
 from listener.ThreadMessageDistributor import ThreadMessageDistributor
 
 if __name__ == '__main__':
