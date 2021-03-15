@@ -1,10 +1,14 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Create Time: 2021/1/25 10:00
+# Create User: NB-Dragon
 class RequestDictionary(object):
     @staticmethod
     def get_header_user_agent():
         user_agent_list = list()
         user_agent_list.append("Mozilla/5.0 (X11; Linux x86_64)")
         user_agent_list.append("AppleWebKit/537.36 (KHTML, like Gecko)")
-        user_agent_list.append("AdvancedDownloader/0.5.5")
+        user_agent_list.append("AdvancedDownloader/0.5.6")
         return {"User-Agent": " ".join(user_agent_list)}
 
     @staticmethod
