@@ -15,8 +15,9 @@ class RuntimeOperator(object):
         self._setup_cache_inner_file()
 
     def get_mission_state(self):
-        if os.path.isfile(self._cache_inner_file["mission"]):
-            file_content = self._get_file_content(self._cache_inner_file["mission"])
+        mission_cache_path = self.get_cache_file("mission")
+        if os.path.isfile(mission_cache_path):
+            file_content = self._get_file_content(mission_cache_path)
             if len(file_content):
                 return json.loads(file_content)
             else:
@@ -25,17 +26,18 @@ class RuntimeOperator(object):
             return {}
 
     def set_mission_state(self, mission_dict: dict):
+        mission_cache_path = self.get_cache_file("mission")
         json_content = json.dumps(mission_dict)
-        self._set_file_content(self._cache_inner_file["mission"], json_content)
+        self._set_file_content(mission_cache_path, json_content)
 
     def get_cache_file(self, file_type: str):
         return self._cache_inner_file[file_type]
 
-    def get_code_entrance_path(self):
-        return self._code_entrance_path
-
     def get_donate_image_path(self):
         return os.path.join(self._code_entrance_path, "static", "image", "Payment.png")
+
+    def get_static_cert_path(self):
+        return os.path.join(self._code_entrance_path, "static", "cert", "ca-cert.pem")
 
     def _check_cache_directory(self):
         if not os.path.exists(self._cache_directory):
