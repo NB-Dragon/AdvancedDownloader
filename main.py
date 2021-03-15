@@ -6,7 +6,7 @@ import os
 from tool.DownloadHelper import DownloadHelper
 from tool.FileOpenHelper import FileOpenHelper
 from tool.RuntimeOperator import RuntimeOperator
-from schema.Analyser.HTTPHelper import RequestDictionary
+from schema.Analyser.HTTPHelper import HeaderGenerator
 from listener.ThreadMessageDistributor import ThreadMessageDistributor
 
 if __name__ == '__main__':
@@ -17,7 +17,7 @@ if __name__ == '__main__':
     download_helper = DownloadHelper(thread_message_queue, runtime_operator)
     file_open_helper = FileOpenHelper(thread_message_queue)
 
-    headers = RequestDictionary.get_header_user_agent()
+    headers = HeaderGenerator.get_header_user_agent()
     # url = "https://vipspeedtest1.wuhan.net.cn:8080/download?size=25000000&r=0.5588543787999258"
     url = "https://github.com/iBotPeaches/Apktool/releases/download/v2.5.0/apktool_2.5.0.jar"
     base_info = {"download_link": url, "save_path": os.getcwd(), "thread_num": 128, "headers": headers}

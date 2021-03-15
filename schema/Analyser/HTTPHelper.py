@@ -60,7 +60,7 @@ class HeaderAnalyser(object):
         return "content-range" in headers or "accept-ranges" in headers
 
 
-class RequestDictionary(object):
+class HeaderGenerator(object):
     @staticmethod
     def get_header_user_agent():
         user_agent_list = list()
