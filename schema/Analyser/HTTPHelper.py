@@ -18,6 +18,10 @@ class HTTPHelper(object):
         return {"filename": filename, "filesize": filesize, "range": range_skill}
 
     @staticmethod
+    def get_url_after_quote(link):
+        return urllib.parse.quote(link, safe=":/&=?%;@+$,~")
+
+    @staticmethod
     def get_request_pool_manager(alive_count):
         cert_pem_file = RuntimeOperator().get_static_cert_path()
         return urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=cert_pem_file, maxsize=alive_count, timeout=10)
