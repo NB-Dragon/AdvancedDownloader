@@ -93,7 +93,7 @@ class HTTPDownloader(object):
             elif message["state_code"] == -1:
                 if len(message["current_region"]) == 2:
                     tmp_region_list = [message["current_region"]]
-                    distribute_list = RegionMaker.get_download_region(tmp_region_list, self._free_worker_count)
+                    distribute_list = RegionMaker().get_download_region(tmp_region_list, self._free_worker_count)
                     self._send_download_mission_split(message["current_region"], distribute_list)
                     self._create_download_mission(distribute_list)
                 else:
@@ -120,7 +120,8 @@ class HTTPDownloader(object):
 
     def _generate_file_all_region(self, file_info):
         if file_info and file_info["range"]:
-            return RegionMaker.get_download_region([[0, file_info["filesize"] - 1]], self._mission_info["thread_num"])
+            unassigned_region_list = [[0, file_info["filesize"] - 1]]
+            return RegionMaker().get_download_region(unassigned_region_list, self._mission_info["thread_num"])
         else:
             return [[0]]
 

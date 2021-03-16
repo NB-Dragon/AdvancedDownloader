@@ -6,32 +6,28 @@ from math import ceil
 
 
 class RegionMaker(object):
-    @staticmethod
-    def get_download_region(current_region_list: list, spare_worker_count: int):
+    def get_download_region(self, current_region_list: list, spare_worker_count: int):
         assert_content = "The length of `current_region_list` needs to be less than or equal to `spare_worker_count`"
         assert len(current_region_list) <= spare_worker_count, assert_content
-        mission_distributor = MissionDistributor()
-        grant_region_dict = mission_distributor.get_granted_num_by_region_list(current_region_list, spare_worker_count)
+        grant_region_dict = self._get_granted_num_by_region_list(current_region_list, spare_worker_count)
         result_list = list()
         for index in range(len(current_region_list)):
             operate_item = grant_region_dict["sorted_list"][index]
             operate_count = grant_region_dict["granted_list"][index]
-            result_list.extend(mission_distributor.split_download_region(operate_item, operate_count))
+            result_list.extend(self._split_download_region(operate_item, operate_count))
         return sorted(result_list, key=lambda x: x[0])
 
-
-class MissionDistributor(object):
-    def get_granted_num_by_region_list(self, current_region_list: list, maximum: int):
+    def _get_granted_num_by_region_list(self, current_region_list: list, maximum: int):
         sorted_by_region_length = sorted(current_region_list, key=lambda x: x[1] - x[0], reverse=True)
         sum_of_region_list = [x[1] - x[0] + 1 for x in sorted_by_region_length]
         average_of_full_size = ceil(sum(sum_of_region_list) / maximum)
         result_list = self._average_distribute_by_capacity(sum_of_region_list, average_of_full_size, maximum)
         return {"sorted_list": sorted_by_region_length, "granted_list": result_list}
 
-    def split_download_region(self, current_region: list, thread_count: int):
+    def _split_download_region(self, current_region: list, thread_count: int):
         """
-            @:param current_region: (min, max); 0 <= min, max
-            @:param count: 0 < count
+            @:param current_region: [min, max]; 0 <= min, max
+            @:param thread_count: 0 < thread_count
         """
         content_size = current_region[1] - current_region[0] + 1
         each_small_region_size = self._split_download_size(content_size, thread_count)
