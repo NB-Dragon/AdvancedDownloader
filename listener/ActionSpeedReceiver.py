@@ -97,7 +97,8 @@ class ActionSpeedReceiver(threading.Thread):
         return "{:.2f}%".format(current_size / expect_size * 100) if expect_size else "unknown"
 
     def _get_speed_description(self, update_size, start_time, end_time):
-        update_size_in_per_second = int(update_size // (end_time - start_time))
+        time_interval = end_time - start_time
+        update_size_in_per_second = int(update_size // time_interval) if time_interval else 0
         return self._get_format_file_size(update_size_in_per_second)
 
     @staticmethod
