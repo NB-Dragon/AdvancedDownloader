@@ -144,6 +144,8 @@ class HTTPDownloader(object):
     def _get_simple_response(self, target_url, headers):
         try:
             return self._request_pool.request("GET", target_url, headers=headers, preload_content=False)
+        except UnicodeEncodeError as e:
+            self._make_message_and_send(str(e) + target_url, True)
         except Exception as e:
             self._make_message_and_send(str(e), True)
             return None
@@ -185,6 +187,7 @@ class DownloadThread(threading.Thread):
         self._mission_uuid = mission_uuid
         self._mission_info = mission_info
         self._current_region = current_region.copy()
+        self._expect_size = None
         self._request_pool = request_pool
         self._download_step_size = 64 << 10
 
@@ -209,6 +212,7 @@ class DownloadThread(threading.Thread):
 
     def _make_download_range_headers(self):
         if len(self._current_region) == 2:
+            self._expect_size = self._current_region[1] - self._current_region[0] + 1
             return "bytes={}-{}".format(self._current_region[0], self._current_region[1])
         else:
             return "bytes={}-".format(self._current_region[0])
@@ -239,6 +243,8 @@ class DownloadThread(threading.Thread):
             for cache in stream_response.stream(self._download_step_size):
                 self._send_write_content_message(content_length, cache)
                 content_length += len(cache)
+                if isinstance(self._expect_size, int) and content_length == self._expect_size:
+                    break
             stream_response.close()
             return {"state_code": 1, "content_length": content_length}
         except Exception as e:
@@ -260,10 +266,10 @@ class DownloadThread(threading.Thread):
         self._parent_message.put(result_dict)
 
     def _send_write_content_message(self, current_position, content):
-        message_dict = dict()
-        message_dict["action"] = "write"
         current_region = self._current_region.copy()
         current_region[0] += current_position
+        message_dict = dict()
+        message_dict["action"] = "write"
         detail_info = {"type": "write", "current_region": current_region, "content": content}
         message_dict["value"] = {"mission_uuid": self._mission_uuid, "detail": detail_info}
         self._thread_message.put(message_dict)
