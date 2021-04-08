@@ -93,7 +93,7 @@ class ActionWriterReceiver(threading.Thread):
             if len(current_region) == 1 or modify_region[0] <= modify_region[1]:
                 all_region.insert(correct_region_index, modify_region)
         mission_range_skill = self._mission_dict[mission_uuid]["download_info"]["file_info"]["range"]
-        if len(all_region) == 0 and mission_range_skill:
+        if mission_range_skill and len(all_region) == 0:
             self._send_speed_finish_message(mission_uuid)
             self._do_with_mission_finish(mission_uuid)
 
