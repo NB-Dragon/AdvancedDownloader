@@ -42,8 +42,9 @@ class HeaderAnalyser(object):
         else:
             link_parse_result = urllib.parse.urlparse(link)
             filename = link_parse_result.path.split("/")[-1]
-        if content_type and "text/html" in headers.get("content-type"):
-            filename = "index.html" if filename == "" else filename
+        if content_type and "text/html" in content_type:
+            filename = "unknown.html" if "." not in filename else filename
+        filename = "unknown.dat" if filename == "" else filename
         while re.findall("%[0-9a-fA-F]{2}", filename):
             filename = urllib.parse.unquote(filename)
         return filename
