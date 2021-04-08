@@ -76,7 +76,7 @@ class ActionSpeedReceiver(threading.Thread):
             speed_and_progress_list = self._generate_mission_speed_and_progress(end_time)
             for speed_info_item in speed_and_progress_list:
                 mission_uuid = speed_info_item.pop("mission_uuid")
-                self._send_speed_info(mission_uuid, speed_info_item)
+                self._make_message_and_send(mission_uuid, speed_info_item)
             self._start_time = time.time()
             for mission_uuid in self._mission_dict.keys():
                 self._mission_dict[mission_uuid]["update_size"] = 0
@@ -111,7 +111,7 @@ class ActionSpeedReceiver(threading.Thread):
         else:
             return "{:.2f}{}/s".format(size, units[0])
 
-    def _send_speed_info(self, mission_uuid: str, detail: dict):
+    def _make_message_and_send(self, mission_uuid: str, detail):
         message_dict = dict()
         message_dict["action"] = "print"
         detail_info = {"sender": "ActionSpeedReceiver", "content": detail, "exception": False}
