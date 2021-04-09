@@ -49,6 +49,16 @@ class HeaderAnalyser(object):
         filename = re.findall("(?<=filename=).*", first_disposition)[0]
         if re.findall("^[\"].*?[\"]$", filename):
             filename = eval(filename)
+        """
+            Fix the decoding problem: https://github.com/pypa/warehouse/issues/9368
+        """
+        try:
+            import chardet
+            byte_string = filename.encode("iso-8859-1")
+            real_encoding = chardet.detect(byte_string)["encoding"]
+            filename = byte_string.decode(real_encoding)
+        except ModuleNotFoundError:
+            pass
         return filename
 
     @staticmethod
