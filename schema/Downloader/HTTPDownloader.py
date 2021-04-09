@@ -240,7 +240,7 @@ class DownloadThread(threading.Thread):
     def _request_final_content(self, stream_response: urllib3.response.HTTPResponse):
         content_length = 0
         try:
-            for cache in stream_response.stream(self._download_step_size):
+            for cache in stream_response.stream(self._download_step_size, True):
                 cache_length = len(cache)
                 if self._expect_size is None or content_length + cache_length <= self._expect_size:
                     self._send_write_content_message(content_length, cache)
