@@ -11,9 +11,9 @@ from tool.RuntimeOperator import RuntimeOperator
 class HTTPHelper(object):
     @staticmethod
     def get_download_file_requirement(headers, link):
-        filename = HeaderAnalyser.get_download_file_name(headers, link)
-        filesize = HeaderAnalyser.get_download_file_size(headers)
-        range_header = HeaderAnalyser.judge_download_range_skill(headers)
+        filename = HeaderAnalyser().get_download_file_name(headers, link)
+        filesize = HeaderAnalyser().get_download_file_size(headers)
+        range_header = HeaderAnalyser().judge_download_range_skill(headers)
         range_skill = isinstance(filesize, int) and range_header
         return {"filename": filename, "filesize": filesize, "range": range_skill}
 
@@ -28,26 +28,35 @@ class HTTPHelper(object):
 
 
 class HeaderAnalyser(object):
-    @staticmethod
-    def get_download_file_name(headers, link):
+    def get_download_file_name(self, headers, link):
         content_disposition = headers.get("content-disposition")
         content_type = headers.get("content-type")
         if content_disposition and "filename=" in content_disposition:
-            content_item_list = content_disposition.split(";")
-            filename_item_list = [item.strip() for item in content_item_list if "filename=" in item]
-            first_disposition = filename_item_list[0].split(",")[0]
-            filename = re.findall("(?<=filename=).*", first_disposition)[0]
-            if re.findall("^[\"].*?[\"]$", filename):
-                filename = eval(filename)
+            filename = self._get_file_name_from_content_disposition(content_disposition)
         else:
             link_parse_result = urllib.parse.urlparse(link)
             filename = link_parse_result.path.split("/")[-1]
-        if content_type and "text/html" in content_type:
-            filename = "unknown.html" if "." not in filename else filename
-        filename = "unknown.dat" if filename == "" else filename
+        filename = self._get_default_file_name(content_type, filename)
         while re.findall("%[0-9a-fA-F]{2}", filename):
             filename = urllib.parse.unquote(filename)
         return filename
+
+    @staticmethod
+    def _get_file_name_from_content_disposition(content_disposition):
+        content_item_list = content_disposition.split(";")
+        filename_item_list = [item.strip() for item in content_item_list if "filename=" in item]
+        first_disposition = filename_item_list[0].split(",")[0]
+        filename = re.findall("(?<=filename=).*", first_disposition)[0]
+        if re.findall("^[\"].*?[\"]$", filename):
+            filename = eval(filename)
+        return filename
+
+    @staticmethod
+    def _get_default_file_name(content_type, current_name):
+        if content_type and "text/html" in content_type:
+            current_name = "unknown.html" if "." not in current_name else current_name
+        default_name = "unknown.dat" if current_name == "" else current_name
+        return default_name
 
     @staticmethod
     def get_download_file_size(headers):
