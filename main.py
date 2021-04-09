@@ -20,7 +20,7 @@ if __name__ == '__main__':
     headers = HeaderGenerator.get_header_user_agent()
     # url = "https://vipspeedtest1.wuhan.net.cn:8080/download?size=25000000&r=0.5588543787999258"
     url = "https://github.com/iBotPeaches/Apktool/releases/download/v2.5.0/apktool_2.5.0.jar"
-    base_info = {"download_link": url, "save_path": os.getcwd(), "thread_num": 128, "headers": headers}
+    base_info = {"download_link": url, "save_path": os.getcwd(), "thread_num": 32, "headers": headers}
     download_helper.create_download_mission(base_info)
 
     file_open_helper.open(runtime_operator.get_donate_image_path())
