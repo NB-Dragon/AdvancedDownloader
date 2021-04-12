@@ -31,34 +31,14 @@ class HeaderAnalyser(object):
     def get_download_file_name(self, headers, link):
         content_disposition = headers.get("content-disposition")
         content_type = headers.get("content-type")
-        if content_disposition and "filename=" in content_disposition:
-            filename = self._get_file_name_from_content_disposition(content_disposition)
+        if content_disposition and "filename" in content_disposition:
+            filename = ContentDispositionParser(content_disposition).get_param_value("filename")
         else:
             link_parse_result = urllib.parse.urlparse(link)
             filename = link_parse_result.path.split("/")[-1]
         filename = self._get_default_file_name(content_type, filename)
         while re.findall("%[0-9a-fA-F]{2}", filename):
             filename = urllib.parse.unquote(filename)
-        return filename
-
-    @staticmethod
-    def _get_file_name_from_content_disposition(content_disposition):
-        content_item_list = content_disposition.split(";")
-        filename_item_list = [item.strip() for item in content_item_list if "filename=" in item]
-        first_disposition = filename_item_list[0].split(",")[0]
-        filename = re.findall("(?<=filename=).*", first_disposition)[0]
-        if re.findall("^[\"].*?[\"]$", filename):
-            filename = eval(filename)
-        """
-            Fix the decoding problem: https://github.com/pypa/warehouse/issues/9368
-        """
-        try:
-            import chardet
-            byte_string = filename.encode("iso-8859-1")
-            real_encoding = chardet.detect(byte_string)["encoding"]
-            filename = byte_string.decode(real_encoding)
-        except ModuleNotFoundError:
-            pass
         return filename
 
     @staticmethod
@@ -80,6 +60,84 @@ class HeaderAnalyser(object):
     @staticmethod
     def judge_download_range_skill(headers):
         return "content-range" in headers or "accept-ranges" in headers
+
+
+class ContentDispositionParser(object):
+    def __init__(self, content):
+        self._disposition_parm = [item.strip() for item in content.split(";")]
+        self._disposition_type = self._disposition_parm.pop(0)
+        self._disposition_parm_dict = self._generate_parm_dict()
+
+    def get_disposition_type(self):
+        return self._disposition_type
+
+    def get_param_value(self, token):
+        return self._disposition_parm_dict[token]
+
+    def _generate_parm_dict(self):
+        after_decode_value_param = self._generate_decode_value_param(self._disposition_parm)
+        after_indexing_param = self._handle_indexing_param(after_decode_value_param)
+        self._combine_same_token(after_indexing_param, "**", "*")
+        self._combine_same_token(after_indexing_param, "*", "")
+        return after_indexing_param
+
+    def _generate_decode_value_param(self, param_list):
+        result_dict = dict()
+        for parm_item in param_list:
+            token, value = parm_item.split("=", 1)
+            value = self._quote_value(value)
+            if token.endswith("*") and "'" in value:
+                charset, language, content = value.split("'", 2)
+                result_dict[token] = self._decode_correct_charset(content, charset)
+            else:
+                result_dict[token] = self._decode_correct_charset(value)
+        return result_dict
+
+    @staticmethod
+    def _handle_indexing_param(parm_dict):
+        indexing_dict = dict()
+        result_dict = dict()
+        for key, value in parm_dict.items():
+            match_result = re.findall("^([^*]+)\\*(\\d+)(\\*?)$", key)
+            if len(match_result):
+                result = match_result[0]
+                token_name, index, star = result
+                if token_name not in indexing_dict:
+                    indexing_dict[token_name] = dict()
+                indexing_dict[token_name][index] = parm_dict[key]
+            else:
+                result_dict[key] = value
+        for key, value in indexing_dict.items():
+            value_list = dict(sorted(value.items())).values()
+            result_dict["{}**".format(key)] = "".join(value_list)
+        return result_dict
+
+    @staticmethod
+    def _combine_same_token(original_dict, from_end, to_end):
+        from_dict_key = [key[:-len(from_end)] for key in original_dict.keys() if key.endswith(from_end)]
+        for key in from_dict_key:
+            new_key = "{}{}".format(key, from_end)
+            old_key = "{}{}".format(key, to_end)
+            original_dict[old_key] = original_dict.pop(new_key)
+
+    @staticmethod
+    def _quote_value(content):
+        return eval(content) if re.findall("^(\").*?\\1$", content) else content
+
+    def _decode_correct_charset(self, content, charset=None):
+        encode_content = content.encode("iso-8859-1")
+        if charset is None:
+            charset = self._detect_correct_charset(encode_content)
+        return encode_content.decode(charset)
+
+    @staticmethod
+    def _detect_correct_charset(byte_string):
+        try:
+            import chardet
+            result = chardet.detect(byte_string)
+            return "iso-8859-1" if result["confidence"] < 0.8 else result["encoding"]
+        except ModuleNotFoundError:
+            return "iso-8859-1"
 
 
 class HeaderGenerator(object):
