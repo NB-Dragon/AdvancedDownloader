@@ -111,8 +111,9 @@ class HTTPDownloader(object):
             stream_response = self._get_simple_response(self._mission_info["download_link"], tmp_headers)
             if self._check_response_can_access(stream_response):
                 headers = {key.lower(): value for key, value in dict(stream_response.headers).items()}
+                current_url = stream_response.geturl()
                 stream_response.close()
-                file_info = HTTPHelper.get_download_file_requirement(headers, self._mission_info["download_link"])
+                file_info = HTTPHelper.get_download_file_requirement(headers, current_url)
                 if file_info["range"] or try_time == 2:
                     return file_info
         return None
