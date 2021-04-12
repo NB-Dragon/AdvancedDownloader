@@ -37,7 +37,7 @@ class ActionPrintReceiver(threading.Thread):
         if not exception:
             print(message_content)
         else:
-            self._append_log_message("{}\n".format(message_content))
+            self._runtime_operator.append_run_log_content("{}\n".format(message_content))
 
     @staticmethod
     def _generate_final_message(mission_uuid, mission_detail):
@@ -47,9 +47,3 @@ class ActionPrintReceiver(threading.Thread):
         output_detail["sender"] = mission_detail["sender"]
         output_detail["content"] = mission_detail["content"]
         return output_detail
-
-    def _append_log_message(self, message):
-        file_path = self._runtime_operator.get_cache_file("log")
-        writer = open(file_path, 'a')
-        writer.write(message)
-        writer.close()

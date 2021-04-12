@@ -15,7 +15,7 @@ class RuntimeOperator(object):
         self._setup_cache_inner_file()
 
     def get_mission_state(self):
-        mission_cache_path = self.get_cache_file("mission")
+        mission_cache_path = self._get_cache_file("mission")
         if os.path.isfile(mission_cache_path):
             file_content = self._get_file_content(mission_cache_path)
             if len(file_content):
@@ -26,18 +26,22 @@ class RuntimeOperator(object):
             return {}
 
     def set_mission_state(self, mission_dict: dict):
-        mission_cache_path = self.get_cache_file("mission")
+        mission_cache_path = self._get_cache_file("mission")
         json_content = json.dumps(mission_dict)
         self._set_file_content(mission_cache_path, json_content)
 
-    def get_cache_file(self, file_type: str):
-        return self._cache_inner_file[file_type]
+    def append_run_log_content(self, run_log: str):
+        run_log_path = self._get_cache_file("log")
+        self._append_file_content(run_log_path, run_log)
 
     def get_donate_image_path(self):
         return os.path.join(self._code_entrance_path, "static", "image", "Payment.png")
 
     def get_static_cert_path(self):
         return os.path.join(self._code_entrance_path, "static", "cert", "ca-cert.pem")
+
+    def _get_cache_file(self, file_type: str):
+        return self._cache_inner_file[file_type]
 
     def _check_cache_directory(self):
         if not os.path.exists(self._cache_directory):
@@ -58,5 +62,11 @@ class RuntimeOperator(object):
     @staticmethod
     def _set_file_content(file_path, content):
         writer = open(file_path, 'w')
+        writer.write(content)
+        writer.close()
+
+    @staticmethod
+    def _append_file_content(file_path, content):
+        writer = open(file_path, 'a')
         writer.write(content)
         writer.close()
