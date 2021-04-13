@@ -3,6 +3,7 @@
 # Create Time: 2021/1/25 10:00
 # Create User: NB-Dragon
 import re
+import chardet
 import urllib.parse
 import urllib3
 from tool.RuntimeOperator import RuntimeOperator
@@ -32,13 +33,13 @@ class HeaderAnalyser(object):
         content_disposition = headers.get("content-disposition")
         content_type = headers.get("content-type")
         if content_disposition and "filename" in content_disposition:
-            filename = ContentDispositionParser(content_disposition).get_param_value("filename")
+            result = ContentDispositionParser().generate_parm_dict(content_disposition)
+            filename = result["param"]["filename"]
         else:
             link_parse_result = urllib.parse.urlparse(link)
             filename = link_parse_result.path.split("/")[-1]
+            filename = ContentDispositionParser.parse_unquote_value(filename)
         filename = self._get_default_file_name(content_type, filename)
-        while re.findall("%[0-9a-fA-F]{2}", filename):
-            filename = urllib.parse.unquote(filename)
         return filename
 
     @staticmethod
@@ -63,34 +64,32 @@ class HeaderAnalyser(object):
 
 
 class ContentDispositionParser(object):
-    def __init__(self, content):
-        self._disposition_parm = [item.strip() for item in content.split(";")]
-        self._disposition_type = self._disposition_parm.pop(0)
-        self._disposition_parm_dict = self._generate_parm_dict()
+    @staticmethod
+    def parse_unquote_value(content):
+        while re.findall("%[0-9a-fA-F]{2}", content):
+            content = urllib.parse.unquote(content)
+        return content
 
-    def get_disposition_type(self):
-        return self._disposition_type
+    def generate_parm_dict(self, content):
+        disposition_parm = [item.strip() for item in content.split(";")]
+        disposition_type = disposition_parm.pop(0)
+        disposition_decode_parm = self._decode_disposition_param(disposition_parm)
+        disposition_decode_parm = self._handle_indexing_param(disposition_decode_parm)
+        self._combine_same_token(disposition_decode_parm, "**", "*")
+        self._combine_same_token(disposition_decode_parm, "*", "")
+        return {"type": disposition_type, "param": disposition_decode_parm}
 
-    def get_param_value(self, token):
-        return self._disposition_parm_dict[token]
-
-    def _generate_parm_dict(self):
-        after_decode_value_param = self._generate_decode_value_param(self._disposition_parm)
-        after_indexing_param = self._handle_indexing_param(after_decode_value_param)
-        self._combine_same_token(after_indexing_param, "**", "*")
-        self._combine_same_token(after_indexing_param, "*", "")
-        return after_indexing_param
-
-    def _generate_decode_value_param(self, param_list):
+    def _decode_disposition_param(self, param_list):
         result_dict = dict()
         for parm_item in param_list:
             token, value = parm_item.split("=", 1)
             value = self._quote_value(value)
             if token.endswith("*") and "'" in value:
                 charset, language, content = value.split("'", 2)
-                result_dict[token] = self._decode_correct_charset(content, charset)
+                value = self._decode_correct_charset(content, charset)
             else:
-                result_dict[token] = self._decode_correct_charset(value)
+                value = self._decode_correct_charset(value)
+            result_dict[token] = self.parse_unquote_value(value)
         return result_dict
 
     @staticmethod
@@ -116,28 +115,27 @@ class ContentDispositionParser(object):
     def _combine_same_token(original_dict, from_end, to_end):
         from_dict_key = [key[:-len(from_end)] for key in original_dict.keys() if key.endswith(from_end)]
         for key in from_dict_key:
-            new_key = "{}{}".format(key, from_end)
-            old_key = "{}{}".format(key, to_end)
-            original_dict[old_key] = original_dict.pop(new_key)
+            from_key = "{}{}".format(key, from_end)
+            to_key = "{}{}".format(key, to_end)
+            original_dict[to_key] = original_dict.pop(from_key)
 
     @staticmethod
     def _quote_value(content):
-        return eval(content) if re.findall("^(\").*?\\1$", content) else content
+        return eval(content) if re.findall("^\".*\"$", content) else content
 
     def _decode_correct_charset(self, content, charset=None):
-        encode_content = content.encode("iso-8859-1")
-        if charset is None:
-            charset = self._detect_correct_charset(encode_content)
-        return encode_content.decode(charset)
+        try:
+            encode_content = content.encode("iso-8859-1")
+            if charset is None:
+                charset = self._detect_correct_charset(encode_content)
+            return encode_content.decode(charset)
+        except UnicodeEncodeError:
+            return content
 
     @staticmethod
     def _detect_correct_charset(byte_string):
-        try:
-            import chardet
-            result = chardet.detect(byte_string)
-            return "iso-8859-1" if result["confidence"] < 0.8 else result["encoding"]
-        except ModuleNotFoundError:
-            return "iso-8859-1"
+        result = chardet.detect(byte_string)
+        return "iso-8859-1" if result["confidence"] < 0.5 else result["encoding"]
 
 
 class HeaderGenerator(object):
