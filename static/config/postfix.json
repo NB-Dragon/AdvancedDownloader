@@ -1,0 +1,11 @@
+{
+  "application/x-javascript": ".js",
+  "application/json": ".json",
+  "image/jpeg": ".jpg",
+  "image/png": ".png",
+  "image/gif": ".gif",
+  "image/x-icon": ".ico",
+  "text/css": ".css",
+  "text/html": ".html",
+  "text/plain": ".txt"
+}
