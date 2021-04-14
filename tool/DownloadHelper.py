@@ -31,7 +31,7 @@ class DownloadHelper(object):
         self._do_final_tips(mission_uuid)
 
     def _do_final_tips(self, uuid_description):
-        final_donate_message = "赞助二维码图片路径为：{}".format(self._runtime_operator.get_donate_image_path())
+        final_donate_message = "赞助二维码图片路径为：{}".format(self._runtime_operator.get_static_donate_image_path())
         self._make_message_and_send(uuid_description, "任务结束", False)
         self._make_message_and_send(uuid_description, "如有帮助，请扫码给予赞助，感谢各位", False)
         self._make_message_and_send(uuid_description, final_donate_message, False)

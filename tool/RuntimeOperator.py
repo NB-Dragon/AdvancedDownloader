@@ -34,11 +34,14 @@ class RuntimeOperator(object):
         run_log_path = self._get_cache_file("log")
         self._append_file_content(run_log_path, run_log)
 
-    def get_donate_image_path(self):
+    def get_static_donate_image_path(self):
         return os.path.join(self._code_entrance_path, "static", "image", "Payment.png")
 
     def get_static_cert_path(self):
         return os.path.join(self._code_entrance_path, "static", "cert", "ca-cert.pem")
+
+    def get_static_postfix_path(self):
+        return os.path.join(self._code_entrance_path, "static", "config", "postfix.json")
 
     def _get_cache_file(self, file_type: str):
         return self._cache_inner_file[file_type]
