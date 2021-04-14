@@ -16,14 +16,7 @@ class RuntimeOperator(object):
 
     def get_mission_state(self):
         mission_cache_path = self._get_cache_file("mission")
-        if os.path.isfile(mission_cache_path):
-            file_content = self._get_file_content(mission_cache_path)
-            if len(file_content):
-                return json.loads(file_content)
-            else:
-                return {}
-        else:
-            return {}
+        return self._get_dict_from_file(mission_cache_path)
 
     def set_mission_state(self, mission_dict: dict):
         mission_cache_path = self._get_cache_file("mission")
@@ -33,6 +26,10 @@ class RuntimeOperator(object):
     def append_run_log_content(self, run_log: str):
         run_log_path = self._get_cache_file("log")
         self._append_file_content(run_log_path, run_log)
+
+    def get_content_type_postfix(self):
+        content_type_postfix_path = self.get_static_postfix_path()
+        return self._get_dict_from_file(content_type_postfix_path)
 
     def get_static_donate_image_path(self):
         return os.path.join(self._code_entrance_path, "static", "image", "Payment.png")
@@ -54,6 +51,16 @@ class RuntimeOperator(object):
         self._cache_inner_file = dict()
         self._cache_inner_file["mission"] = os.path.join(self._cache_directory, "mission.json")
         self._cache_inner_file["log"] = os.path.join(self._cache_directory, "log.txt")
+
+    def _get_dict_from_file(self, file_path):
+        if os.path.isfile(file_path):
+            file_content = self._get_file_content(file_path)
+            if len(file_content):
+                return json.loads(file_content)
+            else:
+                return {}
+        else:
+            return {}
 
     @staticmethod
     def _get_file_content(file_path):
