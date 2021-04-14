@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # Create Time: 2021/1/25 10:00
 # Create User: NB-Dragon
+import os
 import re
 import chardet
 import urllib.parse
@@ -42,12 +43,24 @@ class HeaderAnalyser(object):
         filename = self._get_default_file_name(content_type, filename)
         return filename
 
+    def _get_default_file_name(self, content_type, current_name):
+        if "." in current_name:
+            name, postfix = os.path.splitext(current_name)
+        elif len(current_name):
+            name, postfix = current_name, ".dat"
+        else:
+            name, postfix = "unknown", ".dat"
+        correct_postfix = self._find_correct_postfix(content_type)
+        postfix = correct_postfix or postfix
+        return "{}{}".format(name, postfix)
+
     @staticmethod
-    def _get_default_file_name(content_type, current_name):
-        if content_type and "text/html" in content_type:
-            current_name = "unknown.html" if "." not in current_name else current_name
-        default_name = "unknown.dat" if current_name == "" else current_name
-        return default_name
+    def _find_correct_postfix(content_type):
+        default_postfix = RuntimeOperator().get_content_type_postfix()
+        for key, value in default_postfix.items():
+            if key in content_type:
+                return value
+        return None
 
     @staticmethod
     def get_download_file_size(headers):
