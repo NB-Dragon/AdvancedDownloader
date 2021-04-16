@@ -23,13 +23,13 @@ class RuntimeOperator(object):
         json_content = json.dumps(mission_dict)
         self._set_file_content(mission_cache_path, json_content)
 
-    def append_run_log_content(self, run_log: str):
-        run_log_path = self._get_cache_file("log")
-        self._append_file_content(run_log_path, run_log)
-
     def get_content_type_postfix(self):
         content_type_postfix_path = self.get_static_postfix_path()
         return self._get_dict_from_file(content_type_postfix_path)
+
+    def append_run_log_content(self, run_log: str):
+        run_log_path = self._get_cache_file("log")
+        self._append_file_content(run_log_path, run_log)
 
     def get_static_donate_image_path(self):
         return os.path.join(self._code_entrance_path, "static", "image", "Payment.png")

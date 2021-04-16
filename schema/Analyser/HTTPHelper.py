@@ -21,7 +21,7 @@ class HTTPHelper(object):
 
     @staticmethod
     def get_url_after_quote(link):
-        return urllib.parse.quote(link, safe=":/&=?%;@+$,~")
+        return urllib.parse.quote(link, safe=":/%?=&#;@+$,~")
 
     @staticmethod
     def get_request_pool_manager(alive_count):
@@ -157,7 +157,7 @@ class HeaderGenerator(object):
         user_agent_list = list()
         user_agent_list.append("Mozilla/5.0 (X11; Linux x86_64)")
         user_agent_list.append("AppleWebKit/537.36 (KHTML, like Gecko)")
-        user_agent_list.append("AdvancedDownloader/0.5.7")
+        user_agent_list.append("AdvancedDownloader/0.5.8")
         return {"User-Agent": " ".join(user_agent_list)}
 
     @staticmethod
