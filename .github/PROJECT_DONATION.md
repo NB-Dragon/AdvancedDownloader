@@ -1,2 +1,2 @@
-|Timestamp|User|Money|
+|Timestamp|User|Amount|
 |:-------------:|:-----:|:--------:|
