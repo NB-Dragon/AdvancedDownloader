@@ -1,17 +1,17 @@
 # AdvancedDownloader
-Download everything with high speed, and the resources which need to be verified.<br>
+Download everything with high speed.<br>
 Project link: [https://github.com/NB-Dragon/AdvancedDownloader](https://github.com/NB-Dragon/AdvancedDownloader)
 
 # Characteristic
-1: Faster than **Aria2**, **Thunder** and **Browser**.<br>
-2: Unlimited number of threads, default 128.<br>
+1: Unlimited number of threads.<br>
+2: Faster than **Aria2**, **Thunder** and **Browser**.<br>
 3: Download project from **Github** with high speed.<br>
 4: Download files from **Baidu Net Disk** with high speed.
 
 # Skill
 1: Effectively solve the problem of slow download speed.<br>
 2: Effectively solve the problem of frequent resource interruption.<br>
-3: Effectively solve the problem of resources which need to be verified.
+3: Download the resource which requires authentication.
 
 # Usage
 1: Run command `pip install -r requirements.txt`<br>
