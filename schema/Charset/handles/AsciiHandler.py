@@ -5,7 +5,7 @@
 import re
 
 
-class LowerHandler(object):
+class AsciiHandler(object):
     def __init__(self):
         self._rule_list = list()
 
@@ -17,9 +17,9 @@ class LowerHandler(object):
         return match_count
 
     @staticmethod
-    def _get_lower_count(byte_string: bytes):
+    def _get_ascii_count(byte_string: bytes):
         return len(re.findall(b"[\x00-\x7F]", byte_string))
 
     @staticmethod
-    def _get_bytes_without_lower(byte_string: bytes):
+    def _get_bytes_without_ascii(byte_string: bytes):
         return b"".join(re.findall(b"[^\x00-\x7F]", byte_string))

@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 # Create Time: 2021/4/22 18:00
 # Create User: NB-Dragon
-from schema.Charset.LowerHandler import LowerHandler
+from schema.Charset.handles.AsciiHandler import AsciiHandler
 
 
-class UTF8(LowerHandler):
+class UTF8(AsciiHandler):
     def __init__(self):
         super().__init__()
         self._init_specification()
@@ -24,10 +24,10 @@ class UTF8(LowerHandler):
             tmp_match_count = self._detect_match_count(tmp_byte_string)
             if tmp_match_count > match_length:
                 match_length = tmp_match_count
-        match_length += self._get_lower_count(byte_string)
+        match_length += self._get_ascii_count(byte_string)
         return match_length / expect_length
 
     def _generate_bytes_template(self, byte_string: bytes):
         result_list = list()
-        result_list.append(self._get_bytes_without_lower(byte_string))
+        result_list.append(self._get_bytes_without_ascii(byte_string))
         return result_list
