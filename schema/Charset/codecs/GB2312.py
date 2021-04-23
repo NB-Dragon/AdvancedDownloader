@@ -11,18 +11,8 @@ class GB2312(AsciiHandler):
         self._init_specification()
 
     def _init_specification(self):
-        self._rule_list.append({"regex": b"[\xA1][\xA1-\xFE]", "length": 2})
-        self._rule_list.append({"regex": b"[\xA2][\xB1-\xE2\xE5-\xEE\xF1-\xFC]", "length": 2})
-        self._rule_list.append({"regex": b"[\xA3][\xA1-\xFE]", "length": 2})
-        self._rule_list.append({"regex": b"[\xA4][\xA1-\xF3]", "length": 2})
-        self._rule_list.append({"regex": b"[\xA5][\xA1-\xF6]", "length": 2})
-        self._rule_list.append({"regex": b"[\xA6][\xA1-\xB8\xC1-\xD8]", "length": 2})
-        self._rule_list.append({"regex": b"[\xA7][\xA1-\xC1\xD1-\xF1]", "length": 2})
-        self._rule_list.append({"regex": b"[\xA8][\xA1-\xBA\xC5-\xE9]", "length": 2})
-        self._rule_list.append({"regex": b"[\xA9][\xA4-\xEF]", "length": 2})
-        self._rule_list.append({"regex": b"[\xB0-\xD6][\xA1-\xFE]", "length": 2})
-        self._rule_list.append({"regex": b"[\xD7][\xA1-\xF9]", "length": 2})
-        self._rule_list.append({"regex": b"[\xD8-\xF7][\xA1-\xFE]", "length": 2})
+        current_regex_list = self._generate_current_rule_regex()
+        self._rule_list.append({"regex": b"|".join(current_regex_list), "length": 2})
 
     def detect(self, byte_string: bytes):
         expect_length, match_length = len(byte_string), 0
@@ -50,3 +40,20 @@ class GB2312(AsciiHandler):
     @staticmethod
     def _split_in_length(content, length):
         return [content[i:i + length] for i in range(0, len(content), length)]
+
+    @staticmethod
+    def _generate_current_rule_regex():
+        result_list = list()
+        result_list.append(b"[\xA1][\xA1-\xFE]")
+        result_list.append(b"[\xA2][\xB1-\xE2\xE5-\xEE\xF1-\xFC]")
+        result_list.append(b"[\xA3][\xA1-\xFE]")
+        result_list.append(b"[\xA4][\xA1-\xF3]")
+        result_list.append(b"[\xA5][\xA1-\xF6]")
+        result_list.append(b"[\xA6][\xA1-\xB8\xC1-\xD8]")
+        result_list.append(b"[\xA7][\xA1-\xC1\xD1-\xF1]")
+        result_list.append(b"[\xA8][\xA1-\xBA\xC5-\xE9]")
+        result_list.append(b"[\xA9][\xA4-\xEF]")
+        result_list.append(b"[\xB0-\xD6][\xA1-\xFE]")
+        result_list.append(b"[\xD7][\xA1-\xF9]")
+        result_list.append(b"[\xD8-\xF7][\xA1-\xFE]")
+        return result_list
