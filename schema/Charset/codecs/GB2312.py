@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 # Create Time: 2021/4/22 18:00
 # Create User: NB-Dragon
-import re
+from schema.Charset.LowerHandler import LowerHandler
 
 
-class GB2312(object):
+class GB2312(LowerHandler):
     def __init__(self):
-        self._rule_list = list()
+        super().__init__()
         self._init_specification()
 
     def _init_specification(self):
@@ -41,24 +41,12 @@ class GB2312(object):
         result_list.append(self._get_bytes_without_lower(byte_string[1:]))
         return result_list
 
-    @staticmethod
-    def _adapt_current_charset_template(byte_string_list: list):
+    def _adapt_current_charset_template(self, byte_string_list: list):
         for index in range(len(byte_string_list)):
             byte_string_item = byte_string_list[index]
-            byte_string_item = b"|".join(re.findall(b"[^\x00-\x7F]{2}", byte_string_item))
+            byte_string_item = b"|".join(self._split_in_length(byte_string_item, 2))
             byte_string_list[index] = byte_string_item
 
-    def _detect_match_count(self, byte_string: bytes):
-        match_count = 0
-        for rule in self._rule_list:
-            rule_match_length = len(re.findall(rule["regex"], byte_string))
-            match_count += rule["length"] * rule_match_length
-        return match_count
-
     @staticmethod
-    def _get_lower_count(byte_string: bytes):
-        return len(re.findall(b"[\x00-\x7F]", byte_string))
-
-    @staticmethod
-    def _get_bytes_without_lower(byte_string: bytes):
-        return b"".join(re.findall(b"[^\x00-\x7F]", byte_string))
+    def _split_in_length(content, length):
+        return [content[i:i + length] for i in range(0, len(content), length)]
