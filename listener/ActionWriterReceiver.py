@@ -37,7 +37,7 @@ class ActionWriterReceiver(threading.Thread):
         if handle_type == "write":
             # mission_detail = {"type": "write", "current_region": list, "content": bytes}
             content_info = {"content": mission_detail["content"], "length": len(mission_detail["content"])}
-            self._send_speed_size_message(mission_uuid, content_info["length"])
+            self._send_speed_mission_size(mission_uuid, content_info["length"])
             self._write_bytes_into_file(mission_uuid, mission_detail["current_region"], content_info["content"])
             self._update_mission_region(mission_uuid, mission_detail["current_region"], content_info["length"])
         elif handle_type == "split":
@@ -46,12 +46,12 @@ class ActionWriterReceiver(threading.Thread):
             update_region = mission_detail["update_region"]
             self._do_with_mission_split(mission_uuid, current_region, update_region)
         elif handle_type == "register":
-            # mission_detail = {"type": "register", "mission_info": dict, "download_info": dict, "lock": Any}
-            self._send_speed_register_message(mission_uuid, mission_detail["download_info"])
+            # mission_detail = {"type": "register", "lock": Any, "mission_info": dict, "download_info": dict}
+            self._send_speed_mission_register(mission_uuid, mission_detail["download_info"])
             self._do_with_mission_register(mission_uuid, mission_detail)
         elif handle_type == "finish":
             # mission_detail = {"type": "finish"}
-            self._send_speed_finish_message(mission_uuid)
+            self._send_speed_mission_finish(mission_uuid)
             self._do_with_mission_finish(mission_uuid)
         self._update_mission_progress()
 
@@ -94,7 +94,7 @@ class ActionWriterReceiver(threading.Thread):
                 all_region.insert(correct_region_index, modify_region)
         mission_range_skill = self._mission_dict[mission_uuid]["download_info"]["file_info"]["range"]
         if mission_range_skill and len(all_region) == 0:
-            self._send_speed_finish_message(mission_uuid)
+            self._send_speed_mission_finish(mission_uuid)
             self._do_with_mission_finish(mission_uuid)
 
     @staticmethod
@@ -104,16 +104,16 @@ class ActionWriterReceiver(threading.Thread):
                 return index
         return None
 
-    def _send_speed_size_message(self, mission_uuid: str, content_length):
-        self._send_speed_info(mission_uuid, {"type": "size", "length": content_length})
+    def _send_speed_mission_size(self, mission_uuid: str, content_length):
+        self._send_speed_mission_detail(mission_uuid, {"type": "size", "length": content_length})
 
-    def _send_speed_register_message(self, mission_uuid: str, download_info):
-        self._send_speed_info(mission_uuid, {"type": "register", "download_info": download_info})
+    def _send_speed_mission_register(self, mission_uuid: str, download_info):
+        self._send_speed_mission_detail(mission_uuid, {"type": "register", "download_info": download_info})
 
-    def _send_speed_finish_message(self, mission_uuid: str):
-        self._send_speed_info(mission_uuid, {"type": "finish"})
+    def _send_speed_mission_finish(self, mission_uuid: str):
+        self._send_speed_mission_detail(mission_uuid, {"type": "finish"})
 
-    def _send_speed_info(self, mission_uuid: str, detail: dict):
+    def _send_speed_mission_detail(self, mission_uuid: str, detail: dict):
         message_dict = dict()
         message_dict["action"] = "speed"
         message_dict["value"] = {"mission_uuid": mission_uuid, "detail": detail}

@@ -244,7 +244,7 @@ class DownloadThread(threading.Thread):
             for cache in stream_response.stream(self._download_step_size, True):
                 cache_length = len(cache)
                 if self._expect_size is None or content_length + cache_length <= self._expect_size:
-                    self._send_write_content_message(content_length, cache)
+                    self._send_download_mission_write(content_length, cache)
                     content_length += cache_length
             stream_response.close()
             return {"state_code": 1, "content_length": content_length}
@@ -266,7 +266,7 @@ class DownloadThread(threading.Thread):
         result_dict = {"state_code": state_code, "current_region": self._current_region}
         self._parent_message.put(result_dict)
 
-    def _send_write_content_message(self, current_position, content):
+    def _send_download_mission_write(self, current_position, content):
         current_region = self._current_region.copy()
         current_region[0] += current_position
         message_dict = dict()
