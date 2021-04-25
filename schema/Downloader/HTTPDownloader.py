@@ -147,6 +147,7 @@ class HTTPDownloader(object):
             return self._request_pool.request("GET", target_url, headers=headers, preload_content=False)
         except UnicodeEncodeError as e:
             self._make_message_and_send(str(e) + target_url, True)
+            return None
         except Exception as e:
             self._make_message_and_send(str(e), True)
             return None
