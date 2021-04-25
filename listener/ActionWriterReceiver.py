@@ -114,7 +114,8 @@ class ActionWriterReceiver(threading.Thread):
         self._send_speed_mission_detail(mission_uuid, {"type": "finish"})
 
     def _send_speed_mission_detail(self, mission_uuid: str, detail: dict):
-        message_dict = dict()
-        message_dict["action"] = "speed"
-        message_dict["value"] = {"mission_uuid": mission_uuid, "detail": detail}
-        self._parent_queue.put(message_dict)
+        if self._run_status:
+            message_dict = dict()
+            message_dict["action"] = "speed"
+            message_dict["value"] = {"mission_uuid": mission_uuid, "detail": detail}
+            self._parent_queue.put(message_dict)

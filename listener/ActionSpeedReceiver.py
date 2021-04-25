@@ -112,8 +112,9 @@ class ActionSpeedReceiver(threading.Thread):
             return "{:.2f}{}/s".format(size, units[0])
 
     def _make_message_and_send(self, mission_uuid: str, detail):
-        message_dict = dict()
-        message_dict["action"] = "print"
-        detail_info = {"sender": "ActionSpeedReceiver", "content": detail, "exception": False}
-        message_dict["value"] = {"mission_uuid": mission_uuid, "detail": detail_info}
-        self._parent_queue.put(message_dict)
+        if self._run_status:
+            message_dict = dict()
+            message_dict["action"] = "print"
+            detail_info = {"sender": "ActionSpeedReceiver", "content": detail, "exception": False}
+            message_dict["value"] = {"mission_uuid": mission_uuid, "detail": detail_info}
+            self._parent_queue.put(message_dict)
