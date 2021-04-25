@@ -11,8 +11,23 @@ class UTF8(AsciiHandler):
         self._init_specification()
 
     def _init_specification(self):
-        self._rule_list.append({"regex": b"[\xC0-\xDF][\x80-\xBF]{1}", "length": 2})
-        self._rule_list.append({"regex": b"[\xE0-\xEF][\x80-\xBF]{2}", "length": 3})
-        self._rule_list.append({"regex": b"[\xF0-\xF7][\x80-\xBF]{3}", "length": 4})
-        self._rule_list.append({"regex": b"[\xF8-\xFB][\x80-\xBF]{4}", "length": 5})
-        self._rule_list.append({"regex": b"[\xFC-\xFD][\x80-\xBF]{5}", "length": 6})
+        self._rule_list.append({"regex": b"[\xC2-\xDF][\x80-\xBF]", "length": 2})
+        self._rule_list.append({"regex": b"|".join(self._generate_regex_with_length_3()), "length": 3})
+        self._rule_list.append({"regex": b"|".join(self._generate_regex_with_length_4()), "length": 4})
+
+    @staticmethod
+    def _generate_regex_with_length_3():
+        result_list = list()
+        result_list.append(b"[\xE0][\xA0-\xBF][\x80-\xBF]")
+        result_list.append(b"[\xE1-\xEC][\x80-\xBF][\x80-\xBF]")
+        result_list.append(b"[\xED][\x80-\x9F][\x80-\xBF]")
+        result_list.append(b"[\xEE-\xEF][\x80-\xBF][\x80-\xBF]")
+        return result_list
+
+    @staticmethod
+    def _generate_regex_with_length_4():
+        result_list = list()
+        result_list.append(b"[\xF0][\x90-\xBF][\x80-\xBF][\x80-\xBF]")
+        result_list.append(b"[\xF1-\xF3][\x80-\xBF][\x80-\xBF][\x80-\xBF]")
+        result_list.append(b"[\xF4][\x80-\x8F][\x80-\xBF][\x80-\xBF]")
+        return result_list
