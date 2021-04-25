@@ -21,7 +21,7 @@ class HTTPHelper(object):
 
     @staticmethod
     def get_url_after_quote(link):
-        return urllib.parse.quote(link, safe=":/%?=&#;@+$,~")
+        return urllib.parse.quote(link, safe=":/?#[]@!$&'()*+,;=%")
 
     @staticmethod
     def get_request_pool_manager(alive_count):
