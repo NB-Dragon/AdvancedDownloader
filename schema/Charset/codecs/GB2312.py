@@ -14,33 +14,6 @@ class GB2312(AsciiHandler):
         current_regex_list = self._generate_current_rule_regex()
         self._rule_list.append({"regex": b"|".join(current_regex_list), "length": 2})
 
-    def detect(self, byte_string: bytes):
-        expect_length, match_length = len(byte_string), 0
-        byte_string_template = self._generate_bytes_template(byte_string)
-        self._adapt_current_charset_template(byte_string_template)
-        for tmp_byte_string in byte_string_template:
-            tmp_match_count = self._detect_match_count(tmp_byte_string)
-            if tmp_match_count > match_length:
-                match_length = tmp_match_count
-        match_length += self._get_ascii_count(byte_string)
-        return match_length / expect_length
-
-    def _generate_bytes_template(self, byte_string: bytes):
-        result_list = list()
-        result_list.append(self._get_bytes_without_ascii(byte_string))
-        result_list.append(self._get_bytes_without_ascii(byte_string[1:]))
-        return result_list
-
-    def _adapt_current_charset_template(self, byte_string_list: list):
-        for index in range(len(byte_string_list)):
-            byte_string_item = byte_string_list[index]
-            byte_string_item = b"|".join(self._split_in_length(byte_string_item, 2))
-            byte_string_list[index] = byte_string_item
-
-    @staticmethod
-    def _split_in_length(content, length):
-        return [content[i:i + length] for i in range(0, len(content), length)]
-
     @staticmethod
     def _generate_current_rule_regex():
         result_list = list()
