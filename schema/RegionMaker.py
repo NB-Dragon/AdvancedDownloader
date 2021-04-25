@@ -3,11 +3,10 @@
 # Create Time: 2021/3/15 20:00
 # Create User: NB-Dragon
 from math import ceil
-from typing import List
 
 
 class RegionMaker(object):
-    def get_download_region(self, current_region_list: List[List[int]], spare_worker_count: int):
+    def get_download_region(self, current_region_list, spare_worker_count: int):
         """
             @:param current_region_list: [[min1, max1], [min2, max2], ...];
 
@@ -47,7 +46,7 @@ class RegionMaker(object):
             result_list.extend(self._split_download_region(operate_item, operate_count))
         return sorted(result_list, key=lambda x: x[0])
 
-    def _split_download_region(self, current_region: List[int], thread_count: int):
+    def _split_download_region(self, current_region, thread_count: int):
         content_size = current_region[1] - current_region[0] + 1
         each_small_region_size = self._split_download_size(content_size, thread_count)
         current_position = current_region[0]
