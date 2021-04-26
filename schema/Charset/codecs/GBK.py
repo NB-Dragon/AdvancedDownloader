@@ -10,11 +10,12 @@ from schema.Charset.handles.AsciiHandler import AsciiHandler
 class GBK(AsciiHandler):
     def __init__(self):
         super().__init__()
+        self._ascii_filter_rule = b"[\x00-\x3F]"
+        self._bytes_without_ascii_rule = b"[^\x00-\x3F]+"
         self._init_specification()
 
     def _init_specification(self):
-        current_regex_list = self._generate_current_rule_regex()
-        self._rule_list.append({"regex": b"|".join(current_regex_list), "length": 2})
+        self._rule_list.append({"regex": b"|".join(self._generate_regex_with_length_2()), "length": 2})
 
     def _detect_match_count(self, byte_string: bytes):
         match_count = 0
@@ -26,15 +27,7 @@ class GBK(AsciiHandler):
         return match_count
 
     @staticmethod
-    def _get_ascii_count(byte_string: bytes):
-        return len(re.findall(b"[\x00-\x3F]", byte_string))
-
-    @staticmethod
-    def _get_bytes_without_ascii(byte_string: bytes):
-        return b"".join(re.findall(b"[^\x00-\x3F]", byte_string))
-
-    @staticmethod
-    def _generate_current_rule_regex():
+    def _generate_regex_with_length_2():
         result_list = list()
         result_list.append(b"[\x81-\xA0][\x40-\x7E\x80-\xFE]")
         result_list.append(b"[\xA1][\xA1-\xFE]")

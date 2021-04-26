@@ -11,11 +11,10 @@ class GB2312(AsciiHandler):
         self._init_specification()
 
     def _init_specification(self):
-        current_regex_list = self._generate_current_rule_regex()
-        self._rule_list.append({"regex": b"|".join(current_regex_list), "length": 2})
+        self._rule_list.append({"regex": b"|".join(self._generate_regex_with_length_2()), "length": 2})
 
     @staticmethod
-    def _generate_current_rule_regex():
+    def _generate_regex_with_length_2():
         result_list = list()
         result_list.append(b"[\xA1][\xA1-\xFE]")
         result_list.append(b"[\xA2][\xB1-\xE2\xE5-\xEE\xF1-\xFC]")

@@ -10,6 +10,8 @@ from schema.Charset.handles.AsciiHandler import AsciiHandler
 class GB18030(AsciiHandler):
     def __init__(self):
         super().__init__()
+        self._ascii_filter_rule = b"[\x00-\x2F]"
+        self._bytes_without_ascii_rule = b"[^\x00-\x2F]+"
         self._init_specification()
 
     def _init_specification(self):
@@ -24,11 +26,3 @@ class GB18030(AsciiHandler):
             byte_string = re.sub(rule["regex"], b"\x00", byte_string)
         match_count += len(re.findall(b"[\x30-\x7F]", byte_string))
         return match_count
-
-    @staticmethod
-    def _get_ascii_count(byte_string: bytes):
-        return len(re.findall(b"[\x00-\x2F]", byte_string))
-
-    @staticmethod
-    def _get_bytes_without_ascii(byte_string: bytes):
-        return b"".join(re.findall(b"[^\x00-\x2F]", byte_string))
