@@ -22,13 +22,13 @@ class GB18030(AsciiHandler):
             tmp_result = re.findall(rule["regex"], byte_string)
             match_count += rule["length"] * len(tmp_result)
             byte_string = re.sub(rule["regex"], b"\x00", byte_string)
-        match_count += len(re.findall(b"[\x30-\x39\x40-\x7E]", byte_string))
+        match_count += len(re.findall(b"[\x30-\x7F]", byte_string))
         return match_count
 
     @staticmethod
     def _get_ascii_count(byte_string: bytes):
-        return len(re.findall(b"[\x00-\x2F\x3A-\x3F\x7F]", byte_string))
+        return len(re.findall(b"[\x00-\x2F]", byte_string))
 
     @staticmethod
     def _get_bytes_without_ascii(byte_string: bytes):
-        return b"".join(re.findall(b"[^\x00-\x2F\x3A-\x3F\x7F]", byte_string))
+        return b"".join(re.findall(b"[^\x00-\x2F]", byte_string))
