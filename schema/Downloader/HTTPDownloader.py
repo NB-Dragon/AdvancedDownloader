@@ -11,13 +11,13 @@ from schema.Analyser.HTTPHelper import HTTPHelper
 
 
 class HTTPDownloader(object):
-    def __init__(self, mission_uuid, mission_info: dict, download_info: dict, thread_message: queue.Queue):
+    def __init__(self, mission_uuid, mission_info: dict, download_info: dict, main_thread_message: queue.Queue):
         self._mission_uuid = mission_uuid
         self._mission_info = mission_info
         # mission_info = {"download_link": str, "save_path": str, "thread_num": 128, "headers": dict}
         self._download_info = download_info
         # download_info = {"file_info": dict, "all_region": list[list], "tmp_path": str}
-        self._thread_message = thread_message
+        self._main_thread_message = main_thread_message
         self._request_pool = self._init_request_pool()
         self._mission_lock = self._init_mission_lock()
 
@@ -75,8 +75,8 @@ class HTTPDownloader(object):
 
     def _create_download_mission(self, region_list):
         for each_region in region_list:
-            download_thread = DownloadThread(self._mission_uuid, self._mission_info, each_region,
-                                             self._request_pool, self._download_thread_message, self._thread_message)
+            download_thread = DownloadThread(self._mission_uuid, self._mission_info, each_region, self._request_pool,
+                                             self._download_thread_message, self._main_thread_message)
             download_thread.start()
             self._free_worker_count -= 1
 
@@ -157,7 +157,7 @@ class HTTPDownloader(object):
         message_dict["action"] = "write"
         detail_info = {"type": "split", "current_region": current_region, "update_region": update_region}
         message_dict["value"] = {"mission_uuid": self._mission_uuid, "detail": detail_info}
-        self._thread_message.put(message_dict)
+        self._main_thread_message.put(message_dict)
 
     def _send_download_mission_register(self):
         message_dict = dict()
@@ -165,26 +165,26 @@ class HTTPDownloader(object):
         detail_info = {"type": "register", "lock": self._mission_lock}
         detail_info.update({"mission_info": self._mission_info, "download_info": self._download_info})
         message_dict["value"] = {"mission_uuid": self._mission_uuid, "detail": detail_info}
-        self._thread_message.put(message_dict)
+        self._main_thread_message.put(message_dict)
 
     def _send_download_mission_finish(self):
         message_dict = dict()
         message_dict["action"] = "write"
         detail_info = {"type": "finish"}
         message_dict["value"] = {"mission_uuid": self._mission_uuid, "detail": detail_info}
-        self._thread_message.put(message_dict)
+        self._main_thread_message.put(message_dict)
 
     def _make_message_and_send(self, content, exception: bool):
         message_dict = dict()
         message_dict["action"] = "print"
         detail_info = {"sender": "HTTPDownloader", "content": content, "exception": exception}
         message_dict["value"] = {"mission_uuid": self._mission_uuid, "detail": detail_info}
-        self._thread_message.put(message_dict)
+        self._main_thread_message.put(message_dict)
 
 
 class DownloadThread(threading.Thread):
     def __init__(self, mission_uuid, mission_info: dict, current_region: list, request_pool,
-                 parent_message: queue.Queue, thread_message: queue.Queue):
+                 parent_message: queue.Queue, main_thread_message: queue.Queue):
         super().__init__()
         self._mission_uuid = mission_uuid
         self._mission_info = mission_info
@@ -194,7 +194,7 @@ class DownloadThread(threading.Thread):
         self._download_step_size = 64 << 10
 
         self._parent_message = parent_message
-        self._thread_message = thread_message
+        self._main_thread_message = main_thread_message
 
     def run(self) -> None:
         request_headers = self._generate_request_headers()
@@ -274,11 +274,11 @@ class DownloadThread(threading.Thread):
         message_dict["action"] = "write"
         detail_info = {"type": "write", "current_region": current_region, "content": content}
         message_dict["value"] = {"mission_uuid": self._mission_uuid, "detail": detail_info}
-        self._thread_message.put(message_dict)
+        self._main_thread_message.put(message_dict)
 
     def _make_message_and_send(self, content, exception: bool):
         message_dict = dict()
         message_dict["action"] = "print"
         detail_info = {"sender": "HTTPDownloader.DownloadThread", "content": content, "exception": exception}
         message_dict["value"] = {"mission_uuid": self._mission_uuid, "detail": detail_info}
-        self._thread_message.put(message_dict)
+        self._main_thread_message.put(message_dict)
