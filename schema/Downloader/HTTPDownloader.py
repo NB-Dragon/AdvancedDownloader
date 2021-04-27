@@ -17,11 +17,11 @@ class HTTPDownloader(object):
         # mission_info = {"download_link": str, "save_path": str, "thread_num": 128, "headers": dict}
         self._download_info = download_info
         # download_info = {"file_info": dict, "all_region": list[list], "tmp_path": str}
-        self._main_thread_message = main_thread_message
         self._request_pool = self._init_request_pool()
         self._mission_lock = self._init_mission_lock()
 
         self._free_worker_count = self._mission_info["thread_num"]
+        self._main_thread_message = main_thread_message
         self._download_thread_message = queue.Queue()
 
     def start_download_mission(self):
