@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 # Create Time: 2021/4/22 18:00
 # Create User: NB-Dragon
-from schema.Charset.Handles.AsciiHandler import AsciiHandler
+from schema.Charset.Handles.BaseHandler import BaseHandler
 
 
-class GB2312(AsciiHandler):
+class GB2312(BaseHandler):
     def __init__(self):
         super().__init__()
         self._charset_name = "GB2312"

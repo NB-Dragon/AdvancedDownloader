@@ -4,10 +4,10 @@
 # Create User: NB-Dragon
 import re
 
-from schema.Charset.Handles.AsciiHandler import AsciiHandler
+from schema.Charset.Handles.BaseHandler import BaseHandler
 
 
-class GBK(AsciiHandler):
+class GBK(BaseHandler):
     def __init__(self):
         super().__init__()
         self._charset_name = "GBK"
