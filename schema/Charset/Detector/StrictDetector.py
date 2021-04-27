@@ -3,6 +3,7 @@
 # Create Time: 2021/4/26 12:00
 # Create User: NB-Dragon
 import codecs
+from schema.Charset.Codecs.ASCII import ASCII
 from schema.Charset.Codecs.UTF8 import UTF8
 from schema.Charset.Codecs.GB2312 import GB2312
 from schema.Charset.Codecs.GBK import GBK
@@ -15,6 +16,7 @@ class StrictDetector(object):
         self._init_detector_list()
 
     def _init_detector_list(self):
+        self._detector_list.append(ASCII())
         self._detector_list.append(UTF8())
         self._detector_list.append(GB2312())
         self._detector_list.append(GBK())
