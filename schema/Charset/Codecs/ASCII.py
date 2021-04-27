@@ -5,10 +5,10 @@
 import re
 
 
-class BaseHandler(object):
+class ASCII(object):
     def __init__(self):
         self._rule_list = list()
-        self._charset_name = None
+        self._charset_name = "ASCII"
         self._ascii_filter_rule = b"[\x00-\x7F]"
         self._bytes_without_ascii_rule = b"[^\x00-\x7F]+"
 
