@@ -1,3 +1,7 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Create Time: 2021/4/25 20:00
+# Create User: NB-Dragon
 from schema.Charset.Detector.StrictDetector import StrictDetector
 
 strict_detector = StrictDetector()
