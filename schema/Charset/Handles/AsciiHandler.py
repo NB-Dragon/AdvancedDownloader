@@ -8,6 +8,7 @@ import re
 class AsciiHandler(object):
     def __init__(self):
         self._rule_list = list()
+        self._charset_name = "ascii"
         self._ascii_filter_rule = b"[\x00-\x7F]"
         self._bytes_without_ascii_rule = b"[^\x00-\x7F]+"
 
@@ -17,7 +18,7 @@ class AsciiHandler(object):
         for tmp_byte_string in byte_string_template:
             match_length += self._detect_match_count(tmp_byte_string)
         match_length += self._get_ascii_count(byte_string)
-        return match_length / expect_length
+        return {"charset": self._charset_name, "confidence": match_length / expect_length}
 
     def _generate_bytes_template(self, byte_string: bytes):
         return self._get_bytes_without_ascii(byte_string)

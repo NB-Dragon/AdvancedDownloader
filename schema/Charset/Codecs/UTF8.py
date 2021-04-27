@@ -2,12 +2,13 @@
 # -*- coding: utf-8 -*-
 # Create Time: 2021/4/22 18:00
 # Create User: NB-Dragon
-from schema.Charset.handles.AsciiHandler import AsciiHandler
+from schema.Charset.Handles.AsciiHandler import AsciiHandler
 
 
 class UTF8(AsciiHandler):
     def __init__(self):
         super().__init__()
+        self._charset_name = "UTF8"
         self._init_specification()
 
     def _init_specification(self):

@@ -4,12 +4,13 @@
 # Create User: NB-Dragon
 import re
 
-from schema.Charset.handles.AsciiHandler import AsciiHandler
+from schema.Charset.Handles.AsciiHandler import AsciiHandler
 
 
 class GBK(AsciiHandler):
     def __init__(self):
         super().__init__()
+        self._charset_name = "GBK"
         self._ascii_filter_rule = b"[\x00-\x3F]"
         self._bytes_without_ascii_rule = b"[^\x00-\x3F]+"
         self._init_specification()
