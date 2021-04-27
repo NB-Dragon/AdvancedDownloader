@@ -18,7 +18,7 @@ class BaseHandler(object):
         for tmp_byte_string in byte_string_template:
             match_length += self._detect_match_count(tmp_byte_string)
         match_length += self._get_ascii_count(byte_string)
-        return {"charset": self._charset_name, "confidence": match_length / expect_length}
+        return {"encoding": self._charset_name, "confidence": match_length / expect_length}
 
     def _generate_bytes_template(self, byte_string: bytes):
         return self._get_bytes_without_ascii(byte_string)

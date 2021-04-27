@@ -4,7 +4,7 @@
 # Create User: NB-Dragon
 import os
 import re
-import chardet
+import schema.Charset.chardet as chardet
 import urllib.parse
 import urllib3
 from tool.RuntimeOperator import RuntimeOperator
@@ -157,7 +157,7 @@ class HeaderGenerator(object):
         user_agent_list = list()
         user_agent_list.append("Mozilla/5.0 (X11; Linux x86_64)")
         user_agent_list.append("AppleWebKit/537.36 (KHTML, like Gecko)")
-        user_agent_list.append("AdvancedDownloader/0.5.8")
+        user_agent_list.append("AdvancedDownloader/0.5.9")
         return {"User-Agent": " ".join(user_agent_list)}
 
     @staticmethod
