@@ -4,7 +4,7 @@
 # Create User: NB-Dragon
 import queue
 import threading
-from tool.RuntimeOperator import RuntimeOperator
+from tools.RuntimeOperator import RuntimeOperator
 from listener.ActionPrintReceiver import ActionPrintReceiver
 from listener.ActionSpeedReceiver import ActionSpeedReceiver
 from listener.ActionWriterReceiver import ActionWriterReceiver

@@ -3,9 +3,9 @@
 # Create Time: 2021/1/20 10:00
 # Create User: anonymous
 import os
-from tool.DownloadHelper import DownloadHelper
-from tool.FileOpenHelper import FileOpenHelper
-from tool.RuntimeOperator import RuntimeOperator
+from tools.DownloadHelper import DownloadHelper
+from tools.FileOpenHelper import FileOpenHelper
+from tools.RuntimeOperator import RuntimeOperator
 from schema.analyser.HTTPHelper import HeaderGenerator
 from listener.ThreadMessageDistributor import ThreadMessageDistributor
 

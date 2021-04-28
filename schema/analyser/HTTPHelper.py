@@ -7,7 +7,7 @@ import re
 import schema.charset.chardet as chardet
 import urllib.parse
 import urllib3
-from tool.RuntimeOperator import RuntimeOperator
+from tools.RuntimeOperator import RuntimeOperator
 
 
 class HTTPHelper(object):
