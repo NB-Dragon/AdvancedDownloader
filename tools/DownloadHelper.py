@@ -24,8 +24,8 @@ class DownloadHelper(object):
         link_parse_result = urllib.parse.urlparse(mission_info["download_link"])
         scheme = link_parse_result.scheme
         if scheme in ["https", "http"]:
-            http_helper = HTTPDownloader(mission_uuid, mission_info, download_info, self._message_receiver)
-            http_helper.start_download_mission()
+            http_downloader = HTTPDownloader(mission_uuid, mission_info, download_info, self._message_receiver)
+            http_downloader.start_download_mission()
         else:
             self._make_message_and_send(mission_uuid, "unknown scheme, please wait to support!", False)
         self._do_final_tips(mission_uuid)
