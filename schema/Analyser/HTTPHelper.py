@@ -142,7 +142,7 @@ class ContentDispositionParser(object):
             if charset is None:
                 charset = self._detect_correct_charset(encode_content)
             return encode_content.decode(charset)
-        except UnicodeEncodeError:
+        except (UnicodeEncodeError, LookupError):
             return content
 
     @staticmethod
