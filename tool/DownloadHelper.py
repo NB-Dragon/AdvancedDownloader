@@ -5,7 +5,7 @@
 import uuid
 import urllib.parse
 from tool.RuntimeOperator import RuntimeOperator
-from schema.Downloader.HTTPDownloader import HTTPDownloader
+from schema.downloader.HTTPDownloader import HTTPDownloader
 
 
 class DownloadHelper(object):
