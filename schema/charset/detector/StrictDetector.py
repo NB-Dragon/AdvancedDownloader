@@ -26,10 +26,14 @@ class StrictDetector(object):
     def check_bom_header(byte_string: bytes):
         if byte_string.startswith(codecs.BOM_UTF8):
             return {"encoding": "UTF8", "confidence": 1}
-        elif byte_string.startswith((codecs.BOM_UTF16_LE, codecs.BOM_UTF16_BE)):
-            return {"encoding": "UTF16", "confidence": 1}
-        elif byte_string.startswith((codecs.BOM_UTF32_LE, codecs.BOM_UTF32_BE)):
-            return {"encoding": "UTF32", "confidence": 1}
+        elif byte_string.startswith(codecs.BOM_UTF16_LE):
+            return {"encoding": "UTF-16-LE", "confidence": 1}
+        elif byte_string.startswith(codecs.BOM_UTF16_BE):
+            return {"encoding": "UTF-16-BE", "confidence": 1}
+        elif byte_string.startswith(codecs.BOM_UTF32_LE):
+            return {"encoding": "UTF-32-LE", "confidence": 1}
+        elif byte_string.startswith(codecs.BOM_UTF32_BE):
+            return {"encoding": "UTF-32-BE", "confidence": 1}
         elif byte_string.startswith(b'\xFE\xFF\x00\x00'):
             return {"encoding": "X-ISO-10646-UCS-4-3412", "confidence": 1}
         elif byte_string.startswith(b'\x00\x00\xFF\xFE'):
