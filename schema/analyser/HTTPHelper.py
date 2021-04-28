@@ -4,7 +4,7 @@
 # Create User: NB-Dragon
 import os
 import re
-import schema.Charset.chardet as chardet
+import schema.charset.chardet as chardet
 import urllib.parse
 import urllib3
 from tool.RuntimeOperator import RuntimeOperator

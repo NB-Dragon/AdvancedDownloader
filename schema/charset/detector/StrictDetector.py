@@ -3,11 +3,11 @@
 # Create Time: 2021/4/26 12:00
 # Create User: NB-Dragon
 import codecs
-from schema.Charset.Codecs.ASCII import ASCII
-from schema.Charset.Codecs.UTF8 import UTF8
-from schema.Charset.Codecs.GB2312 import GB2312
-from schema.Charset.Codecs.GBK import GBK
-from schema.Charset.Codecs.GB18030 import GB18030
+from schema.charset.encoding.ASCII import ASCII
+from schema.charset.encoding.UTF8 import UTF8
+from schema.charset.encoding.GB2312 import GB2312
+from schema.charset.encoding.GBK import GBK
+from schema.charset.encoding.GB18030 import GB18030
 
 
 class StrictDetector(object):

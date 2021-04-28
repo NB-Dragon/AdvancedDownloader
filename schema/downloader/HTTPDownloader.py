@@ -7,7 +7,7 @@ import queue
 import urllib3
 import threading
 from schema.RegionMaker import RegionMaker
-from schema.Analyser.HTTPHelper import HTTPHelper
+from schema.analyser.HTTPHelper import HTTPHelper
 
 
 class HTTPDownloader(object):
