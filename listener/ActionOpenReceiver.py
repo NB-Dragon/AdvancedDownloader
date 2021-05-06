@@ -25,7 +25,7 @@ class ActionOpenReceiver(threading.Thread):
         while self._run_status or self._message_queue.qsize():
             message_dict = self._message_queue.get()
             if message_dict is None: continue
-            self._handle_message_detail(message_dict["mission_uuid"], message_dict["detail"])
+            self._handle_message_detail(message_dict["detail"])
         self._do_with_mission_open(None)
 
     def get_message_queue(self):
@@ -38,26 +38,23 @@ class ActionOpenReceiver(threading.Thread):
         self._run_status = False
         self._message_queue.put(None)
 
-    def _handle_message_detail(self, mission_uuid, mission_detail):
+    def _handle_message_detail(self, mission_detail):
         handle_type = mission_detail.pop("type")
         if handle_type == "open":
-            self._do_with_mission_open(mission_uuid)
-        elif handle_type == "register":
-            self._do_with_mission_register(mission_uuid, mission_detail["path"])
-        elif handle_type == "finish":
-            self._do_with_mission_finish(mission_uuid)
+            self._do_with_mission_open(mission_detail["path"])
 
-    def _do_with_mission_open(self, mission_uuid):
+    def _do_with_mission_open(self, file_path):
         adapted_tips = "The current system is not yet adapted, please submit an issue if necessary."
         exception_tips = "Automatic opening failed, please install desktop system and set the default program."
         current_platform = platform.system()
         if current_platform in self._open_method_dict:
             if self._command_installed:
-                self._open_method_dict[current_platform](self._get_mission_file_path(mission_uuid))
+                file_path = file_path or self._runtime_operator.get_static_donate_image_path()
+                self._open_method_dict[current_platform](file_path)
             else:
-                self._make_message_and_send(mission_uuid, exception_tips)
+                self._make_message_and_send(exception_tips)
         else:
-            self._make_message_and_send(mission_uuid, adapted_tips)
+            self._make_message_and_send(adapted_tips)
 
     def _check_command_installed(self):
         try:
@@ -79,12 +76,6 @@ class ActionOpenReceiver(threading.Thread):
     def _do_with_mission_finish(self, mission_uuid):
         self._mission_dict.pop(mission_uuid)
 
-    def _get_mission_file_path(self, mission_uuid):
-        if mission_uuid:
-            return self._mission_dict[mission_uuid]
-        else:
-            return self._runtime_operator.get_static_donate_image_path()
-
     def _init_system_open_dict(self):
         open_method_dict = dict()
         open_method_dict["Linux"] = self._open_in_linux
@@ -104,10 +95,10 @@ class ActionOpenReceiver(threading.Thread):
     def _open_in_windows(file_path):
         os.startfile(file_path)
 
-    def _make_message_and_send(self, mission_uuid: str, detail):
+    def _make_message_and_send(self, detail):
         if self._run_status:
             message_dict = dict()
             message_dict["action"] = "print"
             detail_info = {"sender": "ActionOpenReceiver", "content": detail, "exception": False}
-            message_dict["value"] = {"mission_uuid": mission_uuid, "detail": detail_info}
+            message_dict["value"] = {"mission_uuid": None, "detail": detail_info}
             self._parent_queue.put(message_dict)

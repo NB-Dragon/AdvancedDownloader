@@ -129,20 +129,6 @@
 ```
 
 # Action Open
-## Register
-```json
-{
-  "action": "open",
-  "value": {
-    "mission_uuid": "",
-    "detail": {
-      "type": "register",
-      "path": ""
-    }
-  }
-}
-```
-
 ## Open
 ```json
 {
@@ -151,19 +137,6 @@
     "mission_uuid": "",
     "detail": {
       "type": "open"
-    }
-  }
-}
-```
-
-## Finish
-```json
-{
-  "action": "open",
-  "value": {
-    "mission_uuid": "",
-    "detail": {
-      "type": "finish"
     }
   }
 }
