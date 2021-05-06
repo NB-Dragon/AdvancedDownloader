@@ -7,7 +7,6 @@ import platform
 import queue
 import subprocess
 import threading
-
 from tools.RuntimeOperator import RuntimeOperator
 
 
