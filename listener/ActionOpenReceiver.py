@@ -15,7 +15,6 @@ class ActionOpenReceiver(threading.Thread):
         super().__init__()
         self._runtime_operator = runtime_operator
         self._parent_queue = parent_queue
-        self._mission_dict = dict()
         self._message_queue = queue.Queue()
         self._run_status = True
         self._open_method_dict = self._init_system_open_dict()
@@ -69,12 +68,6 @@ class ActionOpenReceiver(threading.Thread):
                 return False
         except FileNotFoundError:
             return False
-
-    def _do_with_mission_register(self, mission_uuid, file_path):
-        self._mission_dict[mission_uuid] = file_path
-
-    def _do_with_mission_finish(self, mission_uuid):
-        self._mission_dict.pop(mission_uuid)
 
     def _init_system_open_dict(self):
         open_method_dict = dict()
