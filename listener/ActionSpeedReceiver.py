@@ -3,9 +3,9 @@
 # Create Time: 2021/1/25 10:00
 # Create User: NB-Dragon
 import math
-import time
 import queue
 import threading
+import time
 from tools.RuntimeOperator import RuntimeOperator
 
 

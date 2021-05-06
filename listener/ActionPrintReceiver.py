@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 # Create Time: 2021/1/25 10:00
 # Create User: NB-Dragon
-import time
 import json
 import queue
 import threading
+import time
 from tools.RuntimeOperator import RuntimeOperator
 
 
