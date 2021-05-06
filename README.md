@@ -5,7 +5,7 @@ Project link: [https://github.com/NB-Dragon/AdvancedDownloader](https://github.c
 # Characteristic
 1: Unlimited number of threads.<br>
 2: Faster than **Aria2**, **Thunder** and **Browser**.<br>
-3: Download project from **Github** with high speed.<br>
+3: Download project from **GitHub** with high speed.<br>
 4: Download files from **Baidu Net Disk** with high speed.
 
 # Skill
@@ -29,7 +29,7 @@ All systems which support Python3.
 - [ ] Application icon design.
 - [x] HTTP/HTTPS protocol support.
 - [ ] FTP protocol support.
-- [ ] Maganet protocol support.
+- [ ] Magnet protocol support.
 
 # License
 GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
