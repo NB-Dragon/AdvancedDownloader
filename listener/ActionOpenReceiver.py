@@ -30,7 +30,7 @@ class ActionOpenReceiver(threading.Thread):
 
     def get_message_queue(self):
         return self._message_queue
-    
+
     def is_command_installed(self):
         return self._command_installed
 
