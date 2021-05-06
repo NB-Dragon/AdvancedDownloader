@@ -4,6 +4,8 @@
 # Create User: NB-Dragon
 import queue
 import threading
+
+from listener.ActionOpenReceiver import ActionOpenReceiver
 from tools.RuntimeOperator import RuntimeOperator
 from listener.ActionPrintReceiver import ActionPrintReceiver
 from listener.ActionSpeedReceiver import ActionSpeedReceiver
@@ -54,6 +56,9 @@ class ThreadMessageDistributor(threading.Thread):
         action_write_receiver = ActionWriterReceiver(self._runtime_operator, self._message_queue)
         action_write_queue = action_write_receiver.get_message_queue()
         self._all_listener["write"] = {"receiver": action_write_receiver, "queue": action_write_queue}
+        action_open_receiver = ActionOpenReceiver(self._runtime_operator, self._message_queue)
+        action_open_queue = action_open_receiver.get_message_queue()
+        self._all_listener["open"] = {"receiver": action_open_receiver, "queue": action_open_queue}
 
     def _start_all_listener(self):
         for listener in self._all_listener.values():
