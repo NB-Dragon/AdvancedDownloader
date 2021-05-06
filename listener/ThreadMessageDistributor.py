@@ -22,7 +22,6 @@ class ThreadMessageDistributor(threading.Thread):
         self._start_all_listener()
         while self._run_status or self._message_queue.qsize():
             message_dict = self._message_queue.get()
-            # {"action": str, "value": Any}
             if message_dict is None: continue
             action = message_dict["action"]
             if action in self._all_listener:

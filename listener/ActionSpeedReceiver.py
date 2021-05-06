@@ -23,7 +23,6 @@ class ActionSpeedReceiver(threading.Thread):
         self._start_time = time.time()
         while self._run_status or self._message_queue.qsize():
             message_dict = self._message_queue.get()
-            # {"mission_uuid": str, "detail": Any}
             if message_dict:
                 self._handle_message_detail(message_dict["mission_uuid"], message_dict["detail"])
             self._broadcast_speed_content()
@@ -38,13 +37,10 @@ class ActionSpeedReceiver(threading.Thread):
     def _handle_message_detail(self, mission_uuid, mission_detail):
         handle_type = mission_detail.pop("type")
         if handle_type == "size":
-            # mission_detail = {"type": "size", "length": int}
             self._do_with_mission_size(mission_uuid, mission_detail["length"])
         elif handle_type == "register":
-            # mission_detail = {"type": "register", "download_info": dict}
             self._do_with_mission_register(mission_uuid, mission_detail["download_info"])
         elif handle_type == "finish":
-            # mission_detail = {"type": "finish"}
             self._do_with_mission_finish(mission_uuid)
 
     def _do_with_mission_size(self, mission_uuid, length):

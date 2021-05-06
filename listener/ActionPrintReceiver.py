@@ -19,7 +19,6 @@ class ActionPrintReceiver(threading.Thread):
     def run(self) -> None:
         while self._run_status or self._message_queue.qsize():
             message_dict = self._message_queue.get()
-            # {"mission_uuid": str, "detail": {"sender": str, "content": str, "exception": bool}}
             if message_dict:
                 self._handle_message_detail(message_dict["mission_uuid"], message_dict["detail"])
 
@@ -31,7 +30,7 @@ class ActionPrintReceiver(threading.Thread):
         self._message_queue.put(None)
 
     def _handle_message_detail(self, mission_uuid, mission_detail):
-        exception = mission_detail.pop("exception")
+        exception = mission_detail.get("exception", False)
         output_detail = self._generate_final_message(mission_uuid, mission_detail)
         message_content = json.dumps(output_detail, ensure_ascii=False)
         if not exception:
@@ -44,6 +43,6 @@ class ActionPrintReceiver(threading.Thread):
         output_detail = dict()
         output_detail["timestamp"] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         output_detail["mission_uuid"] = mission_uuid
-        output_detail["sender"] = mission_detail["sender"]
-        output_detail["content"] = mission_detail["content"]
+        output_detail["sender"] = mission_detail.get("sender")
+        output_detail["content"] = mission_detail.get("content")
         return output_detail
