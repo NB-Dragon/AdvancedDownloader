@@ -18,7 +18,8 @@ class ActionOpenReceiver(threading.Thread):
         self._mission_dict = dict()
         self._message_queue = queue.Queue()
         self._run_status = True
-        self._open_method = self._find_system_open_method()
+        self._open_method_dict = self._init_system_open_dict()
+        self._command_installed = self._check_command_installed()
 
     def run(self) -> None:
         while self._run_status or self._message_queue.qsize():
@@ -29,6 +30,9 @@ class ActionOpenReceiver(threading.Thread):
 
     def get_message_queue(self):
         return self._message_queue
+    
+    def is_command_install(self):
+        return self._command_installed
 
     def send_stop_state(self):
         self._run_status = False
@@ -46,14 +50,28 @@ class ActionOpenReceiver(threading.Thread):
     def _do_with_mission_open(self, mission_uuid):
         adapted_tips = "The current system is not yet adapted, please submit an issue if necessary."
         exception_tips = "Automatic opening failed, please install desktop system and set the default program."
-        try:
-            if self._open_method:
-                file_path = self._get_mission_file_path(mission_uuid)
-                self._open_method(file_path)
+        current_platform = platform.system()
+        if current_platform in self._open_method_dict:
+            if self._command_installed:
+                self._open_method_dict[current_platform](self._get_mission_file_path(mission_uuid))
             else:
-                self._make_message_and_send(mission_uuid, adapted_tips)
+                self._make_message_and_send(mission_uuid, exception_tips)
+        else:
+            self._make_message_and_send(mission_uuid, adapted_tips)
+
+    def _check_command_installed(self):
+        try:
+            current_platform = platform.system()
+            if current_platform in self._open_method_dict:
+                if current_platform in ["Windows"]:
+                    return True
+                else:
+                    self._open_method_dict[current_platform]("")
+                    return True
+            else:
+                return False
         except FileNotFoundError:
-            self._make_message_and_send(mission_uuid, exception_tips)
+            return False
 
     def _do_with_mission_register(self, mission_uuid, file_path):
         self._mission_dict[mission_uuid] = file_path
@@ -67,24 +85,20 @@ class ActionOpenReceiver(threading.Thread):
         else:
             return self._runtime_operator.get_static_donate_image_path()
 
-    def _find_system_open_method(self):
-        current_platform = platform.system()
-        if current_platform == "Linux":
-            return self._open_in_linux
-        elif current_platform == "Darwin":
-            return self._open_in_mac
-        elif current_platform == "Windows":
-            return self._open_in_windows
-        else:
-            return None
+    def _init_system_open_dict(self):
+        open_method_dict = dict()
+        open_method_dict["Linux"] = self._open_in_linux
+        open_method_dict["Darwin"] = self._open_in_mac
+        open_method_dict["Windows"] = self._open_in_windows
+        return open_method_dict
 
     @staticmethod
     def _open_in_linux(file_path):
-        subprocess.call(["xdg-open", file_path], stderr=subprocess.DEVNULL)
+        subprocess.call(["xdg-open", file_path], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
 
     @staticmethod
     def _open_in_mac(file_path):
-        subprocess.call(["open", file_path], stderr=subprocess.DEVNULL)
+        subprocess.call(["open", file_path], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
 
     @staticmethod
     def _open_in_windows(file_path):
