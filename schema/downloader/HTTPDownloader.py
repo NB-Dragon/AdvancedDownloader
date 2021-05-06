@@ -33,7 +33,9 @@ class HTTPDownloader(object):
             self._create_download_mission(self._download_info["all_region"])
             self._listen_download_message()
             self._mission_lock.acquire()
-            self._rename_final_save_file()
+            final_path_and_name = self._generate_final_file_name()
+            self._rename_final_save_file(final_path_and_name)
+            self._send_file_auto_open(final_path_and_name)
             self._mission_lock.release()
         else:
             self._make_message_and_send("资源禁止访问，请确认验证信息", False)
@@ -98,11 +100,13 @@ class HTTPDownloader(object):
                 else:
                     self._create_download_mission([[0]])
 
-    def _rename_final_save_file(self):
-        self._make_message_and_send("文件整合中", False)
+    def _generate_final_file_name(self):
         file_info = self._download_info["file_info"]
-        save_file = os.path.join(self._mission_info["save_path"], file_info["filename"])
-        os.rename(self._download_info["tmp_path"], save_file)
+        return os.path.join(self._mission_info["save_path"], file_info["filename"])
+
+    def _rename_final_save_file(self, target_save_file):
+        self._make_message_and_send("文件整合中", False)
+        os.rename(self._download_info["tmp_path"], target_save_file)
 
     def _analyse_target_file_info(self):
         tmp_headers = self._mission_info["headers"].copy()
@@ -132,16 +136,6 @@ class HTTPDownloader(object):
         else:
             return None
 
-    @staticmethod
-    def _check_response_can_access(stream_response):
-        if stream_response is None:
-            return False
-        if stream_response.status in [200, 206]:
-            return True
-        else:
-            stream_response.close()
-            return False
-
     def _get_simple_response(self, target_url, headers):
         try:
             return self._request_pool.request("GET", target_url, headers=headers, preload_content=False)
@@ -152,12 +146,15 @@ class HTTPDownloader(object):
             self._make_message_and_send(str(e), True)
             return None
 
-    def _send_download_mission_split(self, current_region, update_region):
-        message_dict = dict()
-        message_dict["action"] = "write"
-        detail_info = {"type": "split", "current_region": current_region, "update_region": update_region}
-        message_dict["value"] = {"mission_uuid": self._mission_uuid, "detail": detail_info}
-        self._main_thread_message.put(message_dict)
+    @staticmethod
+    def _check_response_can_access(stream_response):
+        if stream_response is None:
+            return False
+        if stream_response.status in [200, 206]:
+            return True
+        else:
+            stream_response.close()
+            return False
 
     def _send_download_mission_register(self):
         message_dict = dict()
@@ -167,12 +164,27 @@ class HTTPDownloader(object):
         message_dict["value"] = {"mission_uuid": self._mission_uuid, "detail": detail_info}
         self._main_thread_message.put(message_dict)
 
+    def _send_download_mission_split(self, current_region, update_region):
+        message_dict = dict()
+        message_dict["action"] = "write"
+        detail_info = {"type": "split", "current_region": current_region, "update_region": update_region}
+        message_dict["value"] = {"mission_uuid": self._mission_uuid, "detail": detail_info}
+        self._main_thread_message.put(message_dict)
+
     def _send_download_mission_finish(self):
         message_dict = dict()
         message_dict["action"] = "write"
         detail_info = {"type": "finish"}
         message_dict["value"] = {"mission_uuid": self._mission_uuid, "detail": detail_info}
         self._main_thread_message.put(message_dict)
+
+    def _send_file_auto_open(self, target_save_file):
+        if self._mission_info["open"]:
+            message_dict = dict()
+            message_dict["action"] = "open"
+            detail_info = {"type": "open", "path": target_save_file}
+            message_dict["value"] = {"mission_uuid": self._mission_uuid, "detail": detail_info}
+            self._main_thread_message.put(message_dict)
 
     def _make_message_and_send(self, content, exception: bool):
         message_dict = dict()
