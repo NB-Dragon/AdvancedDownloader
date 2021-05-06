@@ -21,8 +21,8 @@ class ActionWriterReceiver(threading.Thread):
     def run(self) -> None:
         while self._run_status or self._message_queue.qsize():
             message_dict = self._message_queue.get()
-            if message_dict:
-                self._handle_message_detail(message_dict["mission_uuid"], message_dict["detail"])
+            if message_dict is None: continue
+            self._handle_message_detail(message_dict["mission_uuid"], message_dict["detail"])
 
     def get_message_queue(self):
         return self._message_queue

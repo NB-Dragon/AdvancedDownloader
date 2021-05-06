@@ -55,6 +55,19 @@
 }
 ```
 
+## Heart Beat
+```json
+{
+  "action": "speed",
+  "value": {
+    "mission_uuid": null,
+    "detail": {
+      "type": "heartbeat"
+    }
+  }
+}
+```
+
 # Action Write
 ## Register
 ```json

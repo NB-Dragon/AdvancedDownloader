@@ -28,8 +28,8 @@ class ThreadMessageDistributor(threading.Thread):
             if action in self._all_listener:
                 self._all_listener[action]["queue"].put(message_dict["value"])
             else:
-                value = {"exception": False, "content": "action `{}` not defined".format(action)}
-                self._all_listener["print"]["queue"].put(value)
+                self._send_message_to_print("action `{}` not defined".format(action))
+        self._do_before_distributor_down()
         self._stop_all_listener()
 
     def get_message_queue(self):
@@ -38,6 +38,12 @@ class ThreadMessageDistributor(threading.Thread):
     def send_stop_state(self):
         self._run_status = False
         self._message_queue.put(None)
+
+    def _do_before_distributor_down(self):
+        if not self._all_listener["open"]["receiver"].is_command_installed():
+            file_path = self._runtime_operator.get_static_donate_image_path()
+            content = "The sponsored QR code image path is: {}".format(file_path)
+            self._send_message_to_print(content)
 
     def _init_all_listener(self):
         """
@@ -66,3 +72,8 @@ class ThreadMessageDistributor(threading.Thread):
     def _stop_all_listener(self):
         for listener in self._all_listener.values():
             listener["receiver"].send_stop_state()
+
+    def _send_message_to_print(self, content):
+        detail_info = {"sender": "ThreadMessageDistributor", "content": content, "exception": False}
+        value = {"mission_uuid": None, "detail": detail_info}
+        self._all_listener["print"]["queue"].put(value)
