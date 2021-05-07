@@ -50,6 +50,7 @@ class ThreadMessageDistributor(threading.Thread):
         print : handle all message which need to print
         write : handle all file register and writing
         speed : handle all the changes in file size
+        open  : handle all the files open operation
         """
         self._all_listener = dict()
         action_print_receiver = ActionPrintReceiver(self._runtime_operator)
