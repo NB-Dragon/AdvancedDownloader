@@ -139,8 +139,9 @@ class HTTPDownloader(object):
     def _get_simple_response(self, target_url, headers):
         try:
             return self._request_pool.request("GET", target_url, headers=headers, preload_content=False)
-        except UnicodeEncodeError as e:
-            self._make_message_and_send(str(e) + target_url, True)
+        except UnicodeEncodeError:
+            reason = {"error": "The server does not follow the http standard.", "target": target_url}
+            self._make_message_and_send(reason, True)
             return None
         except Exception as e:
             self._make_message_and_send(str(e), True)
