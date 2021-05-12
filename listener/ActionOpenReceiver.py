@@ -14,9 +14,9 @@ class ActionOpenReceiver(threading.Thread):
     def __init__(self, runtime_operator: RuntimeOperator, parent_queue: queue.Queue):
         super().__init__()
         self._runtime_operator = runtime_operator
-        self._parent_queue = parent_queue
         self._message_queue = queue.Queue()
         self._run_status = True
+        self._parent_queue = parent_queue
         self._open_method_dict = self._init_system_open_dict()
         self._command_installed = self._check_command_installed()
 
