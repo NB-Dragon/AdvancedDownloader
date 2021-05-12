@@ -21,7 +21,7 @@ class ThreadMessageDistributor(threading.Thread):
 
     def run(self) -> None:
         self._start_all_listener()
-        while self._run_status or self._message_queue.qsize():
+        while self._should_thread_continue_to_execute():
             message_dict = self._message_queue.get()
             if message_dict is None: continue
             action = message_dict["action"]
@@ -38,6 +38,9 @@ class ThreadMessageDistributor(threading.Thread):
     def send_stop_state(self):
         self._run_status = False
         self._message_queue.put(None)
+
+    def _should_thread_continue_to_execute(self):
+        return self._run_status or self._message_queue.qsize()
 
     def _do_before_distributor_down(self):
         if not self._all_listener["open"]["receiver"].is_command_installed():

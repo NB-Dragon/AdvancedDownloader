@@ -21,7 +21,7 @@ class ActionSpeedReceiver(threading.Thread):
 
     def run(self) -> None:
         self._start_time = time.time()
-        while self._run_status or self._message_queue.qsize():
+        while self._should_thread_continue_to_execute():
             message_dict = self._message_queue.get()
             if message_dict is None: continue
             self._handle_message_detail(message_dict["mission_uuid"], message_dict["detail"])
@@ -33,6 +33,9 @@ class ActionSpeedReceiver(threading.Thread):
     def send_stop_state(self):
         self._run_status = False
         self._message_queue.put(None)
+
+    def _should_thread_continue_to_execute(self):
+        return self._run_status or self._message_queue.qsize()
 
     def _handle_message_detail(self, mission_uuid, mission_detail):
         handle_type = mission_detail.pop("type")
