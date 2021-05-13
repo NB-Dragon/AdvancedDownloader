@@ -16,7 +16,7 @@ class ActionWriterReceiver(threading.Thread):
         self._run_status = True
         self._parent_queue = parent_queue
         self._mission_dict = dict()
-        self._writer_and_lock_dict = dict()
+        self._thread_lock_dict = dict()
 
     def run(self) -> None:
         while self._should_thread_continue_to_execute():
@@ -60,27 +60,25 @@ class ActionWriterReceiver(threading.Thread):
         all_region.sort(key=lambda x: x[0])
 
     def _do_with_mission_register(self, mission_uuid, mission_detail):
-        self._writer_and_lock_dict[mission_uuid] = dict()
-        tmp_file_path = mission_detail["download_info"]["tmp_path"]
-        self._writer_and_lock_dict[mission_uuid]["writer"] = open(tmp_file_path, 'r+b')
-        self._writer_and_lock_dict[mission_uuid]["lock"] = mission_detail.pop("lock")
+        self._thread_lock_dict[mission_uuid] = dict()
+        self._thread_lock_dict[mission_uuid]["lock"] = mission_detail.pop("lock")
         # Regenerate mission_detail to ensure the absolute difference of memory addresses.
         self._mission_dict[mission_uuid] = json.loads(json.dumps(mission_detail))
 
     def _do_with_mission_finish(self, mission_uuid):
-        self._writer_and_lock_dict[mission_uuid]["writer"].close()
-        self._writer_and_lock_dict[mission_uuid]["lock"].release()
-        self._writer_and_lock_dict.pop(mission_uuid)
+        self._thread_lock_dict[mission_uuid]["lock"].release()
+        self._thread_lock_dict.pop(mission_uuid)
         self._mission_dict.pop(mission_uuid)
 
     def _update_mission_progress(self):
         self._runtime_operator.set_mission_state(self._mission_dict)
 
     def _write_bytes_into_file(self, mission_uuid: str, current_region: list, content):
-        writer = self._writer_and_lock_dict[mission_uuid]["writer"]
+        sava_file_path = self._mission_dict[mission_uuid]["download_info"]["save_path"]
+        writer = open(sava_file_path, 'r+b')
         writer.seek(current_region[0])
         writer.write(content)
-        writer.flush()
+        writer.close()
 
     def _update_mission_region(self, mission_uuid: str, current_region: list, length):
         all_region = self._mission_dict[mission_uuid]["download_info"]["all_region"]

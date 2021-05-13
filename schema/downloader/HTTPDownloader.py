@@ -16,7 +16,7 @@ class HTTPDownloader(object):
         self._mission_info = mission_info
         # mission_info = {"download_link": str, "save_path": str, "thread_num": 128, "headers": dict}
         self._download_info = download_info
-        # download_info = {"file_info": dict, "all_region": list[list], "tmp_path": str}
+        # download_info = {"file_info": dict, "all_region": list[list], "save_path": str}
         self._request_pool = self._init_request_pool()
         self._mission_lock = self._init_mission_lock()
 
@@ -33,9 +33,7 @@ class HTTPDownloader(object):
             self._create_download_mission(self._download_info["all_region"])
             self._listen_download_message()
             self._mission_lock.acquire()
-            final_path_and_name = self._generate_final_file_name()
-            self._rename_final_save_file(final_path_and_name)
-            self._send_file_auto_open(final_path_and_name)
+            self._send_file_auto_open()
             self._mission_lock.release()
         else:
             self._make_message_and_send("资源禁止访问，请确认验证信息", False)
@@ -59,15 +57,15 @@ class HTTPDownloader(object):
         if len(self._download_info) == 0 or self._download_info["file_info"]["range"] is False:
             self._download_info["file_info"] = self._analyse_target_file_info()
             self._download_info["all_region"] = self._generate_file_all_region(self._download_info["file_info"])
-            self._download_info["tmp_path"] = self._generate_tmp_file_path(self._download_info["file_info"])
+            self._download_info["save_path"] = self._generate_tmp_file_path(self._download_info["file_info"])
         self._make_message_and_send("资源解析完成", False)
 
     def _create_download_tmp_file(self):
         self._make_message_and_send("任务正在初始化", False)
-        writer = open(self._download_info["tmp_path"], 'a+b')
+        writer = open(self._download_info["save_path"], 'a+b')
         expect_size = self._download_info["file_info"]["filesize"]
         if isinstance(expect_size, int):
-            current_size = os.path.getsize(self._download_info["tmp_path"])
+            current_size = os.path.getsize(self._download_info["save_path"])
             byte_buffer_65536 = bytearray(65536)
             for index in range((expect_size - current_size) // 65536):
                 writer.write(byte_buffer_65536)
@@ -104,10 +102,6 @@ class HTTPDownloader(object):
         file_info = self._download_info["file_info"]
         return os.path.join(self._mission_info["save_path"], file_info["filename"])
 
-    def _rename_final_save_file(self, target_save_file):
-        self._make_message_and_send("文件整合中", False)
-        os.rename(self._download_info["tmp_path"], target_save_file)
-
     def _analyse_target_file_info(self):
         tmp_headers = self._mission_info["headers"].copy()
         tmp_headers["Range"] = "bytes=0-0"
@@ -131,8 +125,7 @@ class HTTPDownloader(object):
 
     def _generate_tmp_file_path(self, file_info):
         if file_info:
-            file_name = "{}.tmp".format(file_info["filename"])
-            return os.path.join(self._mission_info["save_path"], file_name)
+            return os.path.join(self._mission_info["save_path"], file_info["filename"])
         else:
             return None
 
@@ -179,11 +172,11 @@ class HTTPDownloader(object):
         message_dict["value"] = {"mission_uuid": self._mission_uuid, "detail": detail_info}
         self._main_thread_message.put(message_dict)
 
-    def _send_file_auto_open(self, target_save_file):
+    def _send_file_auto_open(self):
         if self._mission_info["open"]:
             message_dict = dict()
             message_dict["action"] = "open"
-            detail_info = {"type": "open", "path": target_save_file}
+            detail_info = {"type": "open", "path": self._download_info["save_path"]}
             message_dict["value"] = {"mission_uuid": self._mission_uuid, "detail": detail_info}
             self._main_thread_message.put(message_dict)
 
