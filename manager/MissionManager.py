@@ -29,8 +29,8 @@ class MissionManager(threading.Thread):
             if message_dict["action"] == "operate":
                 self._handle_operate_action(message_detail["mission_uuid"], message_detail["detail"])
             elif message_dict["action"] == "signal":
-                self._handle_thread_signal(message_detail["mission_uuid"], message_detail["signal"])
-            self._process_the_first_action(message_detail["mission_uuid"])
+                self._handle_thread_signal(message_detail["mission_uuid"], message_detail["detail"])
+            self._process_current_action(message_detail["mission_uuid"])
         self._stop_all_listener()
 
     def get_message_queue(self):
@@ -51,27 +51,30 @@ class MissionManager(threading.Thread):
         handle_type = mission_detail["type"]
         if handle_type == "create":
             self._mission_dict[mission_uuid] = mission_detail["value"]
+            self._mission_dict[mission_uuid]["running"] = False
+            self._thread_and_action_dict[mission_uuid] = {"thread": None, "action": None}
         elif handle_type == "open":
-            self._thread_and_action_dict[mission_uuid]["action"].append("open")
+            self._thread_and_action_dict[mission_uuid]["action"] = "open"
         elif handle_type == "start":
-            self._thread_and_action_dict[mission_uuid]["action"].append("start")
+            self._thread_and_action_dict[mission_uuid]["action"] = "start"
         elif handle_type == "pause":
-            self._thread_and_action_dict[mission_uuid]["action"].append("pause")
+            self._thread_and_action_dict[mission_uuid]["action"] = "pause"
         elif handle_type == "delete":
-            self._thread_and_action_dict[mission_uuid]["action"].append("delete")
+            self._thread_and_action_dict[mission_uuid]["action"] = "delete"
 
-    def _handle_thread_signal(self, mission_uuid, signal_type):
+    def _handle_thread_signal(self, mission_uuid, signal_detail):
+        signal_type = signal_detail["type"]
         if signal_type == "stop":
             self._synchronize_mission_stop_state(mission_uuid)
-            self._synchronize_mission_download_info(mission_uuid)
+            self._synchronize_mission_download_info(mission_uuid, signal_detail["download_info"])
         elif signal_type == "finish":
             self._synchronize_mission_stop_state(mission_uuid)
             self._append_action_open_if_needed(mission_uuid)
 
-    def _process_the_first_action(self, mission_uuid):
-        action_list = self._thread_and_action_dict[mission_uuid]["action"]
-        if len(action_list):
-            current_action = action_list.pop(0)
+    def _process_current_action(self, mission_uuid):
+        current_action = self._thread_and_action_dict[mission_uuid]["action"]
+        if current_action:
+            self._thread_and_action_dict[mission_uuid]["action"] = None
             if current_action == "open":
                 self._do_with_signal_open(mission_uuid)
             elif current_action == "start":
@@ -82,17 +85,18 @@ class MissionManager(threading.Thread):
                 self._do_with_signal_delete(mission_uuid)
 
     def _do_with_signal_open(self, mission_uuid):
-        sava_file = self._mission_dict[mission_uuid]["download_info"]["save_path"]
-        message_dict = dict()
-        message_dict["action"] = "open"
-        detail_info = {"type": "open", "path": sava_file}
-        message_dict["value"] = {"mission_uuid": mission_uuid, "detail": detail_info}
-        self._all_listener["message"]["queue"].put(message_dict)
+        if self._mission_dict[mission_uuid]["download_info"]:
+            sava_file = self._mission_dict[mission_uuid]["download_info"]["full_path"]
+            message_dict = {"action": "open", "value": {"mission_uuid": mission_uuid, "detail": None}}
+            message_dict["value"]["detail"] = {"type": "open", "path": sava_file}
+            self._all_listener["message"]["queue"].put(message_dict)
 
     def _do_with_signal_start(self, mission_uuid):
-        self._thread_and_action_dict[mission_uuid]["thread"] = self._create_mission_thread(mission_uuid)
-        self._thread_and_action_dict[mission_uuid]["thread"].start()
-        self._mission_dict[mission_uuid]["running"] = True
+        mission_thread = self._create_mission_thread(mission_uuid)
+        if mission_thread is not None:
+            self._mission_dict[mission_uuid]["running"] = True
+            self._thread_and_action_dict[mission_uuid]["thread"] = mission_thread
+            self._thread_and_action_dict[mission_uuid]["thread"].start()
 
     def _do_with_signal_pause(self, mission_uuid):
         if self._thread_and_action_dict[mission_uuid]["thread"]:
@@ -100,7 +104,7 @@ class MissionManager(threading.Thread):
 
     def _do_with_signal_delete(self, mission_uuid):
         if self._mission_dict[mission_uuid]["running"]:
-            self._thread_and_action_dict[mission_uuid]["action"].append("delete")
+            self._thread_and_action_dict[mission_uuid]["action"] = "delete"
             self._do_with_signal_pause(mission_uuid)
         else:
             self._mission_dict.pop(mission_uuid)
@@ -110,14 +114,13 @@ class MissionManager(threading.Thread):
         self._mission_dict[mission_uuid]["running"] = False
         self._thread_and_action_dict[mission_uuid]["thread"] = None
 
-    def _synchronize_mission_download_info(self, mission_uuid):
-        history_mission_dict = self._runtime_operator.get_mission_state()
-        self._mission_dict[mission_uuid]["download_info"] = history_mission_dict[mission_uuid]["download_info"]
+    def _synchronize_mission_download_info(self, mission_uuid, download_info):
+        self._mission_dict[mission_uuid]["download_info"] = download_info
 
     def _append_action_open_if_needed(self, mission_uuid):
         current_mission_info = self._mission_dict[mission_uuid]["mission_info"]
         if current_mission_info["open_after_finish"]:
-            self._thread_and_action_dict[mission_uuid]["action"].append("open")
+            self._thread_and_action_dict[mission_uuid]["action"] = "open"
 
     def _init_all_listener(self):
         """
