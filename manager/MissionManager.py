@@ -16,10 +16,10 @@ class MissionManager(threading.Thread):
         self._runtime_operator = runtime_operator
         self._message_queue = queue.Queue()
         self._run_status = True
-        self._mission_template = MissionTemplate(self._runtime_operator)
         self._mission_info_dict = dict()
         self._mission_state_dict = dict()
         self._init_all_listener()
+        self._init_all_tools()
 
     def run(self) -> None:
         self._start_all_listener()
@@ -143,11 +143,13 @@ class MissionManager(threading.Thread):
             if self._mission_state_dict[mission_uuid]["retry"] < 3:
                 self._mission_state_dict[mission_uuid]["action"] = "start"
                 self._mission_state_dict[mission_uuid]["retry"] += 1
-                # 这里发送信号，申请解析获取对应协议的`download_info`
+                mission_info = self._mission_info_dict[mission_uuid]["mission_info"]
+                self._mission_template.send_archive_download_info(mission_uuid, mission_info)
             return None
         else:
-            # 这里从任务生成器获取下载线程
-            return None
+            mission_info = self._mission_info_dict[mission_uuid]["mission_info"]
+            download_info = self._mission_info_dict[mission_uuid]["download_info"]
+            return self._mission_template.create_download_thread(mission_uuid, mission_info, download_info)
 
     def _init_all_listener(self):
         """
@@ -157,6 +159,10 @@ class MissionManager(threading.Thread):
         thread_message_distributor = ThreadMessageDistributor(self._runtime_operator)
         thread_message_queue = thread_message_distributor.get_message_queue()
         self._all_listener["message"] = {"receiver": thread_message_distributor, "queue": thread_message_queue}
+
+    def _init_all_tools(self):
+        self._mission_template = MissionTemplate(self._runtime_operator)
+        self._mission_template.init_thread_message_queue(self._message_queue, self._all_listener["message"]["queue"])
 
     def _start_all_listener(self):
         for listener in self._all_listener.values():
