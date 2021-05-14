@@ -6,6 +6,7 @@ import json
 import queue
 import threading
 from tools.RuntimeOperator import RuntimeOperator
+from manager.MissionTemplate import MissionTemplate
 from listener.ThreadMessageDistributor import ThreadMessageDistributor
 
 
@@ -15,6 +16,7 @@ class MissionManager(threading.Thread):
         self._runtime_operator = runtime_operator
         self._message_queue = queue.Queue()
         self._run_status = True
+        self._mission_template = MissionTemplate(self._runtime_operator)
         self._mission_info_dict = dict()
         self._mission_state_dict = dict()
         self._init_all_listener()
@@ -74,7 +76,8 @@ class MissionManager(threading.Thread):
     def _insert_mission_info_item(self, mission_uuid, mission_value):
         mission_info, download_info = mission_value["mission_info"], mission_value["download_info"]
         self._mission_info_dict[mission_uuid] = dict()
-        self._mission_info_dict[mission_uuid]["mission_info"] = json.loads(json.dumps(mission_info))
+        standard_mission_info = self._mission_template.get_standard_mission_info(mission_info)
+        self._mission_info_dict[mission_uuid]["mission_info"] = standard_mission_info
         self._mission_info_dict[mission_uuid]["download_info"] = json.loads(json.dumps(download_info))
 
     def _insert_mission_state_item(self, mission_uuid):
