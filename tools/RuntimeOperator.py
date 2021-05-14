@@ -11,6 +11,7 @@ class RuntimeOperator(object):
     def __init__(self):
         self._code_entrance_path = os.path.split(os.path.abspath(sys.argv[0]))[0]
         self._cache_directory = os.path.join(self._code_entrance_path, ".cache")
+        self._static_directory = os.path.join(self._code_entrance_path, "static")
         self._setup_cache_directory()
         self._setup_cache_inner_file()
 
@@ -31,14 +32,17 @@ class RuntimeOperator(object):
         run_log_path = self._get_cache_file("log")
         self._append_file_content(run_log_path, run_log)
 
+    def get_code_entrance_path(self):
+        return self._code_entrance_path
+
     def get_static_donate_image_path(self):
-        return os.path.join(self._code_entrance_path, "static", "image", "Payment.png")
+        return os.path.join(self._static_directory, "image", "Payment.png")
 
     def get_static_cert_path(self):
-        return os.path.join(self._code_entrance_path, "static", "cert", "ca-cert.pem")
+        return os.path.join(self._static_directory, "cert", "ca-cert.pem")
 
     def get_static_postfix_path(self):
-        return os.path.join(self._code_entrance_path, "static", "config", "postfix.json")
+        return os.path.join(self._static_directory, "config", "postfix.json")
 
     def _get_cache_file(self, file_type: str):
         return self._cache_inner_file[file_type]
