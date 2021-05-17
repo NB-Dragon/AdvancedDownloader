@@ -86,5 +86,5 @@ class HTTPAnalyser(object):
         self._send_message_to_listener(message_dict)
 
     def _send_message_to_listener(self, detail: dict):
-        message_dict = {"action": "signal", "receiver": "message", "detail": detail}
+        message_dict = {"action": "signal", "receiver": "message", "value": detail}
         self._parent_queue.put(message_dict)
