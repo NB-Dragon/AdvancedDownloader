@@ -25,7 +25,7 @@ class ActionOpenReceiver(threading.Thread):
             message_dict = self._message_queue.get()
             if message_dict is None: continue
             self._handle_message_detail(message_dict["detail"])
-        self._do_with_mission_open(None)
+        self._open_target_file(self._runtime_operator.get_static_donate_image_path())
 
     def get_message_queue(self):
         return self._message_queue
@@ -46,12 +46,18 @@ class ActionOpenReceiver(threading.Thread):
             self._do_with_mission_open(mission_detail["path"])
 
     def _do_with_mission_open(self, file_path):
-        adapted_tips = "The current system is not yet adapted, please submit an issue if necessary."
-        exception_tips = "Automatic opening failed, please install desktop system and set the default program."
+        if os.path.exists(file_path):
+            self._open_target_file(file_path)
+        else:
+            file_tips = "File not found. Please start download first."
+            self._make_message_and_send(file_tips)
+
+    def _open_target_file(self, file_path):
+        adapted_tips = "The current system is not yet adapted. Please open an issue if necessary."
+        exception_tips = "Automatic opening failed. Please install desktop system and set the default program."
         current_platform = platform.system()
         if current_platform in self._open_method_dict:
             if self._command_installed:
-                file_path = file_path or self._runtime_operator.get_static_donate_image_path()
                 self._open_method_dict[current_platform](file_path)
             else:
                 self._make_message_and_send(exception_tips)
