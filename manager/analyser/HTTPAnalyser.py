@@ -10,23 +10,24 @@ from tools.RuntimeOperator import RuntimeOperator
 
 
 class HTTPAnalyser(object):
-    def __init__(self, runtime_operator: RuntimeOperator, parent_queue: queue.Queue):
+    def __init__(self, schema_name, runtime_operator: RuntimeOperator, parent_queue: queue.Queue):
+        self._schema_name = schema_name
         self._runtime_operator = runtime_operator
         self._parent_queue = parent_queue
         self._http_header_analyser = HTTPHeaderAnalyser(runtime_operator)
         self._region_maker = RegionMaker()
 
-    def get_download_info(self, schema, mission_info, mission_uuid):
+    def get_download_info(self, mission_info, mission_uuid):
         self._send_print_message(mission_uuid, "资源连接中", False)
-        download_info = self._analyse_target_file_info(schema, mission_info, mission_uuid)
+        download_info = self._analyse_target_file_info(mission_info, mission_uuid)
         self._send_print_message(mission_uuid, "资源解析完成", False)
         return download_info
 
-    def _analyse_target_file_info(self, schema, mission_info, mission_uuid):
+    def _analyse_target_file_info(self, mission_info, mission_uuid):
         tmp_headers = mission_info["headers"].copy() if mission_info["headers"] else dict()
         tmp_headers["Range"] = "bytes=0-0"
         download_link = mission_info["download_link"]
-        request_manager = self._http_header_analyser.get_request_manager(schema, 1, mission_info["proxy"])
+        request_manager = self._http_header_analyser.get_request_manager(self._schema_name, 1, mission_info["proxy"])
         stream_response = self._get_simple_response(request_manager, mission_uuid, download_link, tmp_headers)
         if self._check_response_can_access(stream_response):
             headers = {key.lower(): value for key, value in dict(stream_response.headers).items()}
@@ -69,10 +70,8 @@ class HTTPAnalyser(object):
         if file_info and file_info["range"]:
             unassigned_region_list = [[0, file_info["filesize"] - 1]]
             return self._region_maker.get_download_region(unassigned_region_list, thread_num)
-        elif file_info:
-            return [[0]]
         else:
-            return None
+            return [[0]] if file_info else None
 
     @staticmethod
     def _generate_file_full_path(file_info, save_path):
