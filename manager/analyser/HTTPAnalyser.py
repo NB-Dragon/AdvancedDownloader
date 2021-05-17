@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 # Create Time: 2021/5/16 12:00
 # Create User: NB-Dragon
+import os
 import queue
-import urllib3
-from schema.analyser.HTTPHelper import HTTPHelper
+from manager.decoder.HTTPHeaderAnalyser import HTTPHeaderAnalyser
+from schema.RegionMaker import RegionMaker
 from tools.RuntimeOperator import RuntimeOperator
 
 
@@ -12,36 +13,28 @@ class HTTPAnalyser(object):
     def __init__(self, runtime_operator: RuntimeOperator, parent_queue: queue.Queue):
         self._runtime_operator = runtime_operator
         self._parent_queue = parent_queue
+        self._http_header_analyser = HTTPHeaderAnalyser(runtime_operator)
+        self._region_maker = RegionMaker()
 
     def get_download_info(self, schema, mission_info, mission_uuid):
+        self._send_print_message(mission_uuid, "资源连接中", False)
+        download_info = self._analyse_target_file_info(schema, mission_info, mission_uuid)
+        self._send_print_message(mission_uuid, "资源解析完成", False)
+        return download_info
+
+    def _analyse_target_file_info(self, schema, mission_info, mission_uuid):
         tmp_headers = mission_info["headers"].copy() if mission_info["headers"] else dict()
         tmp_headers["Range"] = "bytes=0-0"
         download_link = mission_info["download_link"]
-        request_manager = self.get_request_manager(schema, mission_info)
+        request_manager = self._http_header_analyser.get_request_manager(schema, 1, mission_info["proxy"])
         stream_response = self._get_simple_response(request_manager, mission_uuid, download_link, tmp_headers)
         if self._check_response_can_access(stream_response):
             headers = {key.lower(): value for key, value in dict(stream_response.headers).items()}
             current_url = stream_response.geturl() or mission_info["download_link"]
             stream_response.close()
-            return HTTPHelper.get_download_file_requirement(headers, current_url)
+            return self._generate_download_info(mission_info, headers, current_url)
         else:
             return None
-
-    def get_request_manager(self, schema, mission_info):
-        if mission_info["proxy"] is None:
-            return self._get_request_pool_manager(mission_info["thread_num"])
-        else:
-            proxy_url = "{}://{}".format(schema, mission_info["proxy"])
-            return self._get_request_proxy_manager(mission_info["thread_num"], proxy_url)
-
-    def _get_request_pool_manager(self, alive_count):
-        cert_pem_file = self._runtime_operator.get_static_cert_path()
-        return urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=cert_pem_file, maxsize=alive_count, timeout=15)
-
-    def _get_request_proxy_manager(self, alive_count, proxy_url):
-        cert_pem_file = self._runtime_operator.get_static_cert_path()
-        return urllib3.ProxyManager(proxy_url=proxy_url,
-                                    cert_reqs='CERT_REQUIRED', ca_certs=cert_pem_file, maxsize=alive_count, timeout=15)
 
     def _get_simple_response(self, request_manager, mission_uuid, target_url, headers):
         try:
@@ -63,6 +56,30 @@ class HTTPAnalyser(object):
         else:
             stream_response.close()
             return False
+
+    def _generate_download_info(self, mission_info, headers, current_url):
+        download_info = dict()
+        thread_num, save_path = mission_info["thread_num"], mission_info["save_path"]
+        download_info["file_info"] = self._http_header_analyser.get_http_file_info(headers, current_url)
+        download_info["all_region"] = self._generate_file_all_region(download_info["file_info"], thread_num)
+        download_info["full_path"] = self._generate_file_full_path(download_info["file_info"], save_path)
+        return download_info
+
+    def _generate_file_all_region(self, file_info, thread_num):
+        if file_info and file_info["range"]:
+            unassigned_region_list = [[0, file_info["filesize"] - 1]]
+            return self._region_maker.get_download_region(unassigned_region_list, thread_num)
+        elif file_info:
+            return [[0]]
+        else:
+            return None
+
+    @staticmethod
+    def _generate_file_full_path(file_info, save_path):
+        if file_info:
+            return os.path.join(save_path, file_info["filename"])
+        else:
+            return None
 
     def _send_print_message(self, mission_uuid, content, exception: bool):
         message_dict = {"action": "print", "value": {"mission_uuid": mission_uuid, "detail": None}}
