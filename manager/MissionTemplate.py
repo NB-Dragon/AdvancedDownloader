@@ -17,7 +17,7 @@ class MissionTemplate(object):
         standard_mission_info["download_link"] = mission_info.get("download_link")
         standard_mission_info["save_path"] = mission_info.get("save_path", default_save_path)
         standard_mission_info["thread_num"] = mission_info.get("thread_num", 1)
-        standard_mission_info["headers"] = mission_info.get("headers", dict())
+        standard_mission_info["headers"] = mission_info.get("headers", None)
         standard_mission_info["proxy"] = mission_info.get("proxy", None)
         standard_mission_info["open_after_finish"] = False
         return standard_mission_info
