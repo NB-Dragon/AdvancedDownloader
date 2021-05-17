@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # Create Time: 2021/5/16 12:00
 # Create User: NB-Dragon
-class HeaderGenerator(object):
+class HTTPHeaderGenerator(object):
     @staticmethod
     def get_header_user_agent():
         user_agent_list = list()

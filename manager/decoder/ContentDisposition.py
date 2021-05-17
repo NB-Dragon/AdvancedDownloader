@@ -4,7 +4,6 @@
 # Create User: NB-Dragon
 import re
 import urllib.parse
-
 from schema.charset import chardet
 
 

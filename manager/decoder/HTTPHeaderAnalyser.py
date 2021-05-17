@@ -6,15 +6,15 @@ import os
 import re
 import urllib.parse
 import urllib3
-from manager.schema.ContentDisposition import ContentDisposition
+from manager.decoder.ContentDisposition import ContentDisposition
 from tools.RuntimeOperator import RuntimeOperator
 
 
-class HeaderAnalyser(object):
+class HTTPHeaderAnalyser(object):
     def __init__(self, runtime_operator: RuntimeOperator):
         self._runtime_operator = runtime_operator
 
-    def get_http_download_info(self, headers, link):
+    def get_http_file_info(self, headers, link):
         filename = self._get_download_file_name(headers, link)
         filesize = self._get_download_file_size(headers)
         range_header = self._judge_download_range_skill(headers)
