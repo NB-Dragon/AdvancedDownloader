@@ -58,5 +58,5 @@ class MissionAnalyseReceiver(threading.Thread):
     def _send_mission_analyse_result(self, mission_uuid: str, detail: dict):
         message_dict = {"action": "signal", "receiver": "mission_info", "value": None}
         message_detail = {"type": "analyse", "mission_uuid": mission_uuid, "detail": detail}
-        message_dict["detail"] = message_detail
+        message_dict["value"] = message_detail
         self._parent_queue.put(message_dict)
