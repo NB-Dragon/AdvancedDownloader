@@ -46,14 +46,14 @@ class MissionAnalyseReceiver(threading.Thread):
         schema = link_parse_result.scheme
         result_dict = {"analyse_tag": message_detail["analyse_tag"] + 1, "analyse_result": None}
         if schema in self._all_analyser:
-            download_info = self._all_analyser[schema].get_download_info(mission_info, mission_uuid)
+            download_info = self._all_analyser[schema].get_download_info(mission_uuid, mission_info)
             result_dict["analyse_result"] = download_info
         return result_dict
 
     def _init_all_analyser(self):
         self._all_analyser = dict()
-        self._all_analyser["http"] = HTTPAnalyser("http", self._runtime_operator, self._parent_queue)
-        self._all_analyser["https"] = HTTPAnalyser("https", self._runtime_operator, self._parent_queue)
+        self._all_analyser["http"] = HTTPAnalyser("http", self._parent_queue, self._runtime_operator)
+        self._all_analyser["https"] = HTTPAnalyser("https", self._parent_queue, self._runtime_operator)
 
     def _send_mission_analyse_result(self, mission_uuid: str, detail: dict):
         message_dict = {"action": "signal", "receiver": "mission_info", "value": None}

@@ -10,20 +10,20 @@ from tools.RuntimeOperator import RuntimeOperator
 
 
 class HTTPAnalyser(object):
-    def __init__(self, schema_name, runtime_operator: RuntimeOperator, parent_queue: queue.Queue):
+    def __init__(self, schema_name, parent_queue: queue.Queue, runtime_operator: RuntimeOperator):
         self._schema_name = schema_name
-        self._runtime_operator = runtime_operator
         self._parent_queue = parent_queue
+        self._runtime_operator = runtime_operator
         self._http_header_analyser = HTTPHeaderAnalyser(runtime_operator)
         self._region_maker = RegionMaker()
 
-    def get_download_info(self, mission_info, mission_uuid):
+    def get_download_info(self, mission_uuid, mission_info):
         self._send_print_message(mission_uuid, "资源连接中", False)
-        download_info = self._analyse_target_file_info(mission_info, mission_uuid)
+        download_info = self._analyse_target_file_info(mission_uuid, mission_info)
         self._send_print_message(mission_uuid, "资源解析完成", False)
         return download_info
 
-    def _analyse_target_file_info(self, mission_info, mission_uuid):
+    def _analyse_target_file_info(self, mission_uuid, mission_info):
         tmp_headers = mission_info["headers"].copy() if mission_info["headers"] else dict()
         tmp_headers["Range"] = "bytes=0-0"
         download_link = mission_info["download_link"]
