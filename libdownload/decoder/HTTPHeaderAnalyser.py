@@ -15,7 +15,7 @@ class HTTPHeaderAnalyser(object):
         self._runtime_operator = runtime_operator
         self._content_disposition = ContentDisposition()
 
-    def get_http_file_info(self, headers, link):
+    def get_base_file_info(self, headers, link):
         filename = self._get_download_file_name(headers, link)
         filesize = self._get_download_file_size(headers)
         range_header = self._judge_download_range_skill(headers)
