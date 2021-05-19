@@ -30,11 +30,11 @@ class HTTPHeaderAnalyser(object):
         cert_pem_file = self._runtime_operator.get_static_cert_path()
         if proxy is None:
             return urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=cert_pem_file,
-                                       maxsize=alive_count, timeout=15)
+                                       maxsize=alive_count, timeout=5)
         else:
             proxy_url = "{}://{}".format(schema, proxy)
             return urllib3.ProxyManager(cert_reqs='CERT_REQUIRED', ca_certs=cert_pem_file,
-                                        proxy_url=proxy_url, maxsize=alive_count, timeout=15)
+                                        maxsize=alive_count, timeout=5, proxy_url=proxy_url)
 
     def _get_download_file_name(self, headers, link):
         content_disposition = headers.get("content-disposition")
