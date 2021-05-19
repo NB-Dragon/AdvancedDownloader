@@ -71,14 +71,11 @@ class HTTPAnalyser(object):
             unassigned_region_list = [[0, file_info["filesize"] - 1]]
             return self._section_maker.get_download_section(unassigned_region_list, thread_num)
         else:
-            return [[0]] if file_info else None
+            return [[0]]
 
     @staticmethod
     def _generate_file_full_path(file_info, save_path):
-        if file_info:
-            return os.path.join(save_path, file_info["filename"])
-        else:
-            return None
+        return os.path.join(save_path, file_info["filename"])
 
     def _send_print_message(self, mission_uuid, content, exception: bool):
         message_dict = {"action": "print", "value": {"mission_uuid": mission_uuid, "detail": None}}
