@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # Create Time: 2021/4/22 18:00
 # Create User: NB-Dragon
-from manager.charset.ASCII import ASCII
+from libdownload.charset.ASCII import ASCII
 
 
 class UTF8(ASCII):

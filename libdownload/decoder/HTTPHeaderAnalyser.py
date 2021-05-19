@@ -6,7 +6,7 @@ import os
 import re
 import urllib.parse
 import urllib3
-from manager.decoder.ContentDisposition import ContentDisposition
+from libdownload.decoder.ContentDisposition import ContentDisposition
 from tools.RuntimeOperator import RuntimeOperator
 
 

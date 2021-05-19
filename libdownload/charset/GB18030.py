@@ -3,8 +3,7 @@
 # Create Time: 2021/4/25 12:00
 # Create User: NB-Dragon
 import re
-
-from manager.charset.ASCII import ASCII
+from libdownload.charset.ASCII import ASCII
 
 
 class GB18030(ASCII):
