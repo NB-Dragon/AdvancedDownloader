@@ -4,7 +4,7 @@
 # Create User: NB-Dragon
 import re
 import urllib.parse
-from libdownload.tool.CharsetDetector import CharsetDetector
+from libdownload.other.CharsetDetector import CharsetDetector
 
 
 class ContentDisposition(object):

@@ -5,7 +5,7 @@
 import os
 import queue
 from libdownload.decoder.HTTPHeaderAnalyser import HTTPHeaderAnalyser
-from libdownload.tool.SectionMaker import SectionMaker
+from libdownload.other.SectionMaker import SectionMaker
 from tools.RuntimeOperator import RuntimeOperator
 
 
