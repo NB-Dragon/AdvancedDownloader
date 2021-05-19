@@ -19,6 +19,7 @@ class HTTPAnalyser(object):
     def get_download_info(self, mission_uuid, mission_info):
         self._send_print_message(mission_uuid, "资源连接中", False)
         download_info = self._analyse_target_file_info(mission_uuid, mission_info)
+        # download_info = {"filename": str, "filesize": int, "range": bool, "section": list}
         self._send_print_message(mission_uuid, "资源解析完成", False)
         return download_info
 
@@ -58,13 +59,12 @@ class HTTPAnalyser(object):
             return False
 
     def _generate_download_info(self, mission_info, headers, current_url):
-        download_info = dict()
         thread_num, save_path = mission_info["thread_num"], mission_info["save_path"]
-        download_info["file_info"] = self._http_header_analyser.get_http_file_info(headers, current_url)
-        download_info["all_region"] = self._generate_file_all_region(download_info["file_info"], thread_num)
+        download_info = self._http_header_analyser.get_base_file_info(headers, current_url)
+        download_info["section"] = self._generate_file_all_section(download_info["file_info"], thread_num)
         return download_info
 
-    def _generate_file_all_region(self, file_info, thread_num):
+    def _generate_file_all_section(self, file_info, thread_num):
         if file_info and file_info["range"]:
             unassigned_region_list = [[0, file_info["filesize"] - 1]]
             return self._section_maker.get_download_section(unassigned_region_list, thread_num)
