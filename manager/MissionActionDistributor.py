@@ -6,6 +6,7 @@ import queue
 import threading
 from listener.ThreadMessageDistributor import ThreadMessageDistributor
 from manager.MissionAnalyseReceiver import MissionAnalyseReceiver
+from manager.MissionInfoReceiver import MissionInfoReceiver
 from tools.RuntimeOperator import RuntimeOperator
 
 
@@ -48,6 +49,7 @@ class MissionActionDistributor(threading.Thread):
         """
         message : handle all message with action
         analyse : handle all mission which want to analyse
+        info    : handle all mission info command
         """
         self._all_listener = dict()
         thread_message_distributor = ThreadMessageDistributor(self._runtime_operator)
@@ -56,6 +58,9 @@ class MissionActionDistributor(threading.Thread):
         mission_analyse_receiver = MissionAnalyseReceiver(self._runtime_operator, self._message_queue)
         mission_analyse_queue = mission_analyse_receiver.get_message_queue()
         self._all_listener["analyse"] = {"receiver": mission_analyse_receiver, "queue": mission_analyse_queue}
+        mission_info_receiver = MissionInfoReceiver(self._runtime_operator, self._message_queue)
+        mission_info_queue = mission_info_receiver.get_message_queue()
+        self._all_listener["info"] = {"receiver": mission_info_receiver, "queue": mission_info_queue}
 
     def _start_all_listener(self):
         for listener in self._all_listener.values():
