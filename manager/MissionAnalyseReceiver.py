@@ -37,8 +37,11 @@ class MissionAnalyseReceiver(threading.Thread):
 
     def _handle_message_detail(self, signal_type, mission_uuid, message_detail):
         if signal_type == "analyse":
-            analyse_result = self._analyse_download_info(mission_uuid, message_detail)
-            self._send_mission_analyse_result(mission_uuid, analyse_result)
+            self._do_with_mission_analyse(mission_uuid, message_detail)
+
+    def _do_with_mission_analyse(self, mission_uuid, message_detail):
+        analyse_result = self._analyse_download_info(mission_uuid, message_detail)
+        self._send_mission_analyse_result(mission_uuid, analyse_result)
 
     def _analyse_download_info(self, mission_uuid, message_detail):
         mission_info = message_detail["mission_info"]
