@@ -61,11 +61,11 @@ class HTTPAnalyser(object):
     def _generate_download_info(self, mission_info, headers, current_url):
         thread_num, save_path = mission_info["thread_num"], mission_info["save_path"]
         download_info = self._http_header_analyser.get_base_file_info(headers, current_url)
-        download_info["section"] = self._generate_file_all_section(download_info["file_info"], thread_num)
+        download_info["section"] = self._generate_file_all_section(download_info, thread_num)
         return download_info
 
     def _generate_file_all_section(self, file_info, thread_num):
-        if file_info and file_info["range"]:
+        if file_info["range"]:
             unassigned_region_list = [[0, file_info["filesize"] - 1]]
             return self._section_maker.get_download_section(unassigned_region_list, thread_num)
         else:
