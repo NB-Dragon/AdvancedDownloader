@@ -3,14 +3,14 @@
 # Create Time: 2021/4/26 12:00
 # Create User: NB-Dragon
 import codecs
-from schema.charset.encoding.ASCII import ASCII
-from schema.charset.encoding.UTF8 import UTF8
-from schema.charset.encoding.GB2312 import GB2312
-from schema.charset.encoding.GBK import GBK
-from schema.charset.encoding.GB18030 import GB18030
+from manager.charset.encoding.ASCII import ASCII
+from manager.charset.encoding.UTF8 import UTF8
+from manager.charset.encoding.GB2312 import GB2312
+from manager.charset.encoding.GBK import GBK
+from manager.charset.encoding.GB18030 import GB18030
 
 
-class StrictDetector(object):
+class CharsetDetector(object):
     def __init__(self):
         self._detector_list = list()
         self._init_detector_list()
@@ -22,8 +22,15 @@ class StrictDetector(object):
         self._detector_list.append(GBK())
         self._detector_list.append(GB18030())
 
+    def detect(self, byte_string):
+        byte_string = byte_string[0:1000]
+        check_result = self._check_bom_header(byte_string)
+        if check_result is None:
+            check_result = self._check_deeper_content(byte_string)
+        return check_result
+
     @staticmethod
-    def check_bom_header(byte_string: bytes):
+    def _check_bom_header(byte_string: bytes):
         if byte_string.startswith(codecs.BOM_UTF8):
             return {"encoding": "UTF8", "confidence": 1}
         elif byte_string.startswith(codecs.BOM_UTF16_LE):
@@ -40,7 +47,7 @@ class StrictDetector(object):
             return {"encoding": "X-ISO-10646-UCS-4-3412", "confidence": 1}
         return None
 
-    def check_deeper_content(self, byte_string: bytes):
+    def _check_deeper_content(self, byte_string: bytes):
         maximum_detector = {"encoding": "iso-8859-1", "confidence": 0}
         for detector in self._detector_list:
             detect_result = detector.detect(byte_string)

@@ -44,7 +44,7 @@ class HTTPHeaderAnalyser(object):
         else:
             link_parse_result = urllib.parse.urlparse(link)
             filename = link_parse_result.path.split("/")[-1]
-            filename = ContentDisposition.parse_unquote_value(filename)
+            filename = ContentDisposition().parse_unquote_value(filename)
         filename = self._get_default_file_name(content_type, filename)
         return filename
 

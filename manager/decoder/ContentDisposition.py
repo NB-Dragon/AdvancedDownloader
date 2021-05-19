@@ -4,10 +4,13 @@
 # Create User: NB-Dragon
 import re
 import urllib.parse
-from schema.charset import chardet
+from manager.decoder.CharsetDetector import CharsetDetector
 
 
 class ContentDisposition(object):
+    def __init__(self):
+        self._charset_detector = CharsetDetector()
+
     @staticmethod
     def parse_unquote_value(content):
         while re.findall("%[0-9a-fA-F]{2}", content):
@@ -76,7 +79,6 @@ class ContentDisposition(object):
         except (UnicodeEncodeError, LookupError):
             return content
 
-    @staticmethod
-    def _detect_correct_charset(byte_string):
-        result = chardet.detect(byte_string)
+    def _detect_correct_charset(self, byte_string):
+        result = self._charset_detector.detect(byte_string)
         return "iso-8859-1" if result["confidence"] < 0.5 else result["encoding"]
