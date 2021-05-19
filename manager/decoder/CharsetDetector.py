@@ -3,11 +3,11 @@
 # Create Time: 2021/4/26 12:00
 # Create User: NB-Dragon
 import codecs
-from manager.charset.encoding.ASCII import ASCII
-from manager.charset.encoding.UTF8 import UTF8
-from manager.charset.encoding.GB2312 import GB2312
-from manager.charset.encoding.GBK import GBK
-from manager.charset.encoding.GB18030 import GB18030
+from manager.charset.ASCII import ASCII
+from manager.charset.UTF8 import UTF8
+from manager.charset.GB2312 import GB2312
+from manager.charset.GBK import GBK
+from manager.charset.GB18030 import GB18030
 
 
 class CharsetDetector(object):
