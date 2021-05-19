@@ -47,10 +47,10 @@ class MissionAnalyseReceiver(threading.Thread):
         mission_info = message_detail["mission_info"]
         link_parse_result = urllib.parse.urlparse(mission_info["download_link"])
         schema = link_parse_result.scheme
-        result_dict = {"analyse_tag": message_detail["analyse_tag"] + 1, "analyse_result": None}
+        result_dict = {"analyse_tag": message_detail["analyse_tag"] + 1, "download_info": None}
         if schema in self._all_analyser:
             download_info = self._all_analyser[schema].get_download_info(mission_uuid, mission_info)
-            result_dict["analyse_result"] = download_info
+            result_dict["download_info"] = download_info
         return result_dict
 
     def _init_all_analyser(self):
