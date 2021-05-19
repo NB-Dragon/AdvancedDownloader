@@ -13,6 +13,7 @@ from tools.RuntimeOperator import RuntimeOperator
 class HTTPHeaderAnalyser(object):
     def __init__(self, runtime_operator: RuntimeOperator):
         self._runtime_operator = runtime_operator
+        self._content_disposition = ContentDisposition()
 
     def get_http_file_info(self, headers, link):
         filename = self._get_download_file_name(headers, link)
@@ -39,12 +40,12 @@ class HTTPHeaderAnalyser(object):
         content_disposition = headers.get("content-disposition")
         content_type = headers.get("content-type")
         if content_disposition and "filename" in content_disposition:
-            result = ContentDisposition().generate_parm_dict(content_disposition)
+            result = self._content_disposition.generate_parm_dict(content_disposition)
             filename = result["param"]["filename"]
         else:
             link_parse_result = urllib.parse.urlparse(link)
             filename = link_parse_result.path.split("/")[-1]
-            filename = ContentDisposition().parse_unquote_value(filename)
+            filename = self._content_disposition.parse_unquote_value(filename)
         filename = self._get_default_file_name(content_type, filename)
         return filename
 
