@@ -36,7 +36,7 @@ class MissionAnalyseReceiver(threading.Thread):
         return self._run_status or self._message_queue.qsize()
 
     def _handle_message_detail(self, signal_type, mission_uuid, message_detail):
-        if signal_type == "analyse":
+        if signal_type == "request":
             self._do_with_mission_analyse(mission_uuid, message_detail)
 
     def _do_with_mission_analyse(self, mission_uuid, message_detail):

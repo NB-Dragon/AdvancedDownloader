@@ -15,7 +15,7 @@
   "action": "signal",
   "receiver": "analyse",
   "value": {
-    "type": "analyse",
+    "type": "request",
     "mission_uuid": "",
     "detail": {
       "analyse_tag": 0,
