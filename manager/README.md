@@ -30,7 +30,7 @@
 ```json
 {
   "action": "signal",
-  "receiver": "mission_info",
+  "receiver": "info",
   "value": {
     "type": "register",
     "mission_uuid": "",
@@ -47,7 +47,7 @@
 ```json
 {
   "action": "signal",
-  "receiver": "mission_info",
+  "receiver": "info",
   "value": {
     "type": "update",
     "mission_uuid": "",
@@ -63,7 +63,7 @@
 ```json
 {
   "action": "signal",
-  "receiver": "mission_info",
+  "receiver": "info",
   "value": {
     "type": "delete",
     "mission_uuid": "",
@@ -78,7 +78,7 @@
 ```json
 {
   "action": "signal",
-  "receiver": "mission_info",
+  "receiver": "info",
   "value": {
     "type": "data",
     "mission_uuid": "",
@@ -91,7 +91,7 @@
 ```json
 {
   "action": "signal",
-  "receiver": "mission_info",
+  "receiver": "info",
   "value": {
     "type": "request_result",
     "mission_uuid": "",

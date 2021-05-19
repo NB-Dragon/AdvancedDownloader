@@ -41,7 +41,7 @@ class MissionAnalyseReceiver(threading.Thread):
 
     def _do_with_mission_analyse(self, mission_uuid, message_detail):
         analyse_result = self._analyse_download_info(mission_uuid, message_detail)
-        self._send_mission_info_action("request_result", mission_uuid, analyse_result)
+        self._send_info_action("request_result", mission_uuid, analyse_result)
 
     def _analyse_download_info(self, mission_uuid, message_detail):
         mission_info = message_detail["mission_info"]
@@ -58,8 +58,8 @@ class MissionAnalyseReceiver(threading.Thread):
         self._all_analyser["http"] = HTTPAnalyser("http", self._parent_queue, self._runtime_operator)
         self._all_analyser["https"] = HTTPAnalyser("https", self._parent_queue, self._runtime_operator)
 
-    def _send_mission_info_action(self, signal_type, mission_uuid, mission_detail):
-        message_dict = self._generate_action_signal_template("mission_info")
+    def _send_info_action(self, signal_type, mission_uuid, mission_detail):
+        message_dict = self._generate_action_signal_template("info")
         message_dict["value"] = self._generate_signal_value(signal_type, mission_uuid, mission_detail)
         self._parent_queue.put(message_dict)
 
