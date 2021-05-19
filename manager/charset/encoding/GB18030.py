@@ -4,7 +4,7 @@
 # Create User: NB-Dragon
 import re
 
-from schema.charset.encoding.ASCII import ASCII
+from manager.charset.encoding.ASCII import ASCII
 
 
 class GB18030(ASCII):

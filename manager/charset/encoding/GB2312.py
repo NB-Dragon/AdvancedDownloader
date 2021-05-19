@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # Create Time: 2021/4/22 18:00
 # Create User: NB-Dragon
-from schema.charset.encoding.ASCII import ASCII
+from manager.charset.encoding.ASCII import ASCII
 
 
 class GB2312(ASCII):
