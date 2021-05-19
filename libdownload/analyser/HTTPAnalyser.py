@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 # Create Time: 2021/5/16 12:00
 # Create User: NB-Dragon
-import os
 import queue
 from libdownload.decoder.HTTPHeaderAnalyser import HTTPHeaderAnalyser
 from libdownload.other.SectionMaker import SectionMaker
@@ -63,7 +62,6 @@ class HTTPAnalyser(object):
         thread_num, save_path = mission_info["thread_num"], mission_info["save_path"]
         download_info["file_info"] = self._http_header_analyser.get_http_file_info(headers, current_url)
         download_info["all_region"] = self._generate_file_all_region(download_info["file_info"], thread_num)
-        download_info["full_path"] = self._generate_file_full_path(download_info["file_info"], save_path)
         return download_info
 
     def _generate_file_all_region(self, file_info, thread_num):
@@ -72,10 +70,6 @@ class HTTPAnalyser(object):
             return self._section_maker.get_download_section(unassigned_region_list, thread_num)
         else:
             return [[0]]
-
-    @staticmethod
-    def _generate_file_full_path(file_info, save_path):
-        return os.path.join(save_path, file_info["filename"])
 
     def _send_print_message(self, mission_uuid, content, exception: bool):
         message_dict = {"action": "print", "value": {"mission_uuid": mission_uuid, "detail": None}}
