@@ -26,6 +26,67 @@
 ```
 
 # Action Mission Info
+## register
+```json
+{
+  "action": "signal",
+  "receiver": "mission_info",
+  "value": {
+    "type": "register",
+    "mission_uuid": "",
+    "detail": {
+      "mission_info": {},
+      "download_info": {}
+    }
+  }
+}
+```
+
+## update
+> The key in detail is optional
+```json
+{
+  "action": "signal",
+  "receiver": "mission_info",
+  "value": {
+    "type": "update",
+    "mission_uuid": "",
+    "detail": {
+      "mission_info": {},
+      "download_info": {}
+    }
+  }
+}
+```
+
+## delete
+```json
+{
+  "action": "signal",
+  "receiver": "mission_info",
+  "value": {
+    "type": "delete",
+    "mission_uuid": "",
+    "detail": {
+      "delete_file": false
+    }
+  }
+}
+```
+
+## data
+```json
+{
+  "action": "signal",
+  "receiver": "mission_info",
+  "value": {
+    "type": "data",
+    "mission_uuid": "",
+    "detail": {}
+  }
+}
+```
+
 ## request_result
 ```json
 {
@@ -36,7 +97,7 @@
     "mission_uuid": "",
     "detail": {
       "analyse_tag": 0,
-      "download_info": {}
+      "download_info": null
     }
   }
 }
