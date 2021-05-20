@@ -136,7 +136,8 @@
   "value": {
     "mission_uuid": "",
     "detail": {
-      "type": "open"
+      "type": "open",
+      "path": ""
     }
   }
 }
