@@ -4,12 +4,12 @@
 # Create User: NB-Dragon
 import re
 import urllib.parse
-from libdownload.other.CharsetDetector import CharsetDetector
+from core.decoder.HTTPCharsetDetector import HTTPCharsetDetector
 
 
 class ContentDisposition(object):
     def __init__(self):
-        self._charset_detector = CharsetDetector()
+        self._http_charset_detector = HTTPCharsetDetector()
 
     @staticmethod
     def parse_unquote_value(content):
@@ -80,5 +80,5 @@ class ContentDisposition(object):
             return content
 
     def _detect_correct_charset(self, byte_string):
-        result = self._charset_detector.detect(byte_string)
+        result = self._http_charset_detector.detect(byte_string)
         return "iso-8859-1" if result["confidence"] < 0.5 else result["encoding"]

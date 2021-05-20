@@ -3,8 +3,8 @@
 # Create Time: 2021/5/16 12:00
 # Create User: NB-Dragon
 import queue
-from libdownload.decoder.HTTPHeaderAnalyser import HTTPHeaderAnalyser
-from libdownload.other.SectionMaker import SectionMaker
+from core.decoder.HTTPHeaderAnalyser import HTTPHeaderAnalyser
+from core.other.SectionMaker import SectionMaker
 from tools.RuntimeOperator import RuntimeOperator
 
 

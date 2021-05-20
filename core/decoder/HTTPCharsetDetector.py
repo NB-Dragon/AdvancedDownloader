@@ -3,14 +3,14 @@
 # Create Time: 2021/4/26 12:00
 # Create User: NB-Dragon
 import codecs
-from libdownload.charset.ASCII import ASCII
-from libdownload.charset.UTF8 import UTF8
-from libdownload.charset.GB2312 import GB2312
-from libdownload.charset.GBK import GBK
-from libdownload.charset.GB18030 import GB18030
+from core.charset.ASCII import ASCII
+from core.charset.UTF8 import UTF8
+from core.charset.GB2312 import GB2312
+from core.charset.GBK import GBK
+from core.charset.GB18030 import GB18030
 
 
-class CharsetDetector(object):
+class HTTPCharsetDetector(object):
     def __init__(self):
         self._detector_list = list()
         self._init_detector_list()

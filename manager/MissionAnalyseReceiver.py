@@ -5,7 +5,7 @@
 import queue
 import threading
 import urllib.parse
-from libdownload.analyser.HTTPAnalyser import HTTPAnalyser
+from core.analyser.HTTPAnalyser import HTTPAnalyser
 from tools.RuntimeOperator import RuntimeOperator
 
 

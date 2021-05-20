@@ -3,7 +3,7 @@
 # Create Time: 2021/4/22 18:00
 # Create User: NB-Dragon
 import re
-from libdownload.charset.ASCII import ASCII
+from core.charset.ASCII import ASCII
 
 
 class GBK(ASCII):
