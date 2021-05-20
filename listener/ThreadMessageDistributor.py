@@ -24,11 +24,7 @@ class ThreadMessageDistributor(threading.Thread):
         while self._should_thread_continue_to_execute():
             message_dict = self._message_queue.get()
             if message_dict is None: continue
-            action = message_dict["action"]
-            if action in self._all_listener:
-                self._all_listener[action]["queue"].put(message_dict["value"])
-            else:
-                self._send_message_to_print("action `{}` not defined".format(action))
+            self._handle_action_signal(message_dict["receiver"], message_dict["value"])
         self._do_before_distributor_down()
         self._stop_all_listener()
 
@@ -42,11 +38,18 @@ class ThreadMessageDistributor(threading.Thread):
     def _should_thread_continue_to_execute(self):
         return self._run_status or self._message_queue.qsize()
 
+    def _handle_action_signal(self, signal_receiver, signal_detail):
+        if signal_receiver in self._all_listener:
+            self._all_listener[signal_receiver]["queue"].put(signal_detail)
+        else:
+            message_content = "signal_receiver `{}` not defined".format(signal_receiver)
+            self._send_message_to_print(message_content, False)
+
     def _do_before_distributor_down(self):
         if not self._all_listener["open"]["receiver"].is_command_installed():
             file_path = self._runtime_operator.get_static_donate_image_path()
-            content = "The sponsored QR code image path is: {}".format(file_path)
-            self._send_message_to_print(content)
+            message_content = "The sponsored QR code image path is: {}".format(file_path)
+            self._send_message_to_print(message_content, False)
 
     def _init_all_listener(self):
         """
@@ -77,7 +80,12 @@ class ThreadMessageDistributor(threading.Thread):
         for listener in self._all_listener.values():
             listener["receiver"].send_stop_state()
 
-    def _send_message_to_print(self, content):
-        detail_info = {"sender": "ThreadMessageDistributor", "content": content, "exception": False}
-        value = {"mission_uuid": None, "detail": detail_info}
-        self._all_listener["print"]["queue"].put(value)
+    def _send_message_to_print(self, content, exception: bool):
+        message_item = self._generate_print_value(content, exception)
+        self._all_listener["print"]["queue"].put(message_item)
+
+    @staticmethod
+    def _generate_print_value(content, exception: bool):
+        message_type = "exception" if exception else "normal"
+        message_detail = {"sender": "ThreadMessageDistributor", "content": content}
+        return {"type": message_type, "mission_uuid": None, "detail": message_detail}
