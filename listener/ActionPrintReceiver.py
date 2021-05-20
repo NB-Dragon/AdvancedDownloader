@@ -20,7 +20,8 @@ class ActionPrintReceiver(threading.Thread):
         while self._should_thread_continue_to_execute():
             message_dict = self._message_queue.get()
             if message_dict is None: continue
-            self._handle_message_detail(message_dict["mission_uuid"], message_dict["detail"])
+            signal_type, mission_uuid = message_dict["type"], message_dict["mission_uuid"]
+            self._handle_message_detail(signal_type, mission_uuid, message_dict["detail"])
 
     def get_message_queue(self):
         return self._message_queue
@@ -32,13 +33,12 @@ class ActionPrintReceiver(threading.Thread):
     def _should_thread_continue_to_execute(self):
         return self._run_status or self._message_queue.qsize()
 
-    def _handle_message_detail(self, mission_uuid, mission_detail):
-        exception = mission_detail.get("exception", False)
-        output_detail = self._generate_final_message(mission_uuid, mission_detail)
+    def _handle_message_detail(self, signal_type, mission_uuid, message_detail):
+        output_detail = self._generate_final_message(mission_uuid, message_detail)
         message_content = json.dumps(output_detail, ensure_ascii=False)
-        if not exception:
+        if signal_type == "normal":
             print(message_content)
-        else:
+        elif signal_type == "exception":
             self._runtime_operator.append_run_log_content("{}\n".format(message_content))
 
     @staticmethod

@@ -1,17 +1,36 @@
 # Action Print
+## normal
 ```json
 {
-  "action": "print",
+  "action": "signal",
+  "receiver": "print",
   "value": {
+    "type": "normal",
     "mission_uuid": "",
     "detail": {
       "sender": "ClassName",
-      "content": "str|dict",
-      "exception": false
+      "content": "str|dict"
     }
   }
 }
 ```
+
+## exception
+```json
+{
+  "action": "signal",
+  "receiver": "print",
+  "value": {
+    "type": "exception",
+    "mission_uuid": "",
+    "detail": {
+      "sender": "ClassName",
+      "content": "str|dict"
+    }
+  }
+}
+```
+
 
 # Action Speed
 ## Register
