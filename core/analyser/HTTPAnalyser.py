@@ -4,7 +4,6 @@
 # Create User: NB-Dragon
 import queue
 from core.decoder.HTTPHeaderAnalyser import HTTPHeaderAnalyser
-from core.other.SectionMaker import SectionMaker
 from tools.RuntimeOperator import RuntimeOperator
 
 
@@ -14,7 +13,6 @@ class HTTPAnalyser(object):
         self._parent_queue = parent_queue
         self._runtime_operator = runtime_operator
         self._http_header_analyser = HTTPHeaderAnalyser(runtime_operator)
-        self._section_maker = SectionMaker()
 
     def get_download_info(self, mission_uuid, mission_info):
         self._send_print_message(mission_uuid, "资源连接中", False)
@@ -60,16 +58,7 @@ class HTTPAnalyser(object):
 
     def _generate_download_info(self, mission_info, headers, current_url):
         thread_num, save_path = mission_info["thread_num"], mission_info["save_path"]
-        download_info = self._http_header_analyser.get_base_file_info(headers, current_url)
-        download_info["section"] = self._generate_file_all_section(download_info, thread_num)
-        return download_info
-
-    def _generate_file_all_section(self, file_info, thread_num):
-        if file_info["range"]:
-            unassigned_region_list = [[0, file_info["filesize"] - 1]]
-            return self._section_maker.get_download_section(unassigned_region_list, thread_num)
-        else:
-            return [[0]]
+        return self._http_header_analyser.generate_resource_info(headers, current_url, thread_num)
 
     def _send_print_message(self, mission_uuid, content, exception: bool):
         message_dict = {"action": "print", "value": {"mission_uuid": mission_uuid, "detail": None}}
