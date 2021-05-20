@@ -151,11 +151,12 @@
 ## Open
 ```json
 {
-  "action": "open",
+  "action": "signal",
+  "receiver": "open",
   "value": {
+    "type": "open",
     "mission_uuid": "",
     "detail": {
-      "type": "open",
       "path": ""
     }
   }
