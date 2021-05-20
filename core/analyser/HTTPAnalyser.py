@@ -17,9 +17,16 @@ class HTTPAnalyser(object):
     def get_download_info(self, mission_uuid, mission_info):
         self._send_print_message(mission_uuid, "资源连接中", False)
         download_info = self._analyse_target_file_info(mission_uuid, mission_info)
-        # download_info = {"filename": str, "filesize": int, "range": bool, "section": list}
         self._send_print_message(mission_uuid, "资源解析完成", False)
         return download_info
+
+    @staticmethod
+    def get_current_finish_size(download_info):
+        if download_info["other"]["range"] is False:
+            return download_info["other"]["section"][0][0]
+        else:
+            incomplete_size = sum([x[1] - x[0] + 1 for x in download_info["other"]["section"]])
+            return download_info["filesize"] - incomplete_size
 
     def _analyse_target_file_info(self, mission_uuid, mission_info):
         tmp_headers = mission_info["headers"].copy() if mission_info["headers"] else dict()
