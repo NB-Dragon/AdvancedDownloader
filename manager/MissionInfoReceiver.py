@@ -19,7 +19,6 @@ class MissionInfoReceiver(threading.Thread):
         self._parent_queue = parent_queue
         self._mission_info_dict = dict()
         self._default_mission_info = self._generate_default_mission_info()
-        self._hang_up_signal = dict()
 
     def run(self) -> None:
         while self._should_thread_continue_to_execute():
@@ -45,6 +44,8 @@ class MissionInfoReceiver(threading.Thread):
             self._do_with_mission_update(mission_uuid, message_detail)
         elif signal_type == "delete":
             self._do_with_mission_delete(mission_uuid, message_detail)
+        elif signal_type == "open":
+            self._do_with_mission_open(mission_uuid)
         elif signal_type == "data":
             self._do_with_mission_data(mission_uuid)
         elif signal_type == "request_result":
@@ -70,11 +71,19 @@ class MissionInfoReceiver(threading.Thread):
                 self._delete_file_or_directory(mission_uuid)
             self._mission_info_dict.pop(mission_uuid)
 
+    def _do_with_mission_open(self, mission_uuid):
+        if mission_uuid in self._mission_info_dict:
+            if self._mission_info_dict[mission_uuid]["download_info"]:
+                old_save_path = self._mission_info_dict[mission_uuid]["mission_info"]["save_path"]
+                old_full_path = self._get_current_full_save_path(mission_uuid, old_save_path)
+                self._send_open_message(mission_uuid, old_full_path)
+
     def _do_with_mission_data(self, mission_uuid):
-        if self._mission_info_dict[mission_uuid]["download_info"] is None:
-            self._request_mission_analyse(mission_uuid, 0)
-        else:
-            self._send_thread_action("data_result", mission_uuid, self._mission_info_dict[mission_uuid])
+        if mission_uuid in self._mission_info_dict:
+            if self._mission_info_dict[mission_uuid]["download_info"] is None:
+                self._request_mission_analyse(mission_uuid, 0)
+            else:
+                self._send_thread_action("data_result", mission_uuid, self._mission_info_dict[mission_uuid])
 
     def _do_with_mission_request_result(self, mission_uuid, message_detail):
         if mission_uuid in self._mission_info_dict:
@@ -144,6 +153,16 @@ class MissionInfoReceiver(threading.Thread):
     def _send_thread_action(self, signal_type, mission_uuid, mission_detail):
         message_dict = self._generate_action_signal_template("thread")
         message_dict["value"] = self._generate_signal_value(signal_type, mission_uuid, mission_detail)
+        self._parent_queue.put(message_dict)
+
+    def _send_open_message(self, mission_uuid, file_path):
+        message_dict = {"action": "open", "value": {"mission_uuid": mission_uuid, "detail": None}}
+        message_dict["value"]["detail"] = {"type": "open", "path": file_path}
+        self._send_message_to_listener(message_dict)
+
+    def _send_message_to_listener(self, detail: dict):
+        message_dict = self._generate_action_signal_template("message")
+        message_dict["value"] = detail
         self._parent_queue.put(message_dict)
 
     @staticmethod

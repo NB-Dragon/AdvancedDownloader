@@ -74,6 +74,19 @@
 }
 ```
 
+## open
+```json
+{
+  "action": "signal",
+  "receiver": "info",
+  "value": {
+    "type": "open",
+    "mission_uuid": "",
+    "detail": {}
+  }
+}
+```
+
 ## data
 ```json
 {
