@@ -3,16 +3,16 @@
 # Create Time: 2021/5/16 12:00
 # Create User: NB-Dragon
 import queue
-from core.decoder.HTTPHeaderAnalyser import HTTPHeaderAnalyser
+from core.decoder.HTTPHeaderAnalyzer import HTTPHeaderAnalyzer
 from tools.RuntimeOperator import RuntimeOperator
 
 
-class HTTPAnalyser(object):
+class HTTPAnalyzer(object):
     def __init__(self, schema_name, parent_queue: queue.Queue, runtime_operator: RuntimeOperator):
         self._schema_name = schema_name
         self._parent_queue = parent_queue
         self._runtime_operator = runtime_operator
-        self._http_header_analyser = HTTPHeaderAnalyser(runtime_operator)
+        self._http_header_analyser = HTTPHeaderAnalyzer(runtime_operator)
 
     def get_download_info(self, mission_uuid, mission_info):
         self._send_print_message(mission_uuid, "资源连接中", False)
