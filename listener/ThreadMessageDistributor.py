@@ -5,6 +5,7 @@
 import queue
 import threading
 from tools.RuntimeOperator import RuntimeOperator
+from listener.ActionAnalyzeReceiver import ActionAnalyzeReceiver
 from listener.ActionOpenReceiver import ActionOpenReceiver
 from listener.ActionPrintReceiver import ActionPrintReceiver
 from listener.ActionSpeedReceiver import ActionSpeedReceiver
@@ -53,10 +54,11 @@ class ThreadMessageDistributor(threading.Thread):
 
     def _init_all_listener(self):
         """
-        print : handle all message which need to print
-        write : handle all file register and writing
-        speed : handle all the changes in file size
-        open  : handle all the files open operation
+        print   : handle all message which need to print
+        write   : handle all file register and writing
+        speed   : handle all the changes in file size
+        open    : handle all the files open operation
+        analyze : handle all the mission analyze
         """
         self._all_listener = dict()
         action_print_receiver = ActionPrintReceiver(self._runtime_operator)
@@ -71,6 +73,9 @@ class ThreadMessageDistributor(threading.Thread):
         action_open_receiver = ActionOpenReceiver(self._runtime_operator, self._message_queue)
         action_open_queue = action_open_receiver.get_message_queue()
         self._all_listener["open"] = {"receiver": action_open_receiver, "queue": action_open_queue}
+        action_analyze_receiver = ActionAnalyzeReceiver(self._runtime_operator, self._message_queue)
+        action_analyze_queue = action_analyze_receiver.get_message_queue()
+        self._all_listener["analyze"] = {"receiver": action_analyze_receiver, "queue": action_analyze_queue}
 
     def _start_all_listener(self):
         for listener in self._all_listener.values():
