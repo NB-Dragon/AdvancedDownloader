@@ -14,11 +14,12 @@ from listener.ActionWriterReceiver import ActionWriterReceiver
 
 
 class ThreadMessageDistributor(threading.Thread):
-    def __init__(self, runtime_operator: RuntimeOperator):
+    def __init__(self, runtime_operator: RuntimeOperator, parent_queue: queue.Queue):
         super().__init__()
         self._runtime_operator = runtime_operator
         self._message_queue = queue.Queue()
         self._run_status = True
+        self._parent_queue = parent_queue
         self._init_all_listener()
 
     def run(self) -> None:
@@ -26,7 +27,10 @@ class ThreadMessageDistributor(threading.Thread):
         while self._should_thread_continue_to_execute():
             message_dict = self._message_queue.get()
             if message_dict is None: continue
-            self._handle_action_signal(message_dict["receiver"], message_dict["value"])
+            if "." in message_dict["receiver"]:
+                self._send_cross_level_message(message_dict)
+            else:
+                self._handle_action_signal(message_dict["receiver"], message_dict["value"])
         self._do_before_distributor_down()
         self._stop_all_listener()
 
@@ -39,6 +43,14 @@ class ThreadMessageDistributor(threading.Thread):
 
     def _should_thread_continue_to_execute(self):
         return self._run_status or self._message_queue.qsize()
+
+    def _send_cross_level_message(self, raw_message):
+        first_receiver, next_receiver = raw_message["receiver"].split(".", 1)
+        raw_message["receiver"] = next_receiver
+        if first_receiver == "parent":
+            self._parent_queue.put(raw_message)
+        else:
+            self._all_listener[first_receiver]["queue"].put(raw_message)
 
     def _handle_action_signal(self, signal_receiver, signal_detail):
         if signal_receiver in self._all_listener:
