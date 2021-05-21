@@ -8,16 +8,16 @@ from tools.RuntimeOperator import RuntimeOperator
 
 
 class AnalyzeController(object):
-    def __init__(self, runtime_operator: RuntimeOperator, parent_queue: queue.Queue):
+    def __init__(self, runtime_operator: RuntimeOperator, main_thread_message: queue.Queue):
         self._runtime_operator = runtime_operator
-        self._parent_queue = parent_queue
+        self._main_thread_message = main_thread_message
         self._init_all_analyzer()
         self._check_all_analyzer()
 
     def _init_all_analyzer(self):
         self._all_analyser = dict()
-        self._all_analyser["http"] = HTTPAnalyzer("http", self._parent_queue, self._runtime_operator)
-        self._all_analyser["https"] = HTTPAnalyzer("https", self._parent_queue, self._runtime_operator)
+        self._all_analyser["http"] = HTTPAnalyzer("http", self._main_thread_message, self._runtime_operator)
+        self._all_analyser["https"] = HTTPAnalyzer("https", self._main_thread_message, self._runtime_operator)
 
     def _check_all_analyzer(self):
         for analyzer in self._all_analyser.values():
