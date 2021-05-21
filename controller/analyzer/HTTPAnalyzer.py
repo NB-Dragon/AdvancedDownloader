@@ -8,16 +8,15 @@ from tools.RuntimeOperator import RuntimeOperator
 
 
 class HTTPAnalyzer(object):
-    def __init__(self, schema_name, parent_queue: queue.Queue, runtime_operator: RuntimeOperator):
+    def __init__(self, schema_name, main_thread_message: queue.Queue, runtime_operator: RuntimeOperator):
         self._schema_name = schema_name
-        self._parent_queue = parent_queue
-        self._runtime_operator = runtime_operator
+        self._main_thread_message = main_thread_message
         self._http_header_analyser = HTTPHeaderAnalyzer(runtime_operator)
 
     def get_download_info(self, mission_uuid, mission_info):
-        self._send_print_message(mission_uuid, "资源连接中", False)
+        self._make_message_and_send(mission_uuid, "资源连接中", False)
         download_info = self._analyse_target_file_info(mission_uuid, mission_info)
-        self._send_print_message(mission_uuid, "资源解析完成", False)
+        self._make_message_and_send(mission_uuid, "资源解析完成", False)
         return download_info
 
     @staticmethod
@@ -47,10 +46,10 @@ class HTTPAnalyzer(object):
             return request_manager.request("GET", target_url, headers=headers, preload_content=False)
         except UnicodeEncodeError:
             reason = {"error": "The server does not follow the http standard.", "target": target_url}
-            self._send_print_message(mission_uuid, reason, True)
+            self._make_message_and_send(mission_uuid, reason, True)
             return None
         except Exception as e:
-            self._send_print_message(mission_uuid, str(e), True)
+            self._make_message_and_send(mission_uuid, str(e), True)
             return None
 
     @staticmethod
@@ -67,11 +66,17 @@ class HTTPAnalyzer(object):
         thread_num, save_path = mission_info["thread_num"], mission_info["save_path"]
         return self._http_header_analyser.generate_resource_info(headers, current_url, thread_num)
 
-    def _send_print_message(self, mission_uuid, content, exception: bool):
-        message_dict = {"action": "print", "value": {"mission_uuid": mission_uuid, "detail": None}}
-        message_dict["value"]["detail"] = {"sender": "HTTPAnalyser", "content": content, "exception": exception}
-        self._send_message_to_listener(message_dict)
+    def _make_message_and_send(self, mission_uuid, content, exception: bool):
+        signal_header = self._generate_action_signal_template("print")
+        signal_header["value"] = self._generate_print_value(mission_uuid, content, exception)
+        self._main_thread_message.put(signal_header)
 
-    def _send_message_to_listener(self, detail: dict):
-        message_dict = {"action": "signal", "receiver": "message", "value": detail}
-        self._parent_queue.put(message_dict)
+    @staticmethod
+    def _generate_action_signal_template(receiver):
+        return {"action": "signal", "receiver": receiver, "value": None}
+
+    @staticmethod
+    def _generate_print_value(mission_uuid, content, exception: bool):
+        message_type = "exception" if exception else "normal"
+        message_detail = {"sender": "HTTPAnalyser", "content": content}
+        return {"type": message_type, "mission_uuid": mission_uuid, "detail": message_detail}
