@@ -79,12 +79,12 @@
 ## Heart Beat
 ```json
 {
-  "action": "speed",
+  "action": "signal",
+  "receiver": "speed",
   "value": {
+    "type": "heartbeat",
     "mission_uuid": null,
-    "detail": {
-      "type": "heartbeat"
-    }
+    "detail": {}
   }
 }
 ```

@@ -11,7 +11,7 @@ from core.other.SectionMaker import SectionMaker
 from tools.RuntimeOperator import RuntimeOperator
 
 
-class HTTPHeaderAnalyser(object):
+class HTTPHeaderAnalyzer(object):
     def __init__(self, runtime_operator: RuntimeOperator):
         self._runtime_operator = runtime_operator
         self._content_disposition = ContentDisposition()

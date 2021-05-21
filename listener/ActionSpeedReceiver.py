@@ -6,8 +6,7 @@ import math
 import queue
 import threading
 import time
-
-from core.analyser.HTTPAnalyser import HTTPAnalyser
+from controller.AnalyzeController import AnalyzeController
 from tools.RuntimeOperator import RuntimeOperator
 
 
@@ -18,7 +17,7 @@ class ActionSpeedReceiver(threading.Thread):
         self._message_queue = queue.Queue()
         self._run_status = True
         self._parent_queue = parent_queue
-        self._init_all_analyser()
+        self._analyze_controller = AnalyzeController(runtime_operator, parent_queue)
         self._mission_dict = dict()
         self._start_time = 0
 
@@ -57,7 +56,8 @@ class ActionSpeedReceiver(threading.Thread):
     def _do_with_mission_register(self, mission_uuid, message_detail):
         mission_item = {"start_time": time.time(), "update_size": 0, "current_size": 0, "expect_size": 0}
         schema, download_info = message_detail["schema"], message_detail["download_info"]
-        mission_item["current_size"] = self._all_analyser[schema].get_current_finish_size(download_info)
+        schema_analyzer = self._analyze_controller.get_analyzer(schema)
+        mission_item["current_size"] = schema_analyzer.get_current_finish_size(download_info)
         mission_item["expect_size"] = download_info["filesize"]
         self._mission_dict[mission_uuid] = mission_item
 
@@ -110,11 +110,6 @@ class ActionSpeedReceiver(threading.Thread):
             signal_header = self._generate_action_signal_template("print")
             signal_header["value"] = self._generate_print_value(mission_uuid, detail, False)
             self._parent_queue.put(signal_header)
-
-    def _init_all_analyser(self):
-        self._all_analyser = dict()
-        self._all_analyser["http"] = HTTPAnalyser("http", self._parent_queue, self._runtime_operator)
-        self._all_analyser["https"] = HTTPAnalyser("https", self._parent_queue, self._runtime_operator)
 
     @staticmethod
     def _generate_action_signal_template(receiver):
