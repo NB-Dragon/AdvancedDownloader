@@ -68,7 +68,9 @@ class HTTPAnalyzer(object):
 
     def _make_message_and_send(self, mission_uuid, content, exception: bool):
         signal_header = self._generate_action_signal_template("print")
-        signal_header["value"] = self._generate_print_value(mission_uuid, content, exception)
+        message_type = "exception" if exception else "normal"
+        message_detail = {"sender": "HTTPAnalyser", "content": content}
+        signal_header["value"] = self._generate_signal_value(message_type, mission_uuid, message_detail)
         self._main_thread_message.put(signal_header)
 
     @staticmethod
@@ -76,7 +78,5 @@ class HTTPAnalyzer(object):
         return {"action": "signal", "receiver": receiver, "value": None}
 
     @staticmethod
-    def _generate_print_value(mission_uuid, content, exception: bool):
-        message_type = "exception" if exception else "normal"
-        message_detail = {"sender": "HTTPAnalyser", "content": content}
-        return {"type": message_type, "mission_uuid": mission_uuid, "detail": message_detail}
+    def _generate_signal_value(signal_type, mission_uuid, mission_detail):
+        return {"type": signal_type, "mission_uuid": mission_uuid, "detail": mission_detail}

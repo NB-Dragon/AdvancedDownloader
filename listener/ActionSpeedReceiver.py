@@ -109,10 +109,11 @@ class ActionSpeedReceiver(threading.Thread):
         else:
             return "{:.2f}{}/s".format(size, units[0])
 
-    def _make_message_and_send(self, mission_uuid: str, detail):
+    def _make_message_and_send(self, mission_uuid, content):
         if self._run_status:
             signal_header = self._generate_action_signal_template("print")
-            signal_header["value"] = self._generate_print_value(mission_uuid, detail, False)
+            message_detail = {"sender": "ActionSpeedReceiver", "content": content}
+            signal_header["value"] = self._generate_signal_value("normal", mission_uuid, message_detail)
             self._parent_queue.put(signal_header)
 
     @staticmethod
@@ -120,7 +121,5 @@ class ActionSpeedReceiver(threading.Thread):
         return {"action": "signal", "receiver": receiver, "value": None}
 
     @staticmethod
-    def _generate_print_value(mission_uuid, content, exception: bool):
-        message_type = "exception" if exception else "normal"
-        message_detail = {"sender": "ActionSpeedReceiver", "content": content}
-        return {"type": message_type, "mission_uuid": mission_uuid, "detail": message_detail}
+    def _generate_signal_value(signal_type, mission_uuid, mission_detail):
+        return {"type": signal_type, "mission_uuid": mission_uuid, "detail": mission_detail}

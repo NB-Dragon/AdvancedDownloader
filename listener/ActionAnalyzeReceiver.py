@@ -56,7 +56,7 @@ class ActionAnalyzeReceiver(threading.Thread):
     def _send_request_result(self, mission_uuid: str, detail):
         if self._run_status:
             signal_header = self._generate_action_signal_template("parent.info")
-            signal_header["value"] = self._generate_parent_info_value(mission_uuid, detail)
+            signal_header["value"] = self._generate_signal_value("request_result", mission_uuid, detail)
             self._parent_queue.put(signal_header)
 
     @staticmethod
@@ -64,5 +64,5 @@ class ActionAnalyzeReceiver(threading.Thread):
         return {"action": "signal", "receiver": receiver, "value": None}
 
     @staticmethod
-    def _generate_parent_info_value(mission_uuid, mission_detail):
-        return {"type": "request_result", "mission_uuid": mission_uuid, "detail": mission_detail}
+    def _generate_signal_value(signal_type, mission_uuid, mission_detail):
+        return {"type": signal_type, "mission_uuid": mission_uuid, "detail": mission_detail}
