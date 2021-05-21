@@ -111,13 +111,13 @@
 ## Register
 ```json
 {
-  "action": "write",
+  "action": "signal",
+  "receiver": "write",
   "value": {
+    "type": "register",
     "mission_uuid": "",
     "detail": {
-      "type": "register",
-      "lock": "threading.Lock",
-      "mission_info": {},
+      "save_path": "",
       "download_info": {}
     }
   }
@@ -127,28 +127,14 @@
 ## Write
 ```json
 {
-  "action": "write",
+  "action": "signal",
+  "receiver": "write",
   "value": {
+    "type": "write",
     "mission_uuid": "",
     "detail": {
-      "type": "write",
-      "current_region": [],
+      "start_position": 0,
       "content": "bytes"
-    }
-  }
-}
-```
-
-## Split
-```json
-{
-  "action": "write",
-  "value": {
-    "mission_uuid": "",
-    "detail": {
-      "type": "split",
-      "current_region": [],
-      "update_region": [[]]
     }
   }
 }
@@ -157,12 +143,12 @@
 ## Finish
 ```json
 {
-  "action": "write",
+  "action": "signal",
+  "receiver": "write",
   "value": {
+    "type": "finish",
     "mission_uuid": "",
-    "detail": {
-      "type": "finish"
-    }
+    "detail": {}
   }
 }
 ```
