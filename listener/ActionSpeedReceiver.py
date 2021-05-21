@@ -6,6 +6,8 @@ import math
 import queue
 import threading
 import time
+
+from core.analyser.HTTPAnalyser import HTTPAnalyser
 from tools.RuntimeOperator import RuntimeOperator
 
 
@@ -16,6 +18,7 @@ class ActionSpeedReceiver(threading.Thread):
         self._message_queue = queue.Queue()
         self._run_status = True
         self._parent_queue = parent_queue
+        self._init_all_analyser()
         self._mission_dict = dict()
         self._start_time = 0
 
@@ -24,7 +27,8 @@ class ActionSpeedReceiver(threading.Thread):
         while self._should_thread_continue_to_execute():
             message_dict = self._message_queue.get()
             if message_dict is None: continue
-            self._handle_message_detail(message_dict["mission_uuid"], message_dict["detail"])
+            signal_type, mission_uuid = message_dict["type"], message_dict["mission_uuid"]
+            self._handle_message_detail(signal_type, mission_uuid, message_dict["detail"])
             self._broadcast_speed_content()
 
     def get_message_queue(self):
@@ -37,37 +41,28 @@ class ActionSpeedReceiver(threading.Thread):
     def _should_thread_continue_to_execute(self):
         return self._run_status or self._message_queue.qsize()
 
-    def _handle_message_detail(self, mission_uuid, mission_detail):
-        handle_type = mission_detail.pop("type")
-        if handle_type == "size":
-            self._do_with_mission_size(mission_uuid, mission_detail["length"])
-        elif handle_type == "register":
-            self._do_with_mission_register(mission_uuid, mission_detail["download_info"])
-        elif handle_type == "finish":
+    def _handle_message_detail(self, signal_type, mission_uuid, message_detail):
+        if signal_type == "size":
+            self._do_with_mission_size(mission_uuid, message_detail)
+        elif signal_type == "register":
+            self._do_with_mission_register(mission_uuid, message_detail)
+        elif signal_type == "finish":
             self._do_with_mission_finish(mission_uuid)
 
-    def _do_with_mission_size(self, mission_uuid, length):
+    def _do_with_mission_size(self, mission_uuid, message_detail):
+        length = message_detail["length"]
         self._mission_dict[mission_uuid]["update_size"] += length
         self._mission_dict[mission_uuid]["current_size"] += length
 
-    def _do_with_mission_register(self, mission_uuid, download_info):
-        mission_item = dict()
-        mission_item["update_size"] = 0
-        mission_item["start_time"] = time.time()
-        mission_item["current_size"] = self._calc_finish_file_size(download_info)
-        mission_item["expect_size"] = download_info["file_info"]["filesize"]
+    def _do_with_mission_register(self, mission_uuid, message_detail):
+        mission_item = {"start_time": time.time(), "update_size": 0, "current_size": 0, "expect_size": 0}
+        schema, download_info = message_detail["schema"], message_detail["download_info"]
+        mission_item["current_size"] = self._all_analyser[schema].get_current_finish_size(download_info)
+        mission_item["expect_size"] = download_info["filesize"]
         self._mission_dict[mission_uuid] = mission_item
 
     def _do_with_mission_finish(self, mission_uuid):
         self._mission_dict.pop(mission_uuid)
-
-    @staticmethod
-    def _calc_finish_file_size(download_info):
-        if download_info["file_info"]["range"] is False:
-            return 0
-        else:
-            incomplete_size = sum([x[1] - x[0] + 1 for x in download_info["all_region"]])
-            return download_info["file_info"]["filesize"] - incomplete_size
 
     def _broadcast_speed_content(self):
         end_time = time.time()
@@ -112,8 +107,21 @@ class ActionSpeedReceiver(threading.Thread):
 
     def _make_message_and_send(self, mission_uuid: str, detail):
         if self._run_status:
-            message_dict = dict()
-            message_dict["action"] = "print"
-            detail_info = {"sender": "ActionSpeedReceiver", "content": detail, "exception": False}
-            message_dict["value"] = {"mission_uuid": mission_uuid, "detail": detail_info}
-            self._parent_queue.put(message_dict)
+            signal_header = self._generate_action_signal_template("print")
+            signal_header["value"] = self._generate_print_value(mission_uuid, detail, False)
+            self._parent_queue.put(signal_header)
+
+    def _init_all_analyser(self):
+        self._all_analyser = dict()
+        self._all_analyser["http"] = HTTPAnalyser("http", self._parent_queue, self._runtime_operator)
+        self._all_analyser["https"] = HTTPAnalyser("https", self._parent_queue, self._runtime_operator)
+
+    @staticmethod
+    def _generate_action_signal_template(receiver):
+        return {"action": "signal", "receiver": receiver, "value": None}
+
+    @staticmethod
+    def _generate_print_value(mission_uuid, content, exception: bool):
+        message_type = "exception" if exception else "normal"
+        message_detail = {"sender": "ActionSpeedReceiver", "content": content}
+        return {"type": message_type, "mission_uuid": mission_uuid, "detail": message_detail}

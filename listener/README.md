@@ -31,16 +31,17 @@
 }
 ```
 
-
 # Action Speed
 ## Register
 ```json
 {
-  "action": "speed",
+  "action": "signal",
+  "receiver": "speed",
   "value": {
+    "type": "register",
     "mission_uuid": "",
     "detail": {
-      "type": "register",
+      "schema": "",
       "download_info": {}
     }
   }
@@ -50,11 +51,12 @@
 ## Size
 ```json
 {
-  "action": "speed",
+  "action": "signal",
+  "receiver": "speed",
   "value": {
+    "type": "size",
     "mission_uuid": "",
     "detail": {
-      "type": "size",
       "length": 0
     }
   }
@@ -64,12 +66,12 @@
 ## Finish
 ```json
 {
-  "action": "speed",
+  "action": "signal",
+  "receiver": "speed",
   "value": {
+    "type": "finish",
     "mission_uuid": "",
-    "detail": {
-      "type": "finish"
-    }
+    "detail": {}
   }
 }
 ```
