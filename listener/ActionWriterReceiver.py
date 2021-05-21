@@ -79,7 +79,7 @@ class ActionWriterReceiver(threading.Thread):
     def _send_thread_write_finish(self, mission_uuid, start_position, length):
         if self._run_status:
             signal_header = self._generate_action_signal_template("parent.thread")
-            message_detail = {"mission_uuid": mission_uuid, "start_position": start_position, "length": length}
+            message_detail = {"start_position": start_position, "length": length}
             signal_header["value"] = self._generate_signal_value("write_done", mission_uuid, message_detail)
 
     @staticmethod
