@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 # Create Time: 2021/1/25 10:00
 # Create User: NB-Dragon
-import json
 import queue
 import threading
 from tools.RuntimeOperator import RuntimeOperator
@@ -22,7 +21,8 @@ class ActionWriterReceiver(threading.Thread):
         while self._should_thread_continue_to_execute():
             message_dict = self._message_queue.get()
             if message_dict is None: continue
-            self._handle_message_detail(message_dict["mission_uuid"], message_dict["detail"])
+            signal_type, mission_uuid = message_dict["type"], message_dict["mission_uuid"]
+            self._handle_message_detail(signal_type, mission_uuid, message_dict["detail"])
 
     def get_message_queue(self):
         return self._message_queue
@@ -34,84 +34,58 @@ class ActionWriterReceiver(threading.Thread):
     def _should_thread_continue_to_execute(self):
         return self._run_status or self._message_queue.qsize()
 
-    def _handle_message_detail(self, mission_uuid, mission_detail):
-        handle_type = mission_detail.pop("type")
-        if handle_type == "write":
-            content_info = {"content": mission_detail["content"], "length": len(mission_detail["content"])}
-            self._send_speed_mission_size(mission_uuid, content_info["length"])
-            self._write_bytes_into_file(mission_uuid, mission_detail["current_region"], content_info["content"])
-            self._update_mission_region(mission_uuid, mission_detail["current_region"], content_info["length"])
-        elif handle_type == "split":
-            current_region = mission_detail["current_region"]
-            update_region = mission_detail["update_region"]
-            self._do_with_mission_split(mission_uuid, current_region, update_region)
-        elif handle_type == "register":
-            self._send_speed_mission_register(mission_uuid, mission_detail["download_info"])
-            self._do_with_mission_register(mission_uuid, mission_detail)
-        elif handle_type == "finish":
+    def _handle_message_detail(self, signal_type, mission_uuid, message_detail):
+        if signal_type == "write":
+            content, length = message_detail["content"], len(message_detail["content"])
+            self._send_speed_mission_size(mission_uuid, length)
+            self._write_bytes_into_file(mission_uuid, message_detail["start_position"], content)
+            self._send_thread_write_finish(mission_uuid, message_detail["start_position"], length)
+        elif signal_type == "register":
+            schema, download_info = message_detail["schema"], message_detail["download_info"]
+            self._send_speed_mission_register(mission_uuid, schema, download_info)
+            self._do_with_mission_register(mission_uuid, message_detail["save_path"])
+        elif signal_type == "finish":
             self._send_speed_mission_finish(mission_uuid)
             self._do_with_mission_finish(mission_uuid)
-        self._update_mission_progress()
 
-    def _do_with_mission_split(self, mission_uuid, current_region, update_region):
-        all_region = self._mission_dict[mission_uuid]["download_info"]["all_region"]
-        all_region.remove(current_region)
-        all_region.extend(json.loads(json.dumps(update_region)))
-        all_region.sort(key=lambda x: x[0])
-
-    def _do_with_mission_register(self, mission_uuid, mission_detail):
-        self._thread_lock_dict[mission_uuid] = dict()
-        self._thread_lock_dict[mission_uuid]["lock"] = mission_detail.pop("lock")
-        # Regenerate mission_detail to ensure the absolute difference of memory addresses.
-        self._mission_dict[mission_uuid] = json.loads(json.dumps(mission_detail))
+    def _do_with_mission_register(self, mission_uuid, save_path):
+        self._mission_dict[mission_uuid] = save_path
 
     def _do_with_mission_finish(self, mission_uuid):
-        self._thread_lock_dict[mission_uuid]["lock"].release()
-        self._thread_lock_dict.pop(mission_uuid)
         self._mission_dict.pop(mission_uuid)
 
-    def _update_mission_progress(self):
-        self._runtime_operator.set_mission_state(self._mission_dict)
-
-    def _write_bytes_into_file(self, mission_uuid: str, current_region: list, content):
-        sava_file_path = self._mission_dict[mission_uuid]["download_info"]["save_path"]
+    def _write_bytes_into_file(self, mission_uuid: str, start_position, content):
+        sava_file_path = self._mission_dict[mission_uuid]
         writer = open(sava_file_path, 'r+b')
-        writer.seek(current_region[0])
+        writer.seek(start_position)
         writer.write(content)
         writer.close()
 
-    def _update_mission_region(self, mission_uuid: str, current_region: list, length):
-        all_region = self._mission_dict[mission_uuid]["download_info"]["all_region"]
-        correct_region_index = self._find_correct_region_index(all_region, current_region)
-        if isinstance(correct_region_index, int):
-            modify_region = all_region.pop(correct_region_index)
-            modify_region[0] += length
-            if len(current_region) == 1 or modify_region[0] <= modify_region[1]:
-                all_region.insert(correct_region_index, modify_region)
-        mission_range_skill = self._mission_dict[mission_uuid]["download_info"]["file_info"]["range"]
-        if mission_range_skill and len(all_region) == 0:
-            self._send_speed_mission_finish(mission_uuid)
-            self._do_with_mission_finish(mission_uuid)
-
-    @staticmethod
-    def _find_correct_region_index(all_region, current_region):
-        for index in range(len(all_region)):
-            if all_region[index][0] == current_region[0]:
-                return index
-        return None
-
     def _send_speed_mission_size(self, mission_uuid: str, content_length):
-        self._send_speed_mission_detail(mission_uuid, {"type": "size", "length": content_length})
+        self._send_speed_mission_detail(mission_uuid, "size", {"length": content_length})
 
-    def _send_speed_mission_register(self, mission_uuid: str, download_info):
-        self._send_speed_mission_detail(mission_uuid, {"type": "register", "download_info": download_info})
+    def _send_speed_mission_register(self, mission_uuid: str, schema, download_info):
+        self._send_speed_mission_detail(mission_uuid, "register", {"schema": schema, "download_info": download_info})
 
     def _send_speed_mission_finish(self, mission_uuid: str):
-        self._send_speed_mission_detail(mission_uuid, {"type": "finish"})
+        self._send_speed_mission_detail(mission_uuid, "finish", {})
 
-    def _send_speed_mission_detail(self, mission_uuid: str, detail: dict):
+    def _send_speed_mission_detail(self, mission_uuid, message_type, detail: dict):
         if self._run_status:
-            message_dict = dict()
-            message_dict["action"] = "speed"
-            message_dict["value"] = {"mission_uuid": mission_uuid, "detail": detail}
-            self._parent_queue.put(message_dict)
+            signal_header = self._generate_action_signal_template("speed")
+            signal_header["value"] = self._generate_signal_value(message_type, mission_uuid, detail)
+            self._parent_queue.put(signal_header)
+
+    def _send_thread_write_finish(self, mission_uuid, start_position, length):
+        if self._run_status:
+            signal_header = self._generate_action_signal_template("parent.thread")
+            message_detail = {"mission_uuid": mission_uuid, "start_position": start_position, "length": length}
+            signal_header["value"] = self._generate_signal_value("write_done", mission_uuid, message_detail)
+
+    @staticmethod
+    def _generate_action_signal_template(receiver):
+        return {"action": "signal", "receiver": receiver, "value": None}
+
+    @staticmethod
+    def _generate_signal_value(signal_type, mission_uuid, mission_detail):
+        return {"type": signal_type, "mission_uuid": mission_uuid, "detail": mission_detail}
