@@ -17,7 +17,7 @@ class ActionSpeedReceiver(threading.Thread):
         self._message_queue = queue.Queue()
         self._run_status = True
         self._parent_queue = parent_queue
-        self._analyze_controller = AnalyzeController(runtime_operator, parent_queue)
+        self._analyze_controller = None
         self._mission_dict = dict()
         self._start_time = 0
 
@@ -36,6 +36,10 @@ class ActionSpeedReceiver(threading.Thread):
     def send_stop_state(self):
         self._run_status = False
         self._message_queue.put(None)
+
+    def set_analyze_controller(self, analyze_controller: AnalyzeController):
+        self._analyze_controller = analyze_controller
+        self._analyze_controller.init_all_analyzer(self._runtime_operator, self._parent_queue)
 
     def _should_thread_continue_to_execute(self):
         return self._run_status or self._message_queue.qsize()

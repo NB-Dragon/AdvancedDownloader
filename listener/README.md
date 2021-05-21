@@ -89,6 +89,24 @@
 }
 ```
 
+# Action Analyse
+## request
+```json
+{
+  "action": "signal",
+  "receiver": "analyze",
+  "value": {
+    "type": "request",
+    "mission_uuid": "",
+    "detail": {
+      "schema": "",
+      "analyze_tag": 0,
+      "mission_info": {}
+    }
+  }
+}
+```
+
 # Action Write
 ## Register
 ```json

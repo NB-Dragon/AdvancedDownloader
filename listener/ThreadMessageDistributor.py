@@ -5,6 +5,7 @@
 import queue
 import threading
 from tools.RuntimeOperator import RuntimeOperator
+from controller.AnalyzeController import AnalyzeController
 from listener.ActionAnalyzeReceiver import ActionAnalyzeReceiver
 from listener.ActionOpenReceiver import ActionOpenReceiver
 from listener.ActionPrintReceiver import ActionPrintReceiver
@@ -56,24 +57,27 @@ class ThreadMessageDistributor(threading.Thread):
         """
         print   : handle all message which need to print
         write   : handle all file register and writing
-        speed   : handle all the changes in file size
         open    : handle all the files open operation
+        speed   : handle all the changes in file size
         analyze : handle all the mission analyze
         """
         self._all_listener = dict()
         action_print_receiver = ActionPrintReceiver(self._runtime_operator)
         action_print_queue = action_print_receiver.get_message_queue()
         self._all_listener["print"] = {"receiver": action_print_receiver, "queue": action_print_queue}
-        action_speed_receiver = ActionSpeedReceiver(self._runtime_operator, self._message_queue)
-        action_speed_queue = action_speed_receiver.get_message_queue()
-        self._all_listener["speed"] = {"receiver": action_speed_receiver, "queue": action_speed_queue}
         action_write_receiver = ActionWriterReceiver(self._runtime_operator, self._message_queue)
         action_write_queue = action_write_receiver.get_message_queue()
         self._all_listener["write"] = {"receiver": action_write_receiver, "queue": action_write_queue}
         action_open_receiver = ActionOpenReceiver(self._runtime_operator, self._message_queue)
         action_open_queue = action_open_receiver.get_message_queue()
         self._all_listener["open"] = {"receiver": action_open_receiver, "queue": action_open_queue}
+        self._analyze_controller = AnalyzeController()
+        action_speed_receiver = ActionSpeedReceiver(self._runtime_operator, self._message_queue)
+        action_speed_receiver.set_analyze_controller(self._analyze_controller)
+        action_speed_queue = action_speed_receiver.get_message_queue()
+        self._all_listener["speed"] = {"receiver": action_speed_receiver, "queue": action_speed_queue}
         action_analyze_receiver = ActionAnalyzeReceiver(self._runtime_operator, self._message_queue)
+        action_analyze_receiver.set_analyze_controller(self._analyze_controller)
         action_analyze_queue = action_analyze_receiver.get_message_queue()
         self._all_listener["analyze"] = {"receiver": action_analyze_receiver, "queue": action_analyze_queue}
 
