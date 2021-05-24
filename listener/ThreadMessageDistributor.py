@@ -5,7 +5,7 @@
 import queue
 import threading
 from tools.RuntimeOperator import RuntimeOperator
-from controller.AnalyzeController import AnalyzeController
+from schema.AnalyzeController import AnalyzeController
 from listener.ActionAnalyzeReceiver import ActionAnalyzeReceiver
 from listener.ActionOpenReceiver import ActionOpenReceiver
 from listener.ActionPrintReceiver import ActionPrintReceiver

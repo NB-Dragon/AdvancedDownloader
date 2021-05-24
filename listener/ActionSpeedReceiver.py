@@ -6,7 +6,7 @@ import math
 import queue
 import threading
 import time
-from controller.AnalyzeController import AnalyzeController
+from schema.AnalyzeController import AnalyzeController
 from tools.RuntimeOperator import RuntimeOperator
 
 

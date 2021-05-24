@@ -4,7 +4,7 @@
 # Create User: NB-Dragon
 import queue
 import threading
-from controller.AnalyzeController import AnalyzeController
+from schema.AnalyzeController import AnalyzeController
 from tools.RuntimeOperator import RuntimeOperator
 
 
