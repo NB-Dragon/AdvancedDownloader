@@ -30,7 +30,7 @@ class HTTPHeaderAnalyzer(object):
 
     def get_request_manager(self, schema, alive_count, proxy=None):
         cert_pem_file = self._runtime_operator.get_static_cert_path()
-        if proxy is None:
+        if proxy is None or len(proxy) == 0:
             return urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=cert_pem_file,
                                        maxsize=alive_count, timeout=5)
         else:
