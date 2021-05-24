@@ -3,7 +3,7 @@
 # Create Time: 2021/5/16 12:00
 # Create User: NB-Dragon
 import queue
-from controller.analyzer.HTTPAnalyzer import HTTPAnalyzer
+from schema.analyzer.HTTPAnalyzer import HTTPAnalyzer
 from tools.RuntimeOperator import RuntimeOperator
 
 
