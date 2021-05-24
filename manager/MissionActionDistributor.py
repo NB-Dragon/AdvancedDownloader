@@ -50,9 +50,23 @@ class MissionActionDistributor(threading.Thread):
 
     def _handle_same_level_receiver(self, action_type, action_receiver, action_detail):
         if action_type == "operate":
-            pass
+            self._do_with_action_operate(action_receiver, action_detail)
         elif action_type == "signal":
             self._do_with_action_signal(action_receiver, action_detail)
+
+    def _do_with_action_operate(self, action_receiver, action_detail):
+        if action_receiver == "create":
+            pass
+        elif action_receiver == "start":
+            pass
+        elif action_receiver == "pause":
+            pass
+        elif action_receiver == "open":
+            pass
+        elif action_receiver == "delete":
+            pass
+        elif action_receiver == "exit":
+            pass
 
     def _do_with_action_signal(self, action_receiver, action_detail):
         if action_receiver in self._all_listener:
