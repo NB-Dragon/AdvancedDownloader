@@ -3,29 +3,12 @@
 ```json
 {
   "action": "signal",
-  "receiver": "message",
+  "receiver": "message.*",
   "value": {}
 }
 ```
 
-# Action Analyse
-## request
-```json
-{
-  "action": "signal",
-  "receiver": "analyse",
-  "value": {
-    "type": "request",
-    "mission_uuid": "",
-    "detail": {
-      "analyse_tag": 0,
-      "mission_info": {}
-    }
-  }
-}
-```
-
-# Action Mission Info
+# Action Info
 ## register
 ```json
 {
@@ -35,8 +18,9 @@
     "type": "register",
     "mission_uuid": "",
     "detail": {
+      "schema": "",
       "mission_info": {},
-      "download_info": {}
+      "download_info": null
     }
   }
 }
@@ -82,7 +66,7 @@
   "value": {
     "type": "open",
     "mission_uuid": "",
-    "detail": {}
+    "detail": null
   }
 }
 ```
@@ -95,7 +79,7 @@
   "value": {
     "type": "data",
     "mission_uuid": "",
-    "detail": {}
+    "detail": null
   }
 }
 ```
@@ -109,8 +93,25 @@
     "type": "request_result",
     "mission_uuid": "",
     "detail": {
-      "analyse_tag": 0,
+      "analyze_tag": 0,
       "download_info": null
+    }
+  }
+}
+```
+
+# Action Thread
+## write_done
+```json
+{
+  "action": "signal",
+  "receiver": "thread",
+  "value": {
+    "type": "write_done",
+    "mission_uuid": "",
+    "detail": {
+      "start_position": 0,
+      "length": 0
     }
   }
 }

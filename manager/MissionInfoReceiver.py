@@ -18,7 +18,6 @@ class MissionInfoReceiver(threading.Thread):
         self._run_status = True
         self._parent_queue = parent_queue
         self._mission_info_dict = dict()
-        self._default_mission_info = self._generate_default_mission_info()
 
     def run(self) -> None:
         while self._should_thread_continue_to_execute():
@@ -55,6 +54,7 @@ class MissionInfoReceiver(threading.Thread):
         if "mission_info" in message_detail and "download_info" in message_detail:
             mission_info, download_info = message_detail["mission_info"], message_detail["download_info"]
             self._mission_info_dict[mission_uuid] = dict()
+            self._mission_info_dict[mission_uuid]["schema"] = message_detail["schema"]
             self._mission_info_dict[mission_uuid]["mission_info"] = self._get_standard_mission_info(mission_info)
             self._mission_info_dict[mission_uuid]["download_info"] = json.loads(json.dumps(download_info))
 
@@ -76,12 +76,12 @@ class MissionInfoReceiver(threading.Thread):
             if self._mission_info_dict[mission_uuid]["download_info"]:
                 old_save_path = self._mission_info_dict[mission_uuid]["mission_info"]["save_path"]
                 old_full_path = self._get_current_full_save_path(mission_uuid, old_save_path)
-                self._send_open_message(mission_uuid, old_full_path)
+                self._send_open_message("open", mission_uuid, {"path": old_full_path})
 
     def _do_with_mission_data(self, mission_uuid):
         if mission_uuid in self._mission_info_dict:
             if self._mission_info_dict[mission_uuid]["download_info"] is None:
-                self._request_mission_analyse(mission_uuid, 0)
+                self._request_mission_analyze(mission_uuid, 1)
             else:
                 self._send_thread_action("data_result", mission_uuid, self._mission_info_dict[mission_uuid])
 
@@ -89,15 +89,15 @@ class MissionInfoReceiver(threading.Thread):
         if mission_uuid in self._mission_info_dict:
             if message_detail["download_info"]:
                 self._update_download_info(mission_uuid, message_detail["download_info"])
-            if message_detail["download_info"] is None and message_detail["analyse_tag"] < 3:
-                self._request_mission_analyse(mission_uuid, message_detail["analyse_tag"] + 1)
+            if message_detail["download_info"] is None and message_detail["analyze_tag"] < 3:
+                self._request_mission_analyze(mission_uuid, message_detail["analyze_tag"] + 1)
             else:
                 self._send_thread_action("data_result", mission_uuid, self._mission_info_dict[mission_uuid])
 
     def _get_standard_mission_info(self, mission_info):
-        standard_mission_info = self._default_mission_info.copy()
+        standard_mission_info = self._generate_default_mission_info()
         for key, value in mission_info.items():
-            if key in self._default_mission_info:
+            if key in standard_mission_info:
                 standard_mission_info[key] = value
         return standard_mission_info
 
@@ -105,7 +105,7 @@ class MissionInfoReceiver(threading.Thread):
         if "save_path" in mission_info:
             self._rename_file_or_directory(mission_uuid, mission_info["save_path"])
         for key, value in mission_info.items():
-            if key in self._default_mission_info:
+            if key in self._mission_info_dict[mission_uuid]:
                 self._mission_info_dict[mission_uuid][key] = value
 
     def _update_download_info(self, mission_uuid, download_info: dict):
@@ -130,10 +130,11 @@ class MissionInfoReceiver(threading.Thread):
         file_name = self._mission_info_dict[mission_uuid]["download_info"]["filename"]
         return os.path.join(save_path, file_name)
 
-    def _request_mission_analyse(self, mission_uuid, analyse_tag):
+    def _request_mission_analyze(self, mission_uuid, analyze_tag):
         mission_info = self._mission_info_dict[mission_uuid]["mission_info"]
-        analyse_item = {"analyse_tag": analyse_tag, "mission_info": mission_info}
-        self._send_analyse_action("request", mission_uuid, analyse_item)
+        mission_schema = self._mission_info_dict[mission_uuid]["schema"]
+        analyze_item = {"schema": mission_schema, "analyze_tag": analyze_tag, "mission_info": mission_info}
+        self._send_analyze_action("request", mission_uuid, analyze_item)
 
     def _generate_default_mission_info(self):
         standard_mission_info = dict()
@@ -145,24 +146,19 @@ class MissionInfoReceiver(threading.Thread):
         standard_mission_info["open_after_finish"] = False
         return standard_mission_info
 
-    def _send_analyse_action(self, signal_type, mission_uuid, mission_detail):
-        message_dict = self._generate_action_signal_template("analyse")
+    def _send_analyze_action(self, signal_type, mission_uuid, mission_detail):
+        message_dict = self._generate_action_signal_template("message.analyze")
+        message_dict["value"] = self._generate_signal_value(signal_type, mission_uuid, mission_detail)
+        self._parent_queue.put(message_dict)
+
+    def _send_open_message(self, signal_type, mission_uuid, mission_detail):
+        message_dict = self._generate_action_signal_template("message.open")
         message_dict["value"] = self._generate_signal_value(signal_type, mission_uuid, mission_detail)
         self._parent_queue.put(message_dict)
 
     def _send_thread_action(self, signal_type, mission_uuid, mission_detail):
         message_dict = self._generate_action_signal_template("thread")
         message_dict["value"] = self._generate_signal_value(signal_type, mission_uuid, mission_detail)
-        self._parent_queue.put(message_dict)
-
-    def _send_open_message(self, mission_uuid, file_path):
-        message_dict = {"action": "open", "value": {"mission_uuid": mission_uuid, "detail": None}}
-        message_dict["value"]["detail"] = {"type": "open", "path": file_path}
-        self._send_message_to_listener(message_dict)
-
-    def _send_message_to_listener(self, detail: dict):
-        message_dict = self._generate_action_signal_template("message")
-        message_dict["value"] = detail
         self._parent_queue.put(message_dict)
 
     @staticmethod
