@@ -5,7 +5,6 @@
 import queue
 import threading
 from listener.ThreadMessageDistributor import ThreadMessageDistributor
-from manager.MissionAnalyseReceiver import MissionAnalyseReceiver
 from manager.MissionInfoReceiver import MissionInfoReceiver
 from tools.RuntimeOperator import RuntimeOperator
 
@@ -23,10 +22,7 @@ class MissionActionDistributor(threading.Thread):
         while self._should_thread_continue_to_execute():
             message_dict = self._message_queue.get()
             if message_dict is None: continue
-            if message_dict["action"] == "operate":
-                pass
-            elif message_dict["action"] == "signal":
-                self._handle_action_signal(message_dict["receiver"], message_dict["value"])
+            self._handle_message(message_dict)
         self._stop_all_listener()
 
     def get_message_queue(self):
@@ -39,25 +35,41 @@ class MissionActionDistributor(threading.Thread):
     def _should_thread_continue_to_execute(self):
         return self._run_status or self._message_queue.qsize()
 
-    def _handle_action_signal(self, signal_receiver, signal_detail):
-        if signal_receiver in self._all_listener:
-            self._all_listener[signal_receiver]["queue"].put(signal_detail)
+    def _handle_message(self, message_dict):
+        if "." in message_dict["receiver"]:
+            self._handle_cross_level_receiver(message_dict)
         else:
-            self._send_print_message_to_listener("action `{}` not defined".format(signal_receiver))
+            action_type, action_receiver = message_dict["action"], message_dict["receiver"]
+            self._handle_same_level_receiver(action_type, action_receiver, message_dict["value"])
+
+    def _handle_cross_level_receiver(self, raw_message):
+        first_receiver, next_receiver = raw_message["receiver"].split(".", 1)
+        raw_message["receiver"] = next_receiver
+        if first_receiver in self._all_listener:
+            self._all_listener[first_receiver]["queue"].put(raw_message)
+
+    def _handle_same_level_receiver(self, action_type, action_receiver, action_detail):
+        if action_type == "operate":
+            pass
+        elif action_type == "signal":
+            self._do_with_action_signal(action_receiver, action_detail)
+
+    def _do_with_action_signal(self, action_receiver, action_detail):
+        if action_receiver in self._all_listener:
+            self._all_listener[action_receiver]["queue"].put(action_detail)
+        else:
+            message_content = "signal_receiver `{}` not defined".format(action_receiver)
+            self._send_message_to_print(message_content, False)
 
     def _init_all_listener(self):
         """
         message : handle all message with action
-        analyse : handle all mission which want to analyse
         info    : handle all mission info command
         """
         self._all_listener = dict()
-        thread_message_distributor = ThreadMessageDistributor(self._runtime_operator)
+        thread_message_distributor = ThreadMessageDistributor(self._runtime_operator, self._message_queue)
         thread_message_queue = thread_message_distributor.get_message_queue()
         self._all_listener["message"] = {"receiver": thread_message_distributor, "queue": thread_message_queue}
-        mission_analyse_receiver = MissionAnalyseReceiver(self._runtime_operator, self._message_queue)
-        mission_analyse_queue = mission_analyse_receiver.get_message_queue()
-        self._all_listener["analyse"] = {"receiver": mission_analyse_receiver, "queue": mission_analyse_queue}
         mission_info_receiver = MissionInfoReceiver(self._runtime_operator, self._message_queue)
         mission_info_queue = mission_info_receiver.get_message_queue()
         self._all_listener["info"] = {"receiver": mission_info_receiver, "queue": mission_info_queue}
@@ -70,7 +82,13 @@ class MissionActionDistributor(threading.Thread):
         for listener in self._all_listener.values():
             listener["receiver"].send_stop_state()
 
-    def _send_print_message_to_listener(self, content):
-        detail_info = {"sender": "MissionActionDistributor", "content": content, "exception": False}
-        message_dict = {"action": "print", "value": {"mission_uuid": None, "detail": detail_info}}
-        self._all_listener["message"]["queue"].put(message_dict)
+    def _send_message_to_print(self, content, exception: bool):
+        message_item = self._generate_print_value(content, exception)
+        signal_header = {"action": "signal", "receiver": "message.print", "value": message_item}
+        self._message_queue.put(signal_header)
+
+    @staticmethod
+    def _generate_print_value(content, exception: bool):
+        message_type = "exception" if exception else "normal"
+        message_detail = {"sender": "MissionActionDistributor", "content": content}
+        return {"type": message_type, "mission_uuid": None, "detail": message_detail}

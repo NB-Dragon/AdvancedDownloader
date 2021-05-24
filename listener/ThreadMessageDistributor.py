@@ -27,10 +27,7 @@ class ThreadMessageDistributor(threading.Thread):
         while self._should_thread_continue_to_execute():
             message_dict = self._message_queue.get()
             if message_dict is None: continue
-            if "." in message_dict["receiver"]:
-                self._handle_cross_level_receiver(message_dict)
-            else:
-                self._handle_same_level_receiver(message_dict["receiver"], message_dict["value"])
+            self._handle_message(message_dict)
         self._do_before_distributor_down()
         self._stop_all_listener()
 
@@ -44,6 +41,13 @@ class ThreadMessageDistributor(threading.Thread):
     def _should_thread_continue_to_execute(self):
         return self._run_status or self._message_queue.qsize()
 
+    def _handle_message(self, message_dict):
+        if "." in message_dict["receiver"]:
+            self._handle_cross_level_receiver(message_dict)
+        else:
+            action_type, action_receiver = message_dict["action"], message_dict["receiver"]
+            self._handle_same_level_receiver(action_type, action_receiver, message_dict["value"])
+
     def _handle_cross_level_receiver(self, raw_message):
         first_receiver, next_receiver = raw_message["receiver"].split(".", 1)
         raw_message["receiver"] = next_receiver
@@ -52,11 +56,14 @@ class ThreadMessageDistributor(threading.Thread):
         elif first_receiver in self._all_listener:
             self._all_listener[first_receiver]["queue"].put(raw_message)
 
-    def _handle_same_level_receiver(self, signal_receiver, signal_detail):
-        if signal_receiver in self._all_listener:
-            self._all_listener[signal_receiver]["queue"].put(signal_detail)
+    def _handle_same_level_receiver(self, action_type, action_receiver, action_detail):
+        self._do_with_action_signal(action_receiver, action_detail)
+
+    def _do_with_action_signal(self, action_receiver, action_detail):
+        if action_receiver in self._all_listener:
+            self._all_listener[action_receiver]["queue"].put(action_detail)
         else:
-            message_content = "signal_receiver `{}` not defined".format(signal_receiver)
+            message_content = "signal_receiver `{}` not defined".format(action_receiver)
             self._send_message_to_print(message_content, False)
 
     def _do_before_distributor_down(self):
