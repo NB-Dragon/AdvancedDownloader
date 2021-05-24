@@ -71,7 +71,7 @@
   "value": {
     "type": "finish",
     "mission_uuid": "",
-    "detail": {}
+    "detail": null
   }
 }
 ```
@@ -84,7 +84,7 @@
   "value": {
     "type": "heartbeat",
     "mission_uuid": null,
-    "detail": {}
+    "detail": null
   }
 }
 ```
@@ -148,7 +148,7 @@
   "value": {
     "type": "finish",
     "mission_uuid": "",
-    "detail": {}
+    "detail": null
   }
 }
 ```
