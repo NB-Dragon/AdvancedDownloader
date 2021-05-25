@@ -25,6 +25,7 @@ class MissionInfoReceiver(threading.Thread):
             if message_dict is None: continue
             signal_type, mission_uuid = message_dict["type"], message_dict["mission_uuid"]
             self._handle_message_detail(signal_type, mission_uuid, message_dict["detail"])
+            self._update_mission_progress()
 
     def get_message_queue(self):
         return self._message_queue
@@ -80,19 +81,22 @@ class MissionInfoReceiver(threading.Thread):
 
     def _do_with_mission_data(self, mission_uuid):
         if mission_uuid in self._mission_info_dict:
-            if self._mission_info_dict[mission_uuid]["download_info"] is None:
-                self._request_mission_analyze(mission_uuid, 1)
-            else:
+            if self._mission_info_dict[mission_uuid]["download_info"]:
                 self._send_thread_action("data_result", mission_uuid, self._mission_info_dict[mission_uuid])
+            else:
+                self._request_mission_analyze(mission_uuid, 1)
 
     def _do_with_mission_request_result(self, mission_uuid, message_detail):
         if mission_uuid in self._mission_info_dict:
             if message_detail["download_info"]:
                 self._update_download_info(mission_uuid, message_detail["download_info"])
-            if message_detail["download_info"] is None and message_detail["analyze_tag"] < 3:
-                self._request_mission_analyze(mission_uuid, message_detail["analyze_tag"] + 1)
-            else:
+            if message_detail["download_info"] or message_detail["analyze_tag"] == 3:
                 self._send_thread_action("data_result", mission_uuid, self._mission_info_dict[mission_uuid])
+            else:
+                self._request_mission_analyze(mission_uuid, message_detail["analyze_tag"] + 1)
+
+    def _update_mission_progress(self):
+        self._runtime_operator.set_mission_state(self._mission_info_dict)
 
     def _get_standard_mission_info(self, mission_info):
         standard_mission_info = self._generate_default_mission_info()
