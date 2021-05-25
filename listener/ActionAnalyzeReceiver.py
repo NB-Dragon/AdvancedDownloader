@@ -4,18 +4,17 @@
 # Create User: NB-Dragon
 import queue
 import threading
-from schema.AnalyzeController import AnalyzeController
 from tools.RuntimeOperator import RuntimeOperator
 
 
 class ActionAnalyzeReceiver(threading.Thread):
-    def __init__(self, runtime_operator: RuntimeOperator, parent_queue: queue.Queue):
+    def __init__(self, runtime_operator: RuntimeOperator, parent_queue: queue.Queue, analyze_controller):
         super().__init__()
         self._runtime_operator = runtime_operator
         self._message_queue = queue.Queue()
         self._run_status = True
         self._parent_queue = parent_queue
-        self._analyze_controller = None
+        self._analyze_controller = analyze_controller
 
     def run(self) -> None:
         while self._should_thread_continue_to_execute():
@@ -30,10 +29,6 @@ class ActionAnalyzeReceiver(threading.Thread):
     def send_stop_state(self):
         self._run_status = False
         self._message_queue.put(None)
-
-    def set_analyze_controller(self, analyze_controller: AnalyzeController):
-        self._analyze_controller = analyze_controller
-        self._analyze_controller.init_all_analyzer(self._runtime_operator, self._parent_queue)
 
     def _should_thread_continue_to_execute(self):
         return self._run_status or self._message_queue.qsize()

@@ -90,13 +90,11 @@ class ThreadMessageDistributor(threading.Thread):
         action_open_receiver = ActionOpenReceiver(self._runtime_operator, self._message_queue)
         action_open_queue = action_open_receiver.get_message_queue()
         self._all_listener["open"] = {"receiver": action_open_receiver, "queue": action_open_queue}
-        self._analyze_controller = AnalyzeController()
-        action_speed_receiver = ActionSpeedReceiver(self._runtime_operator, self._message_queue)
-        action_speed_receiver.set_analyze_controller(self._analyze_controller)
+        analyze_controller = AnalyzeController(self._runtime_operator, self._message_queue)
+        action_speed_receiver = ActionSpeedReceiver(self._runtime_operator, self._message_queue, analyze_controller)
         action_speed_queue = action_speed_receiver.get_message_queue()
         self._all_listener["speed"] = {"receiver": action_speed_receiver, "queue": action_speed_queue}
-        action_analyze_receiver = ActionAnalyzeReceiver(self._runtime_operator, self._message_queue)
-        action_analyze_receiver.set_analyze_controller(self._analyze_controller)
+        action_analyze_receiver = ActionAnalyzeReceiver(self._runtime_operator, self._message_queue, analyze_controller)
         action_analyze_queue = action_analyze_receiver.get_message_queue()
         self._all_listener["analyze"] = {"receiver": action_analyze_receiver, "queue": action_analyze_queue}
 
