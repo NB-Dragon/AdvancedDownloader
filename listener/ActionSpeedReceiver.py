@@ -55,7 +55,7 @@ class ActionSpeedReceiver(threading.Thread):
     def _do_with_mission_register(self, mission_uuid, message_detail):
         mission_item = {"start_time": time.time(), "update_size": 0, "current_size": 0, "expect_size": 0}
         schema, download_info = message_detail["schema"], message_detail["download_info"]
-        schema_analyzer = self._analyze_controller.get_analyzer(schema)
+        schema_analyzer = self._analyze_controller.get_analyzer_by_schema(schema)
         mission_item["current_size"] = schema_analyzer.get_current_finish_size(download_info)
         mission_item["expect_size"] = download_info["filesize"]
         self._mission_dict[mission_uuid] = mission_item

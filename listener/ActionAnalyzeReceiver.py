@@ -43,8 +43,9 @@ class ActionAnalyzeReceiver(threading.Thread):
 
     def _analyze_download_info(self, mission_uuid, message_detail):
         result_dict = {"analyze_tag": message_detail["analyze_tag"], "download_info": None}
-        current_analyzer = self._analyze_controller.get_analyzer(message_detail["schema"])
-        download_info = current_analyzer.get_download_info(mission_uuid, message_detail["mission_info"])
+        schema, mission_info = message_detail["schema"], message_detail["download_info"]
+        current_analyzer = self._analyze_controller.get_analyzer_by_schema(schema)
+        download_info = current_analyzer.get_download_info(mission_uuid, mission_info)
         result_dict["download_info"] = download_info
         return result_dict
 
