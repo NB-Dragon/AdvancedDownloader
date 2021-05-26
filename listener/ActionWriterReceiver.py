@@ -41,7 +41,7 @@ class ActionWriterReceiver(threading.Thread):
             self._send_speed_mission_size(mission_uuid, length)
             save_path, start_position = message_detail["save_path"], message_detail["start_position"]
             self._write_bytes_into_file(mission_uuid, save_path, start_position, content)
-            self._send_info_write_down(mission_uuid, start_position, length)
+            self._send_info_write_down(mission_uuid, save_path, start_position, length)
         elif signal_type == "register":
             self._send_speed_mission_register(mission_uuid, message_detail["download_info"])
             self._do_with_mission_register(mission_uuid, message_detail["root_path"])
@@ -56,20 +56,20 @@ class ActionWriterReceiver(threading.Thread):
     def _do_with_mission_finish(self, mission_uuid):
         self._mission_dict.pop(mission_uuid)
 
-    def _write_bytes_into_file(self, mission_uuid: str, save_path, start_position, content):
+    def _write_bytes_into_file(self, mission_uuid, save_path, start_position, content):
         sava_file_path = os.path.join(self._mission_dict[mission_uuid], save_path)
         writer = open(sava_file_path, 'r+b')
         writer.seek(start_position)
         writer.write(content)
         writer.close()
 
-    def _send_speed_mission_size(self, mission_uuid: str, content_length):
+    def _send_speed_mission_size(self, mission_uuid, content_length):
         self._send_speed_mission_detail(mission_uuid, "size", {"length": content_length})
 
-    def _send_speed_mission_register(self, mission_uuid: str, download_info):
+    def _send_speed_mission_register(self, mission_uuid, download_info):
         self._send_speed_mission_detail(mission_uuid, "register", {"download_info": download_info})
 
-    def _send_speed_mission_finish(self, mission_uuid: str):
+    def _send_speed_mission_finish(self, mission_uuid):
         self._send_speed_mission_detail(mission_uuid, "finish", None)
 
     def _send_speed_mission_detail(self, mission_uuid, message_type, detail):
@@ -78,11 +78,11 @@ class ActionWriterReceiver(threading.Thread):
             signal_header["value"] = self._generate_signal_value(message_type, mission_uuid, detail)
             self._parent_queue.put(signal_header)
 
-    def _send_info_write_down(self, mission_uuid, start_position, length):
+    def _send_info_write_down(self, mission_uuid, save_path, start_position, length):
         if self._run_status:
             signal_header = self._generate_action_signal_template("parent.info")
-            message_detail = {"start_position": start_position, "length": length}
-            signal_header["value"] = self._generate_signal_value("write_done", mission_uuid, message_detail)
+            message_detail = {"sub_path": save_path, "start_position": start_position, "length": length}
+            signal_header["value"] = self._generate_signal_value("update_section", mission_uuid, message_detail)
 
     def _send_info_delete(self, mission_uuid, delete_file: bool):
         if self._run_status:

@@ -50,7 +50,7 @@ class ActionAnalyzeReceiver(threading.Thread):
         result_dict["download_info"] = download_info
         return result_dict
 
-    def _send_request_result(self, mission_uuid: str, detail):
+    def _send_request_result(self, mission_uuid, detail):
         if self._run_status:
             signal_header = self._generate_action_signal_template("parent.info")
             signal_header["value"] = self._generate_signal_value("request_result", mission_uuid, detail)
