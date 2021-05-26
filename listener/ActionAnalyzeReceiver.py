@@ -4,17 +4,18 @@
 # Create User: NB-Dragon
 import queue
 import threading
+from schema.AnalyzeController import AnalyzeController
 from tools.RuntimeOperator import RuntimeOperator
 
 
 class ActionAnalyzeReceiver(threading.Thread):
-    def __init__(self, runtime_operator: RuntimeOperator, parent_queue: queue.Queue, analyze_controller):
+    def __init__(self, runtime_operator: RuntimeOperator, parent_queue: queue.Queue):
         super().__init__()
         self._runtime_operator = runtime_operator
         self._message_queue = queue.Queue()
         self._run_status = True
         self._parent_queue = parent_queue
-        self._analyze_controller = analyze_controller
+        self._analyze_controller = AnalyzeController(runtime_operator, parent_queue)
 
     def run(self) -> None:
         while self._should_thread_continue_to_execute():
