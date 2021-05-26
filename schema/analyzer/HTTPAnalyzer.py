@@ -37,27 +37,6 @@ class HTTPAnalyzer(object):
         else:
             return None
 
-    def _get_simple_response(self, request_manager, mission_uuid, target_url, headers):
-        try:
-            return request_manager.request("GET", target_url, headers=headers, preload_content=False)
-        except UnicodeEncodeError:
-            reason = {"error": "The server does not follow the http standard.", "target": target_url}
-            self._make_message_and_send(mission_uuid, reason, True)
-            return None
-        except Exception as e:
-            self._make_message_and_send(mission_uuid, str(e), True)
-            return None
-
-    @staticmethod
-    def _check_response_can_access(stream_response):
-        if stream_response is None:
-            return False
-        if stream_response.status in [200, 206]:
-            return True
-        else:
-            stream_response.close()
-            return False
-
     def _generate_standard_item(self, file_info, mission_info):
         if file_info:
             relative_save_path = file_info.pop("filename")
@@ -78,6 +57,27 @@ class HTTPAnalyzer(object):
             return download_info
         else:
             return None
+
+    def _get_simple_response(self, request_manager, mission_uuid, target_url, headers):
+        try:
+            return request_manager.request("GET", target_url, headers=headers, preload_content=False)
+        except UnicodeEncodeError:
+            reason = {"error": "The server does not follow the http standard.", "target": target_url}
+            self._make_message_and_send(mission_uuid, reason, True)
+            return None
+        except Exception as e:
+            self._make_message_and_send(mission_uuid, str(e), True)
+            return None
+
+    @staticmethod
+    def _check_response_can_access(stream_response):
+        if stream_response is None:
+            return False
+        if stream_response.status in [200, 206]:
+            return True
+        else:
+            stream_response.close()
+            return False
 
     def _generate_file_download_section(self, file_info, mission_info):
         file_size, expect_count = file_info["filesize"], mission_info["thread_num"]
