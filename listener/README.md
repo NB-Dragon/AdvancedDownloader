@@ -41,7 +41,6 @@
     "type": "register",
     "mission_uuid": "",
     "detail": {
-      "schema": "",
       "download_info": {}
     }
   }
@@ -117,7 +116,7 @@
     "type": "register",
     "mission_uuid": "",
     "detail": {
-      "save_path": "",
+      "root_path": "",
       "download_info": {}
     }
   }
@@ -133,6 +132,7 @@
     "type": "write",
     "mission_uuid": "",
     "detail": {
+      "save_path": "",
       "start_position": 0,
       "content": "bytes"
     }
@@ -148,7 +148,9 @@
   "value": {
     "type": "finish",
     "mission_uuid": "",
-    "detail": null
+    "detail": {
+      "delete_file": false
+    }
   }
 }
 ```
