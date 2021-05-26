@@ -7,6 +7,7 @@ import os
 import queue
 import shutil
 import threading
+import urllib.parse
 from tools.RuntimeOperator import RuntimeOperator
 
 
@@ -40,10 +41,10 @@ class MissionInfoReceiver(threading.Thread):
     def _handle_message_detail(self, signal_type, mission_uuid, message_detail):
         if signal_type == "register":
             self._do_with_mission_register(mission_uuid, message_detail)
-        elif signal_type == "update":
-            self._do_with_mission_update(mission_uuid, message_detail)
         elif signal_type == "delete":
             self._do_with_mission_delete(mission_uuid, message_detail)
+        elif signal_type == "update":
+            self._do_with_mission_update(mission_uuid, message_detail)
         elif signal_type == "open":
             self._do_with_mission_open(mission_uuid)
         elif signal_type == "data":
@@ -54,10 +55,17 @@ class MissionInfoReceiver(threading.Thread):
     def _do_with_mission_register(self, mission_uuid, message_detail):
         if "mission_info" in message_detail and "download_info" in message_detail:
             mission_info, download_info = message_detail["mission_info"], message_detail["download_info"]
-            self._mission_info_dict[mission_uuid] = dict()
-            self._mission_info_dict[mission_uuid]["schema"] = message_detail["schema"]
-            self._mission_info_dict[mission_uuid]["mission_info"] = self._get_standard_mission_info(mission_info)
-            self._mission_info_dict[mission_uuid]["download_info"] = json.loads(json.dumps(download_info))
+            if mission_info.get("download_link"):
+                self._mission_info_dict[mission_uuid] = dict()
+                self._mission_info_dict[mission_uuid]["schema"] = message_detail["schema"]
+                self._mission_info_dict[mission_uuid]["mission_info"] = self._get_standard_mission_info(mission_info)
+                self._mission_info_dict[mission_uuid]["download_info"] = json.loads(json.dumps(download_info))
+
+    def _do_with_mission_delete(self, mission_uuid, message_detail):
+        if mission_uuid in self._mission_info_dict:
+            if message_detail["delete_file"]:
+                self._delete_file_or_directory(mission_uuid)
+            self._mission_info_dict.pop(mission_uuid)
 
     def _do_with_mission_update(self, mission_uuid, message_detail):
         if mission_uuid in self._mission_info_dict:
@@ -65,12 +73,6 @@ class MissionInfoReceiver(threading.Thread):
                 self._update_download_info(mission_uuid, message_detail["download_info"])
             if "mission_info" in message_detail:
                 self._update_mission_info(mission_uuid, message_detail["mission_info"])
-
-    def _do_with_mission_delete(self, mission_uuid, message_detail):
-        if mission_uuid in self._mission_info_dict:
-            if message_detail["delete_file"]:
-                self._delete_file_or_directory(mission_uuid)
-            self._mission_info_dict.pop(mission_uuid)
 
     def _do_with_mission_open(self, mission_uuid):
         if mission_uuid in self._mission_info_dict:
@@ -103,6 +105,8 @@ class MissionInfoReceiver(threading.Thread):
         for key, value in mission_info.items():
             if key in standard_mission_info:
                 standard_mission_info[key] = value
+        quote_link = self._get_url_after_quote(standard_mission_info["download_link"])
+        standard_mission_info["download_link"] = quote_link
         return standard_mission_info
 
     def _update_mission_info(self, mission_uuid, mission_info: dict):
@@ -118,10 +122,11 @@ class MissionInfoReceiver(threading.Thread):
 
     def _delete_file_or_directory(self, mission_uuid):
         if self._mission_info_dict[mission_uuid]["download_info"]:
-            save_path = self._mission_info_dict[mission_uuid]["mission_info"]["save_path"]
-            old_full_path = self._get_current_full_save_path(mission_uuid, save_path)
-            if os.path.exists(old_full_path):
-                shutil.rmtree(old_full_path)
+            root_path = self._mission_info_dict[mission_uuid]["mission_info"]["save_path"]
+            sub_path = self._get_download_root_path(mission_uuid)
+            full_save_path = os.path.join(root_path, sub_path)
+            if os.path.exists(full_save_path):
+                shutil.rmtree(full_save_path)
 
     def _rename_file_or_directory(self, mission_uuid, new_path):
         if self._mission_info_dict[mission_uuid]["download_info"]:
@@ -129,6 +134,11 @@ class MissionInfoReceiver(threading.Thread):
             old_full_path = self._get_current_full_save_path(mission_uuid, old_save_path)
             new_full_path = self._get_current_full_save_path(mission_uuid, new_path)
             os.rename(old_full_path, new_full_path)
+
+    def _get_download_root_path(self, mission_uuid):
+        download_info = self._mission_info_dict[mission_uuid]["download_info"]
+        first_path = list(download_info["file_dict"].keys())[0]
+        return first_path.split("/", 1)[0]
 
     def _get_current_full_save_path(self, mission_uuid, save_path):
         file_name = self._mission_info_dict[mission_uuid]["download_info"]["filename"]
@@ -149,6 +159,10 @@ class MissionInfoReceiver(threading.Thread):
         standard_mission_info["proxy"] = None
         standard_mission_info["open_after_finish"] = False
         return standard_mission_info
+
+    @staticmethod
+    def _get_url_after_quote(link):
+        return urllib.parse.quote(link, safe=":/?#[]@!$&'()*+,;=%")
 
     def _send_analyze_action(self, signal_type, mission_uuid, mission_detail):
         message_dict = self._generate_action_signal_template("message.analyze")
