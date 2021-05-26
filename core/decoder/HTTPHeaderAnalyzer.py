@@ -21,10 +21,6 @@ class HTTPHeaderAnalyzer(object):
         range_skill = self._judge_download_range_skill(headers, filesize)
         return {"filename": filename, "filesize": filesize, "range": range_skill}
 
-    @staticmethod
-    def get_url_after_quote(link):
-        return urllib.parse.quote(link, safe=":/?#[]@!$&'()*+,;=%")
-
     def get_request_manager(self, schema, alive_count, proxy=None):
         cert_pem_file = self._runtime_operator.get_static_cert_path()
         if proxy is None or len(proxy) == 0:
