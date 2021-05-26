@@ -26,23 +26,6 @@
 }
 ```
 
-## update
-> The key in detail is optional
-```json
-{
-  "action": "signal",
-  "receiver": "info",
-  "value": {
-    "type": "update",
-    "mission_uuid": "",
-    "detail": {
-      "mission_info": {},
-      "download_info": {}
-    }
-  }
-}
-```
-
 ## delete
 ```json
 {
@@ -66,18 +49,68 @@
   "value": {
     "type": "open",
     "mission_uuid": "",
-    "detail": null
+    "detail": {
+      "sub_path": ""
+    }
   }
 }
 ```
 
-## data
+## update_mission_config
 ```json
 {
   "action": "signal",
   "receiver": "info",
   "value": {
-    "type": "data",
+    "type": "update_mission_config",
+    "mission_uuid": "",
+    "detail": {
+      "mission_info": {}
+    }
+  }
+}
+```
+
+## update_download_name
+```json
+{
+  "action": "signal",
+  "receiver": "info",
+  "value": {
+    "type": "update_download_name",
+    "mission_uuid": "",
+    "detail": {
+      "sub_path": "",
+      "target_path": ""
+    }
+  }
+}
+```
+
+## update_section
+```json
+{
+  "action": "signal",
+  "receiver": "info",
+  "value": {
+    "type": "update_section",
+    "mission_uuid": "",
+    "detail": {
+      "sub_path": "",
+      "start_position": 0,
+      "length": 0
+    }
+  }
+}
+```
+
+## request
+```json
+{
+  "action": "signal",
+  "receiver": "info",
+  "value": {
+    "type": "request",
     "mission_uuid": "",
     "detail": null
   }
@@ -101,18 +134,3 @@
 ```
 
 # Action Thread
-## write_done
-```json
-{
-  "action": "signal",
-  "receiver": "thread",
-  "value": {
-    "type": "write_done",
-    "mission_uuid": "",
-    "detail": {
-      "start_position": 0,
-      "length": 0
-    }
-  }
-}
-```
