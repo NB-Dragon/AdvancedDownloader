@@ -10,13 +10,12 @@ from tools.RuntimeOperator import RuntimeOperator
 
 
 class ActionSpeedReceiver(threading.Thread):
-    def __init__(self, runtime_operator: RuntimeOperator, parent_queue: queue.Queue, analyze_controller):
+    def __init__(self, runtime_operator: RuntimeOperator, parent_queue: queue.Queue):
         super().__init__()
         self._runtime_operator = runtime_operator
         self._message_queue = queue.Queue()
         self._run_status = True
         self._parent_queue = parent_queue
-        self._analyze_controller = analyze_controller
         self._mission_dict = dict()
         self._start_time = 0
 
@@ -54,14 +53,24 @@ class ActionSpeedReceiver(threading.Thread):
 
     def _do_with_mission_register(self, mission_uuid, message_detail):
         mission_item = {"start_time": time.time(), "update_size": 0, "current_size": 0, "expect_size": 0}
-        schema, download_info = message_detail["schema"], message_detail["download_info"]
-        schema_analyzer = self._analyze_controller.get_analyzer_by_schema(schema)
-        mission_item["current_size"] = schema_analyzer.get_current_finish_size(download_info)
-        mission_item["expect_size"] = download_info["filesize"]
+        download_info = message_detail["download_info"]
+        mission_item["current_size"] = self._get_current_finish_size(download_info["file_dict"])
+        mission_item["expect_size"] = download_info["total_size"]
         self._mission_dict[mission_uuid] = mission_item
 
     def _do_with_mission_finish(self, mission_uuid):
         self._mission_dict.pop(mission_uuid)
+
+    @staticmethod
+    def _get_current_finish_size(file_dict):
+        finish_size = 0
+        for value in file_dict.values():
+            if value["range"]:
+                incomplete_size = sum([x[1] - x[0] + 1 for x in value["section"]])
+                finish_size += value["filesize"] - incomplete_size
+            else:
+                finish_size += value["section"][0][0]
+        return finish_size
 
     def _broadcast_speed_content(self):
         end_time = time.time()
