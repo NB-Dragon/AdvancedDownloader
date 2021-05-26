@@ -9,7 +9,7 @@
 {
   "total_size": 0,
   "file_dict": {
-    "file_name": {
+    "relative_path": {
       "filesize": 0,
       "range": false,
       "section": []
