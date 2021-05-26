@@ -9,7 +9,17 @@
 {
   "total_size": 0,
   "file_dict": {
-    "relative_path": {
+    "relative_path_1": {
+      "filesize": 0,
+      "range": false,
+      "section": []
+    },
+    "relative_path_2": {
+      "filesize": 0,
+      "range": false,
+      "section": []
+    },
+    "relative_path_n": {
       "filesize": 0,
       "range": false,
       "section": []
