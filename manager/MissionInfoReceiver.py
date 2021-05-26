@@ -74,8 +74,24 @@ class MissionInfoReceiver(threading.Thread):
     def _do_with_mission_open(self, mission_uuid, message_detail):
         if mission_uuid in self._mission_info_dict:
             if self._mission_info_dict[mission_uuid]["download_info"]:
-                full_save_path = self._get_target_save_path(mission_uuid, message_detail["sub_path"])
-                self._send_open_message("open", mission_uuid, {"path": full_save_path})
+                old_save_path = self._get_target_save_path(mission_uuid, message_detail["sub_path"])
+                self._send_open_message("open", mission_uuid, {"path": old_save_path})
+
+    def _do_with_mission_update_mission_config(self, mission_uuid, message_detail):
+        if "save_path" in message_detail["mission_info"]:
+            download_root_path = self._get_download_root_path(mission_uuid)
+            old_save_path = self._get_target_save_path(mission_uuid, download_root_path)
+            new_save_path = os.path.join(message_detail["mission_info"]["save_path"], download_root_path)
+            if os.path.exists(old_save_path):
+                self._rename_file(mission_uuid, old_save_path, new_save_path)
+        for key, value in message_detail["mission_info"].items():
+            if key in self._mission_info_dict[mission_uuid]["mission_info"]:
+                self._mission_info_dict[mission_uuid]["mission_info"][key] = value
+
+    def _do_with_mission_update_download_name(self, mission_uuid, message_detail):
+        sub_path, target_path = message_detail["sub_path"], message_detail["target_path"]
+        self._rename_file_or_directory(mission_uuid, sub_path, target_path)
+        self._update_download_info_sub_path(mission_uuid, sub_path, target_path)
 
     def _do_with_mission_update_section(self, mission_uuid, message_detail):
         sub_path = message_detail["sub_path"]
@@ -85,13 +101,6 @@ class MissionInfoReceiver(threading.Thread):
         if len(match_section) == 1 or match_section[0] <= match_section[1]:
             current_file_section.append(match_section)
             current_file_section.sort(key=lambda x: x[0])
-
-    def _do_with_mission_update(self, mission_uuid, message_detail):
-        if mission_uuid in self._mission_info_dict:
-            if "download_info" in message_detail:
-                self._update_download_info(mission_uuid, message_detail["download_info"])
-            if "mission_info" in message_detail:
-                self._update_mission_info(mission_uuid, message_detail["mission_info"])
 
     def _do_with_mission_request(self, mission_uuid):
         if mission_uuid in self._mission_info_dict:
@@ -123,19 +132,23 @@ class MissionInfoReceiver(threading.Thread):
 
     def _delete_file_or_directory(self, mission_uuid):
         if self._mission_info_dict[mission_uuid]["download_info"]:
-            download_info = self._mission_info_dict[mission_uuid]["download_info"]
-            first_sub_path = list(download_info["file_dict"].keys())[0]
-            sub_path = first_sub_path.split("/", 1)[0]
-            full_save_path = self._get_target_save_path(mission_uuid, sub_path)
-            if os.path.exists(full_save_path):
-                shutil.rmtree(full_save_path)
+            download_root_path = self._get_download_root_path(mission_uuid)
+            old_save_path = self._get_target_save_path(mission_uuid, download_root_path)
+            if os.path.exists(old_save_path):
+                shutil.rmtree(old_save_path)
 
-    def _rename_file_or_directory(self, mission_uuid, new_path):
-        if self._mission_info_dict[mission_uuid]["download_info"]:
-            old_save_path = self._mission_info_dict[mission_uuid]["mission_info"]["save_path"]
-            old_full_path = self._get_current_full_save_path(mission_uuid, old_save_path)
-            new_full_path = self._get_current_full_save_path(mission_uuid, new_path)
-            os.rename(old_full_path, new_full_path)
+    def _rename_file_or_directory(self, mission_uuid, sub_path, target_path):
+        old_save_path = self._get_target_save_path(mission_uuid, sub_path)
+        new_save_path = self._get_target_save_path(mission_uuid, target_path)
+        if os.path.exists(old_save_path):
+            self._rename_file(mission_uuid, old_save_path, new_save_path)
+
+    def _update_download_info_sub_path(self, mission_uuid, sub_path, target_path):
+        download_info_file_dict = self._mission_info_dict[mission_uuid]["download_info"]["file_dict"]
+        for relative_path in download_info_file_dict.keys():
+            if relative_path.startswith(sub_path):
+                new_path = "{}{}".format(target_path, relative_path.split(sub_path, 1)[1])
+                download_info_file_dict[new_path] = download_info_file_dict.pop(relative_path)
 
     @staticmethod
     def _pop_match_section(start_position, section_list):
@@ -148,6 +161,11 @@ class MissionInfoReceiver(threading.Thread):
                 section_list.remove(section_item)
                 section_list.append([section_item[0], start_position - 1])
                 return [start_position, section_item[1]]
+
+    def _get_download_root_path(self, mission_uuid):
+        download_info = self._mission_info_dict[mission_uuid]["download_info"]
+        first_sub_path = list(download_info["file_dict"].keys())[0]
+        return first_sub_path.split("/", 1)[0]
 
     def _get_target_save_path(self, mission_uuid, sub_path):
         root_path = self._mission_info_dict[mission_uuid]["mission_info"]["save_path"]
@@ -172,6 +190,18 @@ class MissionInfoReceiver(threading.Thread):
     @staticmethod
     def _get_url_after_quote(link):
         return urllib.parse.quote(link, safe=":/?#[]@!$&'()*+,;=%")
+
+    def _rename_file(self, mission_uuid, old_path, new_path):
+        try:
+            os.rename(old_path, new_path)
+        except (IsADirectoryError, NotADirectoryError):
+            self._send_print_message("normal", mission_uuid, "File type mismatch")
+
+    def _send_print_message(self, signal_type, mission_uuid, content):
+        message_dict = self._generate_action_signal_template("message.print")
+        detail = {"sender": "MissionInfoReceiver", "content": content}
+        message_dict["value"] = self._generate_signal_value(signal_type, mission_uuid, detail)
+        self._parent_queue.put(message_dict)
 
     def _send_analyze_message(self, signal_type, mission_uuid, mission_detail):
         message_dict = self._generate_action_signal_template("message.analyze")
