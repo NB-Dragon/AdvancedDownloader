@@ -1,17 +1,19 @@
 # Download Info
 > All analysis tools must implement the following two functions.
 
-## get_base_file_info
-> @:param filename: The name to save, which can be a file or directory.<br>
-> @:param filesize: Sum of the file size in the resource.<br>
-> @:param other: Self-defined according to different schema.
+## get_download_info
+> @:param total_size: Sum of the file size in `file_dict`.<br>
+> @:param file_dict: Each file info.<br>
+> @:param file_dict.file_name: The relative path to save in current resource.
 ```json
 {
-  "filename": "",
-  "filesize": 0,
-  "other": {}
+  "total_size": 0,
+  "file_dict": {
+    "file_name": {
+      "filesize": 0,
+      "range": false,
+      "section": []
+    }
+  }
 }
 ```
-
-## get_current_finish_size
-> @:return: Current downloaded file size.
