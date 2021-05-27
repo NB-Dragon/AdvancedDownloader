@@ -44,16 +44,13 @@ class MissionInfoReceiver(threading.Thread):
         elif signal_type == "delete":
             self._do_with_mission_delete(mission_uuid, message_detail)
         elif signal_type == "open":
-            if self._check_string_parameter(message_detail["sub_path"]):
-                self._do_with_mission_open(mission_uuid, message_detail)
+            self._do_with_mission_open(mission_uuid, message_detail)
         elif signal_type == "update_mission_config":
             self._do_with_mission_update_mission_config(mission_uuid, message_detail)
         elif signal_type == "update_download_name":
-            if self._check_string_parameter(message_detail["sub_path"], message_detail["target_path"]):
-                self._do_with_mission_update_download_name(mission_uuid, message_detail)
+            self._do_with_mission_update_download_name(mission_uuid, message_detail)
         elif signal_type == "update_section":
-            if self._check_string_parameter(message_detail["sub_path"]):
-                self._do_with_mission_update_section(mission_uuid, message_detail)
+            self._do_with_mission_update_section(mission_uuid, message_detail)
         elif signal_type == "request":
             self._do_with_mission_request(mission_uuid)
         elif signal_type == "request_result":
@@ -210,13 +207,6 @@ class MissionInfoReceiver(threading.Thread):
             os.rename(old_path, new_path)
         except (IsADirectoryError, NotADirectoryError):
             self._send_print_message("normal", mission_uuid, "File type mismatch")
-
-    @staticmethod
-    def _check_string_parameter(*content):
-        for content_item in content:
-            if content_item is None or len(content_item) == 0:
-                return False
-        return True
 
     def _send_print_message(self, signal_type, mission_uuid, content):
         message_dict = self._generate_action_signal_template("message.print")
