@@ -6,6 +6,7 @@ import queue
 import threading
 from listener.ThreadMessageDistributor import ThreadMessageDistributor
 from manager.MissionInfoReceiver import MissionInfoReceiver
+from manager.MissionThreadReceiver import MissionThreadReceiver
 from tools.RuntimeOperator import RuntimeOperator
 
 
@@ -55,18 +56,12 @@ class MissionActionDistributor(threading.Thread):
             self._do_with_action_signal(action_receiver, action_detail)
 
     def _do_with_action_operate(self, action_receiver, action_detail):
-        if action_receiver == "create":
-            pass
-        elif action_receiver == "start":
-            pass
-        elif action_receiver == "pause":
-            pass
-        elif action_receiver == "open":
-            pass
-        elif action_receiver == "delete":
-            pass
-        elif action_receiver == "exit":
-            pass
+        """
+        :param action_receiver: create|start|pause|open|delete
+        :param action_detail: Any
+        :return:
+        """
+        pass
 
     def _do_with_action_signal(self, action_receiver, action_detail):
         if action_receiver in self._all_listener:
@@ -79,6 +74,7 @@ class MissionActionDistributor(threading.Thread):
         """
         message : handle all message with action
         info    : handle all mission info command
+        thread  : control mission in start, pause, delete and exit
         """
         self._all_listener = dict()
         thread_message_distributor = ThreadMessageDistributor(self._runtime_operator, self._message_queue)
@@ -87,6 +83,9 @@ class MissionActionDistributor(threading.Thread):
         mission_info_receiver = MissionInfoReceiver(self._runtime_operator, self._message_queue)
         mission_info_queue = mission_info_receiver.get_message_queue()
         self._all_listener["info"] = {"receiver": mission_info_receiver, "queue": mission_info_queue}
+        mission_thread_receiver = MissionThreadReceiver(self._runtime_operator, self._message_queue)
+        mission_thread_queue = mission_thread_receiver.get_message_queue()
+        self._all_listener["thread"] = {"receiver": mission_thread_receiver, "queue": mission_thread_queue}
 
     def _start_all_listener(self):
         for listener in self._all_listener.values():
