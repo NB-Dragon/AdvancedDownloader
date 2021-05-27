@@ -36,15 +36,15 @@ class ActionAnalyzeReceiver(threading.Thread):
 
     def _handle_message_detail(self, signal_type, mission_uuid, message_detail):
         if signal_type == "request":
-            self._do_with_mission_analyze(mission_uuid, message_detail)
+            self._do_with_mission_request(mission_uuid, message_detail)
 
-    def _do_with_mission_analyze(self, mission_uuid, message_detail):
+    def _do_with_mission_request(self, mission_uuid, message_detail):
         analyze_result = self._analyze_download_info(mission_uuid, message_detail)
         self._send_request_result(mission_uuid, analyze_result)
 
     def _analyze_download_info(self, mission_uuid, message_detail):
         result_dict = {"analyze_tag": message_detail["analyze_tag"], "download_info": None}
-        schema, mission_info = message_detail["schema"], message_detail["download_info"]
+        schema, mission_info = message_detail["schema"], message_detail["mission_info"]
         current_analyzer = self._analyze_controller.get_analyzer_by_schema(schema)
         download_info = current_analyzer.get_download_info(mission_uuid, mission_info)
         result_dict["download_info"] = download_info

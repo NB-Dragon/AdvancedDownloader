@@ -22,7 +22,6 @@ class AnalyzeController(object):
     def _check_all_analyzer(self):
         for analyzer in self._all_analyser.values():
             assert hasattr(analyzer, "get_download_info"), "analyzer doesn't have method get_download_info."
-            assert hasattr(analyzer, "get_current_finish_size"), "analyzer doesn't have method get_current_finish_size."
 
     def get_analyzer_by_schema(self, schema):
         return self._all_analyser.get(schema)
