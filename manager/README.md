@@ -111,7 +111,7 @@
     "mission_uuid": "",
     "detail": {
       "sub_path": "",
-      "start_position": 0,
+      "position": 0,
       "length": 0
     }
   }
