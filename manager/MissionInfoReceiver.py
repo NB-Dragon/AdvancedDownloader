@@ -109,8 +109,8 @@ class MissionInfoReceiver(threading.Thread):
     def _do_with_mission_update_section(self, mission_uuid, message_detail):
         if mission_uuid in self._mission_info_dict:
             if self._mission_info_dict[mission_uuid]["download_info"]:
-                start_position, length = message_detail["start_position"], message_detail["length"]
-                self._update_download_section(mission_uuid, message_detail["sub_path"], start_position, length)
+                position, length = message_detail["position"], message_detail["length"]
+                self._update_download_section(mission_uuid, message_detail["sub_path"], position, length)
 
     def _do_with_mission_delete(self, mission_uuid, message_detail):
         if mission_uuid in self._mission_info_dict:
@@ -140,33 +140,34 @@ class MissionInfoReceiver(threading.Thread):
         new_save_path = self._get_mission_info_save_path(mission_uuid, sub_new_path)
         self._rename_file(mission_uuid, old_save_path, new_save_path)
 
-    def _update_download_info_sub_path(self, mission_uuid, sub_path, target_path):
+    def _update_download_info_sub_path(self, mission_uuid, sub_old_path, sub_new_path):
         download_info_file_dict = self._mission_info_dict[mission_uuid]["download_info"]["file_dict"]
-        for relative_path in download_info_file_dict.keys():
-            if relative_path.startswith(sub_path):
-                new_path = "{}{}".format(target_path, relative_path.split(sub_path, 1)[1])
-                download_info_file_dict[new_path] = download_info_file_dict.pop(relative_path)
+        for download_file_item in download_info_file_dict.keys():
+            if download_file_item.startswith(sub_old_path):
+                last_path = download_file_item.split(sub_old_path, 1)[1]
+                new_path = os.path.join(sub_new_path, last_path)
+                download_info_file_dict[new_path] = download_info_file_dict.pop(download_file_item)
 
-    def _update_download_section(self, mission_uuid, sub_path, start_position, length):
+    def _update_download_section(self, mission_uuid, sub_path, position, length):
         download_info = self._mission_info_dict[mission_uuid]["download_info"]
         current_file_section = download_info["file_dict"][sub_path]["section"]
-        match_section = self._pop_match_section(start_position, current_file_section)
+        match_section = self._pop_match_section(position, current_file_section)
         match_section[0] += length
         if len(match_section) == 1 or match_section[0] <= match_section[1]:
             current_file_section.append(match_section)
             current_file_section.sort(key=lambda x: x[0])
 
     @staticmethod
-    def _pop_match_section(start_position, section_list):
+    def _pop_match_section(position, section_list):
         for section_item in section_list:
-            if section_item[0] == start_position:
+            if section_item[0] == position:
                 section_list.remove(section_item)
                 return section_item
         for section_item in section_list:
-            if section_item[0] < start_position <= section_item[1]:
+            if section_item[0] < position <= section_item[1]:
                 section_list.remove(section_item)
-                section_list.append([section_item[0], start_position - 1])
-                return [start_position, section_item[1]]
+                section_list.append([section_item[0], position - 1])
+                return [position, section_item[1]]
 
     def _get_current_download_save_path(self, mission_uuid):
         download_root_path = self._get_download_info_root_path(mission_uuid)
