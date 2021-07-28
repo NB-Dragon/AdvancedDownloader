@@ -26,36 +26,6 @@
 }
 ```
 
-## delete
-```json
-{
-  "action": "signal",
-  "receiver": "info",
-  "value": {
-    "type": "delete",
-    "mission_uuid": "",
-    "detail": {
-      "delete_file": false
-    }
-  }
-}
-```
-
-## open
-```json
-{
-  "action": "signal",
-  "receiver": "info",
-  "value": {
-    "type": "open",
-    "mission_uuid": "",
-    "detail": {
-      "sub_path": ""
-    }
-  }
-}
-```
-
 ## update_mission_config
 ```json
 {
@@ -80,25 +50,23 @@
     "type": "update_download_name",
     "mission_uuid": "",
     "detail": {
-      "sub_path": "",
-      "target_path": ""
+      "sub_old_path": "",
+      "sub_new_path": ""
     }
   }
 }
 ```
 
-## update_section
+## open
 ```json
 {
   "action": "signal",
   "receiver": "info",
   "value": {
-    "type": "update_section",
+    "type": "open",
     "mission_uuid": "",
     "detail": {
-      "sub_path": "",
-      "start_position": 0,
-      "length": 0
+      "sub_path": ""
     }
   }
 }
@@ -128,6 +96,38 @@
     "detail": {
       "analyze_tag": 0,
       "download_info": null
+    }
+  }
+}
+```
+
+## update_section
+```json
+{
+  "action": "signal",
+  "receiver": "info",
+  "value": {
+    "type": "update_section",
+    "mission_uuid": "",
+    "detail": {
+      "sub_path": "",
+      "start_position": 0,
+      "length": 0
+    }
+  }
+}
+```
+
+## delete
+```json
+{
+  "action": "signal",
+  "receiver": "info",
+  "value": {
+    "type": "delete",
+    "mission_uuid": "",
+    "detail": {
+      "delete_file": false
     }
   }
 }
