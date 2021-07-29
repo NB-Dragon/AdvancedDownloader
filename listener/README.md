@@ -88,7 +88,7 @@
 }
 ```
 
-# Action Analyse
+# Action Analyze
 ## request
 ```json
 {

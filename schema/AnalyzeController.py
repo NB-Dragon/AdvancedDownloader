@@ -15,13 +15,13 @@ class AnalyzeController(object):
         self._check_all_analyzer()
 
     def _init_all_analyzer(self):
-        self._all_analyser = dict()
-        self._all_analyser["http"] = HTTPAnalyzer("http", self._main_thread_message, self._runtime_operator)
-        self._all_analyser["https"] = HTTPAnalyzer("https", self._main_thread_message, self._runtime_operator)
+        self._all_analyzer = dict()
+        self._all_analyzer["http"] = HTTPAnalyzer("http", self._main_thread_message, self._runtime_operator)
+        self._all_analyzer["https"] = HTTPAnalyzer("https", self._main_thread_message, self._runtime_operator)
 
     def _check_all_analyzer(self):
-        for analyzer in self._all_analyser.values():
+        for analyzer in self._all_analyzer.values():
             assert hasattr(analyzer, "get_download_info"), "analyzer doesn't have method get_download_info."
 
     def get_analyzer_by_schema(self, schema):
-        return self._all_analyser.get(schema)
+        return self._all_analyzer.get(schema)

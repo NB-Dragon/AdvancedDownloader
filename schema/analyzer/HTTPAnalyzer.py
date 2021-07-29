@@ -13,27 +13,27 @@ class HTTPAnalyzer(object):
         self._schema_name = schema_name
         self._main_thread_message = main_thread_message
         self._section_maker = SectionMaker()
-        self._http_header_analyser = HTTPHeaderAnalyzer(runtime_operator)
+        self._http_header_analyzer = HTTPHeaderAnalyzer(runtime_operator)
 
     def get_download_info(self, mission_uuid, mission_info):
         self._make_message_and_send(mission_uuid, "资源连接中", False)
-        file_info = self._analyse_target_file_info(mission_uuid, mission_info)
+        file_info = self._analyze_target_file_info(mission_uuid, mission_info)
         standard_item = self._generate_standard_item(file_info, mission_info)
         download_info = self._generate_final_download_info(standard_item)
         self._make_message_and_send(mission_uuid, "资源解析完成", False)
         return download_info
 
-    def _analyse_target_file_info(self, mission_uuid, mission_info):
+    def _analyze_target_file_info(self, mission_uuid, mission_info):
         tmp_headers = mission_info["headers"].copy() if mission_info["headers"] else dict()
         tmp_headers["Range"] = "bytes=0-0"
         download_link = mission_info["download_link"]
-        request_manager = self._http_header_analyser.get_request_manager(self._schema_name, 1, mission_info["proxy"])
+        request_manager = self._http_header_analyzer.get_request_manager(self._schema_name, 1, mission_info["proxy"])
         stream_response = self._get_simple_response(request_manager, mission_uuid, download_link, tmp_headers)
         if self._check_response_can_access(stream_response):
             headers = {key.lower(): value for key, value in dict(stream_response.headers).items()}
             current_url = stream_response.geturl() or mission_info["download_link"]
             stream_response.close()
-            return self._http_header_analyser.generate_resource_info(headers, current_url)
+            return self._http_header_analyzer.generate_resource_info(headers, current_url)
         else:
             return None
 
@@ -89,7 +89,7 @@ class HTTPAnalyzer(object):
     def _make_message_and_send(self, mission_uuid, content, exception: bool):
         signal_header = self._generate_action_signal_template("print")
         message_type = "exception" if exception else "normal"
-        message_detail = {"sender": "HTTPAnalyser", "content": content}
+        message_detail = {"sender": "HTTPAnalyzer", "content": content}
         signal_header["value"] = self._generate_signal_value(message_type, mission_uuid, message_detail)
         self._main_thread_message.put(signal_header)
 
