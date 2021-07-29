@@ -92,19 +92,12 @@ class MissionInfoReceiver(threading.Thread):
 
     def _do_with_mission_request(self, mission_uuid):
         if mission_uuid in self._mission_info_dict:
-            if self._mission_info_dict[mission_uuid]["download_info"]:
-                self._send_thread_action("request_result", mission_uuid, self._mission_info_dict[mission_uuid])
-            else:
-                self._request_mission_analyze(mission_uuid, 1)
+            self._send_or_request_download_info(mission_uuid, 1)
 
     def _do_with_mission_request_result(self, mission_uuid, message_detail):
         if mission_uuid in self._mission_info_dict:
-            if message_detail["download_info"]:
-                self._mission_info_dict[mission_uuid]["download_info"] = message_detail["download_info"]
-            if message_detail["download_info"] or message_detail["analyze_tag"] == 3:
-                self._send_thread_action("request_result", mission_uuid, self._mission_info_dict[mission_uuid])
-            else:
-                self._request_mission_analyze(mission_uuid, message_detail["analyze_tag"] + 1)
+            self._mission_info_dict[mission_uuid]["download_info"] = message_detail["download_info"]
+            self._send_or_request_download_info(mission_uuid, message_detail["analyze_tag"])
 
     def _do_with_mission_update_section(self, mission_uuid, message_detail):
         if mission_uuid in self._mission_info_dict:
@@ -187,6 +180,12 @@ class MissionInfoReceiver(threading.Thread):
         root_path = self._mission_info_dict[mission_uuid]["mission_info"]["save_path"]
         return os.path.join(root_path, sub_path)
 
+    def _send_or_request_download_info(self, mission_uuid, analyze_tag):
+        if self._mission_info_dict[mission_uuid]["download_info"] or analyze_tag >= 3:
+            self._send_thread_message("request_result", mission_uuid, self._mission_info_dict[mission_uuid])
+        else:
+            self._request_mission_analyze(mission_uuid, analyze_tag + 1)
+
     def _request_mission_analyze(self, mission_uuid, analyze_tag):
         mission_info = self._mission_info_dict[mission_uuid]["mission_info"]
         mission_schema = self._mission_info_dict[mission_uuid]["schema"]
@@ -251,7 +250,7 @@ class MissionInfoReceiver(threading.Thread):
         message_dict["value"] = self._generate_signal_value(signal_type, mission_uuid, mission_detail)
         self._parent_queue.put(message_dict)
 
-    def _send_thread_action(self, signal_type, mission_uuid, mission_detail):
+    def _send_thread_message(self, signal_type, mission_uuid, mission_detail):
         message_dict = self._generate_action_signal_template("thread")
         message_dict["value"] = self._generate_signal_value(signal_type, mission_uuid, mission_detail)
         self._parent_queue.put(message_dict)
