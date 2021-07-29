@@ -7,7 +7,7 @@ import threading
 from tools.RuntimeOperator import RuntimeOperator
 
 
-class MissionThreadReceiver(threading.Thread):
+class MissionProgressReceiver(threading.Thread):
     """
     register       : {"mission_uuid": "uuid", "thread": None, "running": False}
     start          : 如果running为False, 向info发送request信号, 设置running=True

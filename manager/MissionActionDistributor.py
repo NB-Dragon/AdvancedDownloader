@@ -6,7 +6,7 @@ import queue
 import threading
 from listener.ThreadMessageDistributor import ThreadMessageDistributor
 from manager.MissionInfoReceiver import MissionInfoReceiver
-from manager.MissionThreadReceiver import MissionThreadReceiver
+from manager.MissionProgressReceiver import MissionProgressReceiver
 from tools.RuntimeOperator import RuntimeOperator
 
 
@@ -72,9 +72,9 @@ class MissionActionDistributor(threading.Thread):
 
     def _init_all_listener(self):
         """
-        message : handle all message with action
-        info    : handle all mission info command
-        thread  : control mission in start, pause, delete and exit
+        message  : handle all message with action
+        info     : handle all mission info command
+        progress : control mission in start, pause, delete and exit
         """
         self._all_listener = dict()
         thread_message_distributor = ThreadMessageDistributor(self._runtime_operator, self._message_queue)
@@ -83,9 +83,9 @@ class MissionActionDistributor(threading.Thread):
         mission_info_receiver = MissionInfoReceiver(self._runtime_operator, self._message_queue)
         mission_info_queue = mission_info_receiver.get_message_queue()
         self._all_listener["info"] = {"receiver": mission_info_receiver, "queue": mission_info_queue}
-        mission_thread_receiver = MissionThreadReceiver(self._runtime_operator, self._message_queue)
-        mission_thread_queue = mission_thread_receiver.get_message_queue()
-        self._all_listener["thread"] = {"receiver": mission_thread_receiver, "queue": mission_thread_queue}
+        mission_progress_receiver = MissionProgressReceiver(self._runtime_operator, self._message_queue)
+        mission_progress_queue = mission_progress_receiver.get_message_queue()
+        self._all_listener["progress"] = {"receiver": mission_progress_receiver, "queue": mission_progress_queue}
 
     def _start_all_listener(self):
         for listener in self._all_listener.values():
