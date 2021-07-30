@@ -10,18 +10,18 @@ from tools.RuntimeOperator import RuntimeOperator
 class MissionProgressReceiver(threading.Thread):
     """
     register       : {"mission_uuid": "uuid", "thread": None, "running": False}
-    start          : 如果running为False, 向info发送request信号, 设置running=True
     request_result : 如果结果完整，检查是否存在Thread，不存在就创建Thread并启动；否则设置running=False
+    start          : 如果running为False, 向info发送request信号, 设置running=True
     pause          : 判断是否存在Thread(mission_uuid)，有则发送停止信号
-    stop           : 根据原因分别处理
+    stop           : 根据原因分别处理(由具体下载线程发出)
         initiative : 设置thread为空，设置running=False，执行删除逻辑(删除文件: False)
         passive    : 设置thread为空，设置running=False，执行挂起任务
-    delete         : 根据running状态分别处理
+    delete         : 根据running状态分别处理(由用户操作发出)
         true       : 判断是否存在Thread(mission_uuid)，有则发送停止信号，挂起任务
         false      : 执行删除逻辑(删除文件: False|True)
-    update         : 根据running状态分别处理，默认重启参数为false
+    update         : 根据running状态分别处理，默认重启参数为false(由用户操作发出)
         true       : 判断是否存在Thread(mission_uuid)，有则发送停止信号，修改重启参数，挂起任务
-        false      : 向info发送request信号update_mission_config或update_download_name
+        false      : 向info发送update_mission_config或update_download_name信号
                      根据重启参数，按需向info发送request信号
 
     备注：
