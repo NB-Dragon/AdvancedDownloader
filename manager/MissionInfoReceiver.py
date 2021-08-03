@@ -47,8 +47,8 @@ class MissionInfoReceiver(threading.Thread):
             self._do_with_mission_update_download_name(mission_uuid, message_detail)
         elif signal_type == "open":
             self._do_with_mission_open(mission_uuid, message_detail)
-        elif signal_type == "request":
-            self._do_with_mission_request(mission_uuid)
+        elif signal_type == "request_info":
+            self._do_with_mission_request_info(mission_uuid)
         elif signal_type == "request_result":
             self._do_with_mission_request_result(mission_uuid, message_detail)
         elif signal_type == "update_section":
@@ -90,7 +90,7 @@ class MissionInfoReceiver(threading.Thread):
                 old_save_path = self._get_mission_info_save_path(mission_uuid, message_detail["sub_path"])
                 self._send_open_message("open", mission_uuid, {"path": old_save_path})
 
-    def _do_with_mission_request(self, mission_uuid):
+    def _do_with_mission_request_info(self, mission_uuid):
         if mission_uuid in self._mission_info_dict:
             self._send_or_request_download_info(mission_uuid, 1)
 
@@ -190,7 +190,7 @@ class MissionInfoReceiver(threading.Thread):
         mission_info = self._mission_info_dict[mission_uuid]["mission_info"]
         mission_schema = self._mission_info_dict[mission_uuid]["schema"]
         analyze_item = {"schema": mission_schema, "analyze_tag": analyze_tag, "mission_info": mission_info}
-        self._send_analyze_message("request", mission_uuid, analyze_item)
+        self._send_analyze_message("request_info", mission_uuid, analyze_item)
 
     def _generate_default_mission_info(self):
         standard_mission_info = dict()

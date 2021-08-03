@@ -72,13 +72,13 @@
 }
 ```
 
-## request
+## request_info
 ```json
 {
   "action": "signal",
   "receiver": "info",
   "value": {
-    "type": "request",
+    "type": "request_info",
     "mission_uuid": "",
     "detail": null
   }

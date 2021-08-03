@@ -89,13 +89,13 @@
 ```
 
 # Action Analyze
-## request
+## request Info
 ```json
 {
   "action": "signal",
   "receiver": "analyze",
   "value": {
-    "type": "request",
+    "type": "request_info",
     "mission_uuid": "",
     "detail": {
       "schema": "",

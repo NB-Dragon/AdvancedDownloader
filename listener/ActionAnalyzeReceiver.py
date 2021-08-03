@@ -35,10 +35,10 @@ class ActionAnalyzeReceiver(threading.Thread):
         return self._run_status or self._message_queue.qsize()
 
     def _handle_message_detail(self, signal_type, mission_uuid, message_detail):
-        if signal_type == "request":
-            self._do_with_mission_request(mission_uuid, message_detail)
+        if signal_type == "request_info":
+            self._do_with_mission_request_info(mission_uuid, message_detail)
 
-    def _do_with_mission_request(self, mission_uuid, message_detail):
+    def _do_with_mission_request_info(self, mission_uuid, message_detail):
         analyze_result = self._analyze_download_info(mission_uuid, message_detail)
         self._send_request_result(mission_uuid, analyze_result)
 
