@@ -2,16 +2,15 @@
 # -*- coding: utf-8 -*-
 # Create Time: 2021/5/16 12:00
 # Create User: NB-Dragon
-import queue
 from core.decoder.HTTPHeaderAnalyzer import HTTPHeaderAnalyzer
 from core.other.SectionMaker import SectionMaker
 from tools.RuntimeOperator import RuntimeOperator
 
 
 class HTTPAnalyzer(object):
-    def __init__(self, schema_name, main_thread_message: queue.Queue, runtime_operator: RuntimeOperator):
+    def __init__(self, schema_name, parent_message, runtime_operator: RuntimeOperator):
         self._schema_name = schema_name
-        self._main_thread_message = main_thread_message
+        self._parent_message = parent_message
         self._section_maker = SectionMaker()
         self._http_header_analyzer = HTTPHeaderAnalyzer(runtime_operator)
 
@@ -91,7 +90,7 @@ class HTTPAnalyzer(object):
         message_type = "exception" if exception else "normal"
         message_detail = {"sender": "HTTPAnalyzer", "content": content}
         signal_header["value"] = self._generate_signal_value(message_type, mission_uuid, message_detail)
-        self._main_thread_message.put(signal_header)
+        self._parent_message.put(signal_header)
 
     @staticmethod
     def _generate_action_signal_template(receiver):
