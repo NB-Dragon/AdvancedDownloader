@@ -58,7 +58,7 @@ class ActionAnalyzeReceiver(threading.Thread):
 
     @staticmethod
     def _generate_action_signal_template(receiver):
-        return {"action": "signal", "receiver": receiver, "value": None}
+        return {"receiver": receiver, "value": None}
 
     @staticmethod
     def _generate_signal_value(signal_type, mission_uuid, mission_detail):

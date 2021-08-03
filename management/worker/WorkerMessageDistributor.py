@@ -44,8 +44,7 @@ class WorkerMessageDistributor(threading.Thread):
         if "." in message_dict["receiver"]:
             self._handle_cross_level_receiver(message_dict)
         else:
-            action_type, action_receiver = message_dict["action"], message_dict["receiver"]
-            self._handle_same_level_receiver(action_type, action_receiver, message_dict["value"])
+            self._handle_same_level_receiver(message_dict["receiver"], message_dict["value"])
 
     def _handle_cross_level_receiver(self, raw_message):
         first_receiver, next_receiver = raw_message["receiver"].split(".", 1)
@@ -55,10 +54,7 @@ class WorkerMessageDistributor(threading.Thread):
         elif first_receiver in self._all_listener:
             self._all_listener[first_receiver]["queue"].put(raw_message)
 
-    def _handle_same_level_receiver(self, action_type, action_receiver, action_detail):
-        self._do_with_action_signal(action_receiver, action_detail)
-
-    def _do_with_action_signal(self, action_receiver, action_detail):
+    def _handle_same_level_receiver(self, action_receiver, action_detail):
         if action_receiver in self._all_listener:
             self._all_listener[action_receiver]["queue"].put(action_detail)
         else:

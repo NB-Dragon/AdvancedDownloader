@@ -2,7 +2,6 @@
 ## normal
 ```json
 {
-  "action": "signal",
   "receiver": "print",
   "value": {
     "type": "normal",
@@ -18,7 +17,6 @@
 ## exception
 ```json
 {
-  "action": "signal",
   "receiver": "print",
   "value": {
     "type": "exception",
@@ -35,7 +33,6 @@
 ## Register
 ```json
 {
-  "action": "signal",
   "receiver": "speed",
   "value": {
     "type": "register",
@@ -50,7 +47,6 @@
 ## Size
 ```json
 {
-  "action": "signal",
   "receiver": "speed",
   "value": {
     "type": "size",
@@ -65,7 +61,6 @@
 ## Finish
 ```json
 {
-  "action": "signal",
   "receiver": "speed",
   "value": {
     "type": "finish",
@@ -78,7 +73,6 @@
 ## Heart Beat
 ```json
 {
-  "action": "signal",
   "receiver": "speed",
   "value": {
     "type": "heartbeat",
@@ -92,7 +86,6 @@
 ## request Info
 ```json
 {
-  "action": "signal",
   "receiver": "analyze",
   "value": {
     "type": "request_info",
@@ -110,7 +103,6 @@
 ## Register
 ```json
 {
-  "action": "signal",
   "receiver": "write",
   "value": {
     "type": "register",
@@ -126,7 +118,6 @@
 ## Write
 ```json
 {
-  "action": "signal",
   "receiver": "write",
   "value": {
     "type": "write",
@@ -143,7 +134,6 @@
 ## Finish
 ```json
 {
-  "action": "signal",
   "receiver": "write",
   "value": {
     "type": "finish",
@@ -159,7 +149,6 @@
 ## Open
 ```json
 {
-  "action": "signal",
   "receiver": "open",
   "value": {
     "type": "open",
