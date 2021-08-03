@@ -5,14 +5,14 @@
 import queue
 import threading
 from tools.RuntimeOperator import RuntimeOperator
-from listener.ActionAnalyzeReceiver import ActionAnalyzeReceiver
-from listener.ActionOpenReceiver import ActionOpenReceiver
-from listener.ActionPrintReceiver import ActionPrintReceiver
-from listener.ActionSpeedReceiver import ActionSpeedReceiver
-from listener.ActionWriterReceiver import ActionWriterReceiver
+from management.worker.ActionAnalyzeReceiver import ActionAnalyzeReceiver
+from management.worker.ActionOpenReceiver import ActionOpenReceiver
+from management.worker.ActionPrintReceiver import ActionPrintReceiver
+from management.worker.ActionSpeedReceiver import ActionSpeedReceiver
+from management.worker.ActionWriterReceiver import ActionWriterReceiver
 
 
-class ThreadMessageDistributor(threading.Thread):
+class WorkerMessageDistributor(threading.Thread):
     def __init__(self, runtime_operator: RuntimeOperator, parent_queue: queue.Queue):
         super().__init__()
         self._runtime_operator = runtime_operator

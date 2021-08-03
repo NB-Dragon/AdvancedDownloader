@@ -80,13 +80,13 @@ class ActionWriterReceiver(threading.Thread):
 
     def _send_info_write_down(self, mission_uuid, save_path, position, length):
         if self._run_status:
-            signal_header = self._generate_action_signal_template("parent.info")
+            signal_header = self._generate_action_signal_template("parent.mission.info")
             message_detail = {"sub_path": save_path, "position": position, "length": length}
             signal_header["value"] = self._generate_signal_value("update_section", mission_uuid, message_detail)
 
     def _send_info_delete(self, mission_uuid, delete_file: bool):
         if self._run_status:
-            signal_header = self._generate_action_signal_template("parent.info")
+            signal_header = self._generate_action_signal_template("parent.mission.info")
             message_detail = {"delete_file": delete_file}
             signal_header["value"] = self._generate_signal_value("delete", mission_uuid, message_detail)
 

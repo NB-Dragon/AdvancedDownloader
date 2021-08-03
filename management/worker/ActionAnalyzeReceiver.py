@@ -4,7 +4,7 @@
 # Create User: NB-Dragon
 import queue
 import threading
-from schema.AnalyzeController import AnalyzeController
+from management.worker.analyzer.AnalyzeController import AnalyzeController
 from tools.RuntimeOperator import RuntimeOperator
 
 
@@ -52,7 +52,7 @@ class ActionAnalyzeReceiver(threading.Thread):
 
     def _send_request_result(self, mission_uuid, detail):
         if self._run_status:
-            signal_header = self._generate_action_signal_template("parent.info")
+            signal_header = self._generate_action_signal_template("parent.mission.info")
             signal_header["value"] = self._generate_signal_value("request_result", mission_uuid, detail)
             self._parent_queue.put(signal_header)
 

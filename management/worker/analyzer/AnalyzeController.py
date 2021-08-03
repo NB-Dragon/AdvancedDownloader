@@ -7,16 +7,16 @@ from tools.RuntimeOperator import RuntimeOperator
 
 
 class AnalyzeController(object):
-    def __init__(self, runtime_operator: RuntimeOperator, parent_message):
+    def __init__(self, runtime_operator: RuntimeOperator, parent_queue):
         self._runtime_operator = runtime_operator
-        self._parent_message = parent_message
+        self._parent_queue = parent_queue
         self._init_all_analyzer()
         self._check_all_analyzer()
 
     def _init_all_analyzer(self):
         self._all_analyzer = dict()
-        self._all_analyzer["http"] = HTTPAnalyzer("http", self._parent_message, self._runtime_operator)
-        self._all_analyzer["https"] = HTTPAnalyzer("https", self._parent_message, self._runtime_operator)
+        self._all_analyzer["http"] = HTTPAnalyzer("http", self._parent_queue, self._runtime_operator)
+        self._all_analyzer["https"] = HTTPAnalyzer("https", self._parent_queue, self._runtime_operator)
 
     def _check_all_analyzer(self):
         title_message = "schema for '{}' doesn't have method 'get_download_info'."
