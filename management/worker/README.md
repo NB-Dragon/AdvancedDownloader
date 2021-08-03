@@ -1,5 +1,5 @@
 # Action Print
-## normal
+## Normal
 ```json
 {
   "receiver": "print",
@@ -14,7 +14,7 @@
 }
 ```
 
-## exception
+## Exception
 ```json
 {
   "receiver": "print",
@@ -83,7 +83,7 @@
 ```
 
 # Action Analyze
-## request Info
+## Request Info
 ```json
 {
   "receiver": "analyze",

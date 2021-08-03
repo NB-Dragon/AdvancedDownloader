@@ -2,17 +2,15 @@
 > The detail of value is refer to README.md in the listener directory.
 ```json
 {
-  "action": "signal",
-  "receiver": "message.*",
+  "receiver": "parent.message.*",
   "value": {}
 }
 ```
 
 # Action Info
-## register
+## Register
 ```json
 {
-  "action": "signal",
   "receiver": "info",
   "value": {
     "type": "register",
@@ -26,10 +24,9 @@
 }
 ```
 
-## update_mission_config
+## Update Mission Config
 ```json
 {
-  "action": "signal",
   "receiver": "info",
   "value": {
     "type": "update_mission_config",
@@ -41,10 +38,9 @@
 }
 ```
 
-## update_download_name
+## Update Download Name
 ```json
 {
-  "action": "signal",
   "receiver": "info",
   "value": {
     "type": "update_download_name",
@@ -57,10 +53,9 @@
 }
 ```
 
-## open
+## Open
 ```json
 {
-  "action": "signal",
   "receiver": "info",
   "value": {
     "type": "open",
@@ -72,10 +67,9 @@
 }
 ```
 
-## request_info
+## Request Info
 ```json
 {
-  "action": "signal",
   "receiver": "info",
   "value": {
     "type": "request_info",
@@ -85,10 +79,9 @@
 }
 ```
 
-## request_result
+## Request Result
 ```json
 {
-  "action": "signal",
   "receiver": "info",
   "value": {
     "type": "request_result",
@@ -101,10 +94,9 @@
 }
 ```
 
-## update_section
+## Update Section
 ```json
 {
-  "action": "signal",
   "receiver": "info",
   "value": {
     "type": "update_section",
@@ -118,10 +110,9 @@
 }
 ```
 
-## delete
+## Delete
 ```json
 {
-  "action": "signal",
   "receiver": "info",
   "value": {
     "type": "delete",
