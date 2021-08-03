@@ -4,13 +4,13 @@
 # Create User: NB-Dragon
 import queue
 import threading
-from listener.ThreadMessageDistributor import ThreadMessageDistributor
-from manager.MissionInfoReceiver import MissionInfoReceiver
-from manager.MissionProgressReceiver import MissionProgressReceiver
+from management.worker.WorkerMessageDistributor import WorkerMessageDistributor
+from management.mission.MissionInfoReceiver import MissionInfoReceiver
+from management.mission.MissionProgressReceiver import MissionProgressReceiver
 from tools.RuntimeOperator import RuntimeOperator
 
 
-class MissionActionDistributor(threading.Thread):
+class MissionMessageDistributor(threading.Thread):
     def __init__(self, runtime_operator: RuntimeOperator):
         super().__init__()
         self._runtime_operator = runtime_operator
@@ -77,7 +77,7 @@ class MissionActionDistributor(threading.Thread):
         progress : control mission in start, pause, delete and exit
         """
         self._all_listener = dict()
-        thread_message_distributor = ThreadMessageDistributor(self._runtime_operator, self._message_queue)
+        thread_message_distributor = WorkerMessageDistributor(self._runtime_operator, self._message_queue)
         thread_message_queue = thread_message_distributor.get_message_queue()
         self._all_listener["message"] = {"receiver": thread_message_distributor, "queue": thread_message_queue}
         mission_info_receiver = MissionInfoReceiver(self._runtime_operator, self._message_queue)
@@ -97,11 +97,11 @@ class MissionActionDistributor(threading.Thread):
 
     def _send_message_to_print(self, content, exception: bool):
         message_item = self._generate_print_value(content, exception)
-        signal_header = {"action": "signal", "receiver": "message.print", "value": message_item}
+        signal_header = {"receiver": "parent.worker.print", "value": message_item}
         self._message_queue.put(signal_header)
 
     @staticmethod
     def _generate_print_value(content, exception: bool):
         message_type = "exception" if exception else "normal"
-        message_detail = {"sender": "MissionActionDistributor", "content": content}
+        message_detail = {"sender": "MissionMessageDistributor", "content": content}
         return {"type": message_type, "mission_uuid": None, "detail": message_detail}

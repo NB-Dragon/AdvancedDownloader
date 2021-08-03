@@ -107,5 +107,5 @@ class WorkerMessageDistributor(threading.Thread):
     @staticmethod
     def _generate_print_value(content, exception: bool):
         message_type = "exception" if exception else "normal"
-        message_detail = {"sender": "ThreadMessageDistributor", "content": content}
+        message_detail = {"sender": "WorkerMessageDistributor", "content": content}
         return {"type": message_type, "mission_uuid": None, "detail": message_detail}
