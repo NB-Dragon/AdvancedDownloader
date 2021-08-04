@@ -64,15 +64,15 @@ class ActionWriterReceiver(threading.Thread):
         writer.close()
 
     def _send_speed_mission_size(self, mission_uuid, content_length):
-        self._send_speed_mission_detail(mission_uuid, "size", {"length": content_length})
+        self._send_speed_mission_detail("size", mission_uuid, {"length": content_length})
 
     def _send_speed_mission_register(self, mission_uuid, download_info):
-        self._send_speed_mission_detail(mission_uuid, "register", {"download_info": download_info})
+        self._send_speed_mission_detail("register", mission_uuid, {"download_info": download_info})
 
     def _send_speed_mission_finish(self, mission_uuid):
-        self._send_speed_mission_detail(mission_uuid, "finish", None)
+        self._send_speed_mission_detail("finish", mission_uuid, None)
 
-    def _send_speed_mission_detail(self, mission_uuid, message_type, detail):
+    def _send_speed_mission_detail(self, message_type, mission_uuid, detail):
         if self._run_status:
             signal_header = self._generate_action_signal_template("speed")
             signal_header["value"] = self._generate_signal_value(message_type, mission_uuid, detail)
