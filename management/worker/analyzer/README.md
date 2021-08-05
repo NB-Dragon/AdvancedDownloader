@@ -1,5 +1,5 @@
-# Download Info
-> All analysis tools must implement the following two functions.
+# Analyzer
+> All analyze tools must implement the following functions.
 
 ## get_download_info
 > @:param total_size: Sum of the file size in `file_dict`.<br>
