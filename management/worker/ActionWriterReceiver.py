@@ -58,10 +58,22 @@ class ActionWriterReceiver(threading.Thread):
 
     def _write_bytes_into_file(self, mission_uuid, save_path, position, content):
         sava_file_path = os.path.join(self._mission_dict[mission_uuid], save_path)
+        self._fill_data_for_position(sava_file_path, position)
         writer = open(sava_file_path, 'r+b')
         writer.seek(position)
         writer.write(content)
         writer.close()
+
+    @staticmethod
+    def _fill_data_for_position(file_path, expect_size: int):
+        current_size = os.path.getsize(file_path)
+        if expect_size > current_size:
+            writer = open(file_path, 'a+b')
+            byte_buffer_65536 = bytearray(65536)
+            for index in range((expect_size - current_size) // 65536):
+                writer.write(byte_buffer_65536)
+            writer.write(bytearray((expect_size - current_size) % 65536))
+            writer.close()
 
     def _send_speed_mission_size(self, mission_uuid, content_length):
         self._send_speed_mission_detail("size", mission_uuid, {"length": content_length})
