@@ -251,7 +251,7 @@ class ActionConfigReceiver(threading.Thread):
         self._parent_queue.put(message_dict)
 
     def _send_mission_progress(self, signal_type, mission_uuid, mission_detail):
-        message_dict = self._generate_action_signal_template("thread")
+        message_dict = self._generate_action_signal_template("progress")
         message_dict["value"] = self._generate_signal_value(signal_type, mission_uuid, mission_detail)
         self._parent_queue.put(message_dict)
 

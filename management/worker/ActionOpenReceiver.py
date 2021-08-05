@@ -50,7 +50,7 @@ class ActionOpenReceiver(threading.Thread):
             self._open_target_file(mission_uuid, file_path)
         else:
             file_tips = "File not found. Please start download first."
-            self._make_message_and_send(mission_uuid, file_tips)
+            self._send_worker_print("normal", mission_uuid, file_tips)
 
     def _open_target_file(self, mission_uuid, file_path):
         adapted_tips = "The current system is not yet adapted. Please open an issue if necessary."
@@ -60,9 +60,9 @@ class ActionOpenReceiver(threading.Thread):
             if self._command_installed:
                 self._open_method_dict[current_platform](file_path)
             else:
-                self._make_message_and_send(mission_uuid, exception_tips)
+                self._send_worker_print("normal", mission_uuid, exception_tips)
         else:
-            self._make_message_and_send(mission_uuid, adapted_tips)
+            self._send_worker_print("normal", mission_uuid, adapted_tips)
 
     def _check_command_installed(self):
         try:
@@ -97,12 +97,12 @@ class ActionOpenReceiver(threading.Thread):
     def _open_in_windows(file_path):
         os.startfile(file_path)
 
-    def _make_message_and_send(self, mission_uuid, content):
+    def _send_worker_print(self, signal_type, mission_uuid, content):
         if self._run_status:
-            signal_header = self._generate_action_signal_template("print")
+            message_dict = self._generate_action_signal_template("print")
             message_detail = {"sender": "ActionOpenReceiver", "content": content}
-            signal_header["value"] = self._generate_signal_value("normal", mission_uuid, message_detail)
-            self._parent_queue.put(signal_header)
+            message_dict["value"] = self._generate_signal_value(signal_type, mission_uuid, message_detail)
+            self._parent_queue.put(message_dict)
 
     @staticmethod
     def _generate_action_signal_template(receiver):

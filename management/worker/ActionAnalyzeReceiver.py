@@ -40,7 +40,7 @@ class ActionAnalyzeReceiver(threading.Thread):
 
     def _do_with_mission_request_info(self, mission_uuid, message_detail):
         analyze_result = self._analyze_download_info(mission_uuid, message_detail)
-        self._send_request_result(mission_uuid, analyze_result)
+        self._send_mission_config("request_result", mission_uuid, analyze_result)
 
     def _analyze_download_info(self, mission_uuid, message_detail):
         result_dict = {"analyze_tag": message_detail["analyze_tag"], "download_info": None}
@@ -50,11 +50,11 @@ class ActionAnalyzeReceiver(threading.Thread):
         result_dict["download_info"] = download_info
         return result_dict
 
-    def _send_request_result(self, mission_uuid, detail):
+    def _send_mission_config(self, signal_type, mission_uuid, mission_detail):
         if self._run_status:
-            signal_header = self._generate_action_signal_template("parent.mission.config")
-            signal_header["value"] = self._generate_signal_value("request_result", mission_uuid, detail)
-            self._parent_queue.put(signal_header)
+            message_dict = self._generate_action_signal_template("parent.mission.config")
+            message_dict["value"] = self._generate_signal_value(signal_type, mission_uuid, mission_detail)
+            self._parent_queue.put(message_dict)
 
     @staticmethod
     def _generate_action_signal_template(receiver):

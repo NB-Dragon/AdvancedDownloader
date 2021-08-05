@@ -78,7 +78,7 @@ class ActionSpeedReceiver(threading.Thread):
             speed_and_progress_list = self._generate_mission_speed_and_progress(end_time)
             for speed_info_item in speed_and_progress_list:
                 mission_uuid = speed_info_item.pop("mission_uuid")
-                self._make_message_and_send(mission_uuid, speed_info_item)
+                self._send_worker_print("normal", mission_uuid, speed_info_item)
             self._start_time = time.time()
             for mission_uuid in self._mission_dict.keys():
                 self._mission_dict[mission_uuid]["update_size"] = 0
@@ -113,12 +113,12 @@ class ActionSpeedReceiver(threading.Thread):
         else:
             return "{:.2f}{}/s".format(size, units[0])
 
-    def _make_message_and_send(self, mission_uuid, content):
+    def _send_worker_print(self, signal_type, mission_uuid, content):
         if self._run_status:
-            signal_header = self._generate_action_signal_template("print")
+            message_dict = self._generate_action_signal_template("print")
             message_detail = {"sender": "ActionSpeedReceiver", "content": content}
-            signal_header["value"] = self._generate_signal_value("normal", mission_uuid, message_detail)
-            self._parent_queue.put(signal_header)
+            message_dict["value"] = self._generate_signal_value(signal_type, mission_uuid, message_detail)
+            self._parent_queue.put(message_dict)
 
     @staticmethod
     def _generate_action_signal_template(receiver):

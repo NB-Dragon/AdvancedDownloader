@@ -38,16 +38,16 @@ class ActionWriterReceiver(threading.Thread):
     def _handle_message_detail(self, signal_type, mission_uuid, message_detail):
         if signal_type == "write":
             content, length = message_detail["content"], len(message_detail["content"])
-            self._send_speed_mission_size(mission_uuid, length)
+            self._send_worker_speed_size(mission_uuid, length)
             save_path, position = message_detail["save_path"], message_detail["position"]
             self._write_bytes_into_file(mission_uuid, save_path, position, content)
-            self._send_info_write_down(mission_uuid, save_path, position, length)
+            self._send_mission_config_update_section(mission_uuid, save_path, position, length)
         elif signal_type == "register":
-            self._send_speed_mission_register(mission_uuid, message_detail["download_info"])
+            self._send_worker_speed_register(mission_uuid, message_detail["download_info"])
             self._do_with_mission_register(mission_uuid, message_detail["root_path"])
         elif signal_type == "finish":
-            self._send_speed_mission_finish(mission_uuid)
-            self._send_info_delete(mission_uuid, message_detail["delete_file"])
+            self._send_worker_speed_finish(mission_uuid)
+            self._send_mission_config_delete(mission_uuid, message_detail["delete_file"])
             self._do_with_mission_finish(mission_uuid)
 
     def _do_with_mission_register(self, mission_uuid, root_path):
@@ -75,32 +75,36 @@ class ActionWriterReceiver(threading.Thread):
             writer.write(bytearray((expect_size - current_size) % 65536))
             writer.close()
 
-    def _send_speed_mission_size(self, mission_uuid, content_length):
-        self._send_speed_mission_detail("size", mission_uuid, {"length": content_length})
+    def _send_worker_speed_size(self, mission_uuid, content_length):
+        message_detail = {"length": content_length}
+        self._send_worker_speed("size", mission_uuid, message_detail)
 
-    def _send_speed_mission_register(self, mission_uuid, download_info):
-        self._send_speed_mission_detail("register", mission_uuid, {"download_info": download_info})
+    def _send_worker_speed_register(self, mission_uuid, download_info):
+        message_detail = {"download_info": download_info}
+        self._send_worker_speed("register", mission_uuid, message_detail)
 
-    def _send_speed_mission_finish(self, mission_uuid):
-        self._send_speed_mission_detail("finish", mission_uuid, None)
+    def _send_worker_speed_finish(self, mission_uuid):
+        self._send_worker_speed("finish", mission_uuid, None)
 
-    def _send_speed_mission_detail(self, message_type, mission_uuid, detail):
+    def _send_mission_config_update_section(self, mission_uuid, save_path, position, length):
+        message_detail = {"sub_path": save_path, "position": position, "length": length}
+        self._send_mission_config("update_section", mission_uuid, message_detail)
+
+    def _send_mission_config_delete(self, mission_uuid, delete_file: bool):
+        message_detail = {"delete_file": delete_file}
+        self._send_mission_config("delete", mission_uuid, message_detail)
+
+    def _send_worker_speed(self, signal_type, mission_uuid, mission_detail):
         if self._run_status:
-            signal_header = self._generate_action_signal_template("speed")
-            signal_header["value"] = self._generate_signal_value(message_type, mission_uuid, detail)
-            self._parent_queue.put(signal_header)
+            message_dict = self._generate_action_signal_template("speed")
+            message_dict["value"] = self._generate_signal_value(signal_type, mission_uuid, mission_detail)
+            self._parent_queue.put(message_dict)
 
-    def _send_info_write_down(self, mission_uuid, save_path, position, length):
+    def _send_mission_config(self, signal_type, mission_uuid, mission_detail):
         if self._run_status:
-            signal_header = self._generate_action_signal_template("parent.mission.config")
-            message_detail = {"sub_path": save_path, "position": position, "length": length}
-            signal_header["value"] = self._generate_signal_value("update_section", mission_uuid, message_detail)
-
-    def _send_info_delete(self, mission_uuid, delete_file: bool):
-        if self._run_status:
-            signal_header = self._generate_action_signal_template("parent.mission.config")
-            message_detail = {"delete_file": delete_file}
-            signal_header["value"] = self._generate_signal_value("delete", mission_uuid, message_detail)
+            message_dict = self._generate_action_signal_template("parent.mission.config")
+            message_dict["value"] = self._generate_signal_value(signal_type, mission_uuid, mission_detail)
+            self._parent_queue.put(message_dict)
 
     @staticmethod
     def _generate_action_signal_template(receiver):
