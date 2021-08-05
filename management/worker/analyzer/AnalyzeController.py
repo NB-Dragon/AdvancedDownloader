@@ -7,21 +7,21 @@ from tools.RuntimeOperator import RuntimeOperator
 
 
 class AnalyzeController(object):
-    def __init__(self, runtime_operator: RuntimeOperator, parent_queue):
+    def __init__(self, runtime_operator: RuntimeOperator, worker_message_queue):
         self._runtime_operator = runtime_operator
-        self._parent_queue = parent_queue
+        self._worker_message_queue = worker_message_queue
         self._init_all_analyzer()
-        self._check_all_analyzer()
 
     def _init_all_analyzer(self):
         self._all_analyzer = dict()
-        self._all_analyzer["http"] = HTTPAnalyzer("http", self._parent_queue, self._runtime_operator)
-        self._all_analyzer["https"] = HTTPAnalyzer("https", self._parent_queue, self._runtime_operator)
+        self._all_analyzer["http"] = HTTPAnalyzer
+        self._all_analyzer["https"] = HTTPAnalyzer
 
-    def _check_all_analyzer(self):
-        title_message = "schema for '{}' doesn't have method 'get_download_info'."
-        for schema, analyzer in self._all_analyzer.items():
-            assert hasattr(analyzer, "get_download_info"), title_message.format(schema)
+    def _create_analyzer(self, schema):
+        analyzer_class = self._all_analyzer[schema]
+        title_message = "schema for '{}' doesn't have method 'get_download_info'.".format(schema)
+        assert hasattr(analyzer_class, "get_download_info"), title_message
+        return analyzer_class(schema, self._worker_message_queue, self._runtime_operator)
 
     def get_analyzer_by_schema(self, schema):
-        return self._all_analyzer.get(schema)
+        return self._create_analyzer(schema)

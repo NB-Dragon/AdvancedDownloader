@@ -8,9 +8,9 @@ from tools.RuntimeOperator import RuntimeOperator
 
 
 class HTTPAnalyzer(object):
-    def __init__(self, schema_name, parent_queue, runtime_operator: RuntimeOperator):
+    def __init__(self, schema_name, worker_message_queue, runtime_operator: RuntimeOperator):
         self._schema_name = schema_name
-        self._parent_queue = parent_queue
+        self._worker_message_queue = worker_message_queue
         self._section_maker = SectionMaker()
         self._http_header_analyzer = HTTPHeaderAnalyzer(runtime_operator)
 
@@ -90,7 +90,7 @@ class HTTPAnalyzer(object):
         message_type = "exception" if exception else "normal"
         message_detail = {"sender": "HTTPAnalyzer", "content": content}
         signal_header["value"] = self._generate_signal_value(message_type, mission_uuid, message_detail)
-        self._parent_queue.put(signal_header)
+        self._worker_message_queue.put(signal_header)
 
     @staticmethod
     def _generate_action_signal_template(receiver):
