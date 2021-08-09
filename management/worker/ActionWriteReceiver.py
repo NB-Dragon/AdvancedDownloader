@@ -8,7 +8,7 @@ import threading
 from tools.RuntimeOperator import RuntimeOperator
 
 
-class ActionWriterReceiver(threading.Thread):
+class ActionWriteReceiver(threading.Thread):
     def __init__(self, runtime_operator: RuntimeOperator, parent_queue: queue.Queue):
         super().__init__()
         self._runtime_operator = runtime_operator

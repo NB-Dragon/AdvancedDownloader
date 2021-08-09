@@ -9,7 +9,7 @@ from management.worker.ActionAnalyzeReceiver import ActionAnalyzeReceiver
 from management.worker.ActionOpenReceiver import ActionOpenReceiver
 from management.worker.ActionPrintReceiver import ActionPrintReceiver
 from management.worker.ActionSpeedReceiver import ActionSpeedReceiver
-from management.worker.ActionWriterReceiver import ActionWriterReceiver
+from management.worker.ActionWriteReceiver import ActionWriteReceiver
 
 
 class WorkerMessageDistributor(threading.Thread):
@@ -79,7 +79,7 @@ class WorkerMessageDistributor(threading.Thread):
         action_print_receiver = ActionPrintReceiver(self._runtime_operator)
         action_print_queue = action_print_receiver.get_message_queue()
         self._all_listener["print"] = {"receiver": action_print_receiver, "queue": action_print_queue}
-        action_write_receiver = ActionWriterReceiver(self._runtime_operator, self._message_queue)
+        action_write_receiver = ActionWriteReceiver(self._runtime_operator, self._message_queue)
         action_write_queue = action_write_receiver.get_message_queue()
         self._all_listener["write"] = {"receiver": action_write_receiver, "queue": action_write_queue}
         action_open_receiver = ActionOpenReceiver(self._runtime_operator, self._message_queue)
