@@ -10,23 +10,25 @@ from tools.RuntimeOperator import RuntimeOperator
 class ActionProgressReceiver(threading.Thread):
     """
     register       : {"mission_uuid": "uuid", "thread": None, "running": False}
-    request_result : 如果结果完整，检查是否存在Thread，不存在就创建Thread并启动；否则设置running=False
-    start          : 如果running为False, 向info发送request信号, 设置running=True
+    request_result : 根据数据是否完整分别处理
+        complete   : 创建线程，向parent.worker.write发送register信号，启动线程
+        incomplete : 设置running=False
+    start          : 如果running为False, 向info发送request_info信号, 设置running=True
     pause          : 判断是否存在Thread(mission_uuid)，有则发送停止信号
     stop           : 根据原因分别处理(由具体下载线程发出)
-        initiative : 设置thread为空，设置running=False，执行删除逻辑(删除文件: False)
-        passive    : 设置thread为空，设置running=False，执行挂起任务
+        initiative : 设置thread为None，running=False；执行删除逻辑(删除文件: False)
+        passive    : 设置thread为None，running=False；执行挂起任务
     delete         : 根据running状态分别处理(由用户操作发出)
         true       : 判断是否存在Thread(mission_uuid)，有则发送停止信号，挂起任务
         false      : 执行删除逻辑(删除文件: False|True)
     update         : 根据running状态分别处理，默认重启参数为false(由用户操作发出)
         true       : 判断是否存在Thread(mission_uuid)，有则发送停止信号，修改重启参数，挂起任务
         false      : 向info发送update_mission_config或update_download_name信号
-                     根据重启参数，按需向info发送request信号
+                     根据重启参数，向自己发送start信号
 
     备注：
     需要挂起任务的时机：逻辑中明确需要
-    执行删除逻辑: 删除注册过的内容，向message.write发送结束信号
+    执行删除逻辑: 删除注册过的内容，向parent.worker.write发送finish信号
     执行挂起任务：每个mission_uuid有对应的挂起数据数组，把所有消息重新压栈到消息队列中
     """
     def __init__(self, runtime_operator: RuntimeOperator, parent_queue: queue.Queue):
@@ -58,13 +60,8 @@ class ActionProgressReceiver(threading.Thread):
         if signal_type == "register":
             pass
 
-    def _send_analyze_action(self, signal_type, mission_uuid, mission_detail):
-        message_dict = self._generate_action_signal_template("message.analyze")
-        message_dict["value"] = self._generate_signal_value(signal_type, mission_uuid, mission_detail)
-        self._parent_queue.put(message_dict)
-
-    def _send_write_action(self, signal_type, mission_uuid, mission_detail):
-        message_dict = self._generate_action_signal_template("message.write")
+    def _send_worker_write(self, signal_type, mission_uuid, mission_detail):
+        message_dict = self._generate_action_signal_template("parent.worker.write")
         message_dict["value"] = self._generate_signal_value(signal_type, mission_uuid, mission_detail)
         self._parent_queue.put(message_dict)
 
