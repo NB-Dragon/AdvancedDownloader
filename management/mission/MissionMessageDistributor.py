@@ -6,7 +6,7 @@ import queue
 import threading
 from management.worker.WorkerMessageDistributor import WorkerMessageDistributor
 from management.mission.ActionConfigReceiver import ActionConfigReceiver
-from management.mission.MissionProgressReceiver import MissionProgressReceiver
+from management.mission.ActionProgressReceiver import ActionProgressReceiver
 from tools.RuntimeOperator import RuntimeOperator
 
 
@@ -80,12 +80,12 @@ class MissionMessageDistributor(threading.Thread):
         thread_message_distributor = WorkerMessageDistributor(self._runtime_operator, self._message_queue)
         thread_message_queue = thread_message_distributor.get_message_queue()
         self._all_listener["message"] = {"receiver": thread_message_distributor, "queue": thread_message_queue}
-        mission_config_receiver = ActionConfigReceiver(self._runtime_operator, self._message_queue)
-        mission_config_queue = mission_config_receiver.get_message_queue()
-        self._all_listener["config"] = {"receiver": mission_config_receiver, "queue": mission_config_queue}
-        mission_progress_receiver = MissionProgressReceiver(self._runtime_operator, self._message_queue)
-        mission_progress_queue = mission_progress_receiver.get_message_queue()
-        self._all_listener["progress"] = {"receiver": mission_progress_receiver, "queue": mission_progress_queue}
+        action_config_receiver = ActionConfigReceiver(self._runtime_operator, self._message_queue)
+        action_config_queue = action_config_receiver.get_message_queue()
+        self._all_listener["config"] = {"receiver": action_config_receiver, "queue": action_config_queue}
+        action_progress_receiver = ActionProgressReceiver(self._runtime_operator, self._message_queue)
+        action_progress_queue = action_progress_receiver.get_message_queue()
+        self._all_listener["progress"] = {"receiver": action_progress_receiver, "queue": action_progress_queue}
 
     def _start_all_listener(self):
         for listener in self._all_listener.values():

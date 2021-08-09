@@ -7,7 +7,7 @@ import threading
 from tools.RuntimeOperator import RuntimeOperator
 
 
-class MissionProgressReceiver(threading.Thread):
+class ActionProgressReceiver(threading.Thread):
     """
     register       : {"mission_uuid": "uuid", "thread": None, "running": False}
     request_result : 如果结果完整，检查是否存在Thread，不存在就创建Thread并启动；否则设置running=False
