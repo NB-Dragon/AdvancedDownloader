@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # Create Time: 2021/5/16 12:00
 # Create User: NB-Dragon
+import json
 from core.decoder.HTTPHeaderAnalyzer import HTTPHeaderAnalyzer
 from core.other.SectionMaker import SectionMaker
 from tools.RuntimeOperator import RuntimeOperator
@@ -16,6 +17,7 @@ class HTTPAnalyzer(object):
 
     def get_download_info(self, mission_uuid, mission_info):
         self._make_message_and_send(mission_uuid, "资源连接中", False)
+        mission_info = json.loads(json.dumps(mission_info))
         file_info = self._analyze_target_file_info(mission_uuid, mission_info)
         standard_item = self._generate_standard_item(file_info, mission_info)
         download_info = self._generate_final_download_info(standard_item)
@@ -23,7 +25,7 @@ class HTTPAnalyzer(object):
         return download_info
 
     def _analyze_target_file_info(self, mission_uuid, mission_info):
-        tmp_headers = mission_info["headers"].copy() if mission_info["headers"] else dict()
+        tmp_headers = mission_info["headers"] if mission_info["headers"] else dict()
         tmp_headers["Range"] = "bytes=0-0"
         download_link = mission_info["download_link"]
         request_manager = self._http_header_analyzer.get_request_manager(self._schema_name, 1, mission_info["proxy"])
