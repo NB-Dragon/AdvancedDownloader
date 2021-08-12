@@ -2,27 +2,37 @@
 > All analyze tools must implement the following functions.
 
 ## get_download_info
-> @:param total_size: Sum of the file size in `file_dict`.<br>
-> @:param file_dict: Each file info.<br>
-> @:param file_dict.file_name: The relative path to save in current resource.
+> @:param total_size: Sum of the section size.<br>
+> @:param file_list: List of real documents.<br>
+> @:param section_list: List of the unit, reference torrent.<br>
+> @:param `file_position`, `section_start`, `section_end` are integer data.
 ```json
 {
   "total_size": 0,
-  "file_dict": {
-    "relative_path_1": {
-      "filesize": 0,
-      "range": false,
-      "section": []
+  "file_list": {
+    "uuid + namespace + file + 1": {
+      "save_path": "relative_path"
     },
-    "relative_path_2": {
-      "filesize": 0,
-      "range": false,
-      "section": []
+    "uuid + namespace + file + n": {
+      "save_path": "relative_path"
+    }
+  },
+  "section_list": {
+    "uuid + namespace + section + 1": {
+      "progress": [],
+      "file_mapping": {
+        "file_hash_1": ["file_position", "section_start", "section_end"],
+        "file_hash_2": ["file_position", "section_start", "section_end"],
+        "file_hash_n": ["file_position", "section_start", "section_end"]
+      }
     },
-    "relative_path_n": {
-      "filesize": 0,
-      "range": false,
-      "section": []
+    "uuid + namespace + section + n": {
+      "progress": [],
+      "file_mapping": {
+        "file_hash_1": ["file_position", "section_start", "section_end"],
+        "file_hash_2": ["file_position", "section_start", "section_end"],
+        "file_hash_n": ["file_position", "section_start", "section_end"]
+      }
     }
   }
 }
