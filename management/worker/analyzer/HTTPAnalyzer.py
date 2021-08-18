@@ -3,8 +3,8 @@
 # Create Time: 2021/5/16 12:00
 # Create User: NB-Dragon
 import json
+import uuid
 from core.decoder.HTTPHeaderAnalyzer import HTTPHeaderAnalyzer
-from core.other.SectionMaker import SectionMaker
 from tools.RuntimeOperator import RuntimeOperator
 
 
@@ -12,24 +12,23 @@ class HTTPAnalyzer(object):
     def __init__(self, schema_name, worker_message_queue, runtime_operator: RuntimeOperator):
         self._schema_name = schema_name
         self._worker_message_queue = worker_message_queue
-        self._section_maker = SectionMaker()
         self._http_header_analyzer = HTTPHeaderAnalyzer(runtime_operator)
 
     def get_download_info(self, mission_uuid, mission_info):
         self._make_message_and_send(mission_uuid, "资源连接中", False)
         mission_info = json.loads(json.dumps(mission_info))
-        file_info = self._analyze_target_file_info(mission_uuid, mission_info)
-        standard_item = self._generate_standard_item(file_info, mission_info)
-        download_info = self._generate_final_download_info(standard_item)
+        source_info = self._analyze_target_source_info(mission_uuid, mission_info)
+        download_info = self._generate_final_download_info(mission_uuid, source_info)
+        self._handle_download_info_summary(download_info)
         self._make_message_and_send(mission_uuid, "资源解析完成", False)
         return download_info
 
-    def _analyze_target_file_info(self, mission_uuid, mission_info):
+    def _analyze_target_source_info(self, mission_uuid, mission_info):
         tmp_headers = mission_info["headers"] if mission_info["headers"] else dict()
         tmp_headers["Range"] = "bytes=0-0"
         download_link = mission_info["download_link"]
         request_manager = self._http_header_analyzer.get_request_manager(self._schema_name, 1, mission_info["proxy"])
-        stream_response = self._get_simple_response(request_manager, mission_uuid, download_link, tmp_headers)
+        stream_response = self._get_simple_response(mission_uuid, request_manager, download_link, tmp_headers)
         if self._check_response_can_access(stream_response):
             headers = {key.lower(): value for key, value in dict(stream_response.headers).items()}
             current_url = stream_response.geturl() or mission_info["download_link"]
@@ -38,28 +37,20 @@ class HTTPAnalyzer(object):
         else:
             return None
 
-    def _generate_standard_item(self, file_info, mission_info):
-        if file_info:
-            relative_save_path = file_info.pop("filename")
-            result_dict = {"filesize": file_info["filesize"], "range": file_info["range"]}
-            download_section = self._generate_file_download_section(file_info, mission_info)
-            result_dict["section"] = download_section
-            return {relative_save_path: result_dict}
+    def _generate_final_download_info(self, mission_uuid, source_info):
+        if source_info:
+            file_uuid = str(uuid.uuid3(uuid.UUID(mission_uuid), "file: 1"))
+            file_info = {"save_path": source_info["filename"], "file_size": source_info["filesize"]}
+            section_progress = self._generate_section_progress(source_info)
+            section_uuid = str(uuid.uuid3(uuid.UUID(mission_uuid), "section: 1"))
+            section_info = {"progress": section_progress, "file_mapping": dict()}
+            section_info["file_mapping"][file_uuid] = [0]
+            section_info["file_mapping"][file_uuid].extend(section_progress[0])
+            return {"total_size": 0, "file_dict": {file_uuid: file_info}, "section_dict": {section_uuid: section_info}}
         else:
             return None
 
-    @staticmethod
-    def _generate_final_download_info(standard_dict):
-        if standard_dict:
-            download_info = {"total_size": 0, "file_dict": dict()}
-            for key, value in standard_dict.items():
-                download_info["total_size"] += standard_dict[key]["filesize"]
-                download_info["file_dict"][key] = value
-            return download_info
-        else:
-            return None
-
-    def _get_simple_response(self, request_manager, mission_uuid, target_url, headers):
+    def _get_simple_response(self, mission_uuid, request_manager, target_url, headers):
         try:
             return request_manager.request("GET", target_url, headers=headers, preload_content=False)
         except UnicodeEncodeError:
@@ -68,6 +59,21 @@ class HTTPAnalyzer(object):
             return None
         except Exception as e:
             self._make_message_and_send(mission_uuid, str(e), True)
+            return None
+
+    def _make_message_and_send(self, mission_uuid, content, exception: bool):
+        signal_header = self._generate_action_signal_template("print")
+        message_type = "exception" if exception else "normal"
+        message_detail = {"sender": "HTTPAnalyzer", "content": content}
+        signal_header["value"] = self._generate_signal_value(message_type, mission_uuid, message_detail)
+        self._worker_message_queue.put(signal_header)
+
+    @staticmethod
+    def _handle_download_info_summary(standard_dict):
+        if standard_dict:
+            for value in standard_dict["file_dict"].values():
+                standard_dict["total_size"] += value["file_size"] if value["file_size"] else 0
+        else:
             return None
 
     @staticmethod
@@ -80,19 +86,9 @@ class HTTPAnalyzer(object):
             stream_response.close()
             return False
 
-    def _generate_file_download_section(self, file_info, mission_info):
-        file_size, expect_count = file_info["filesize"], mission_info["thread_num"]
-        if file_info["range"]:
-            return self._section_maker.get_download_section([[0, file_size - 1]], expect_count)
-        else:
-            return [[0]]
-
-    def _make_message_and_send(self, mission_uuid, content, exception: bool):
-        signal_header = self._generate_action_signal_template("print")
-        message_type = "exception" if exception else "normal"
-        message_detail = {"sender": "HTTPAnalyzer", "content": content}
-        signal_header["value"] = self._generate_signal_value(message_type, mission_uuid, message_detail)
-        self._worker_message_queue.put(signal_header)
+    @staticmethod
+    def _generate_section_progress(source_info):
+        return [[0, source_info["filesize"] - 1]] if source_info["range"] else [[0]]
 
     @staticmethod
     def _generate_action_signal_template(receiver):
