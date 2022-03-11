@@ -1,0 +1,17 @@
+{
+  "database": {
+    "mysql": {
+      "databaseCharset": "utf8",
+      "databaseHostPort": 3306,
+      "databaseHostName": "localhost",
+      "databaseUserName": "username",
+      "databasePassword": "password",
+      "databaseName": "name"
+    }
+  },
+  "global": {
+    "auto_start": true,
+    "timeout": 5,
+    "retry": 3
+  }
+}
