@@ -14,6 +14,6 @@ if __name__ == "__main__":
         command_message = command_helper.get_next_command_message()
         if isinstance(command_message, dict) and command_message["success"]:
             thread_message_module.append_message(command_message["message"])
-        else:
+        elif command_message is None:
             thread_message_module.send_stop_state()
             break
