@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # Create Time: 2022/01/01 00:00
 # Create User: NB-Dragon
+import json
 import os
 import queue
 import shutil
@@ -58,18 +59,20 @@ class ThreadArchiveModule(threading.Thread):
 
     def _do_with_create_request(self, mission_uuid, message_detail):
         self._mission_dict[mission_uuid] = dict()
-        self._mission_dict[mission_uuid]["mission_info"] = message_detail["mission_info"]
+        mission_info = json.loads(json.dumps(message_detail["mission_info"]))
+        self._mission_dict[mission_uuid]["mission_info"] = mission_info
         self._mission_dict[mission_uuid]["download_info"] = None
 
     def _do_with_archive_request(self, mission_uuid, message_detail):
         if mission_uuid in self._mission_dict:
             response_detail = {"success": mission_uuid in self._mission_dict}
-            self._mission_dict[mission_uuid]["download_info"] = message_detail["download_info"]
+            download_info = json.loads(json.dumps(message_detail["download_info"]))
+            self._mission_dict[mission_uuid]["download_info"] = download_info
             self._send_semantic_transform(mission_uuid, "archive_response", response_detail)
 
     def _do_with_query_request(self, mission_uuid, message_detail):
         if mission_uuid in self._mission_dict:
-            response_detail = self._mission_dict[mission_uuid]
+            response_detail = json.loads(json.dumps(self._mission_dict[mission_uuid]))
             self._send_semantic_transform(mission_uuid, "query_response", response_detail)
 
     def _do_with_delete_request(self, mission_uuid, message_detail):
