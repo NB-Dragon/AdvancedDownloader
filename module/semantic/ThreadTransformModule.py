@@ -76,7 +76,10 @@ class ThreadTransformModule(threading.Thread):
         self._send_archiver_archive(mission_uuid, "query_request", None)
 
     def _do_with_update_request(self, mission_uuid, message_detail):
-        self._send_archiver_archive(mission_uuid, "archive_request", message_detail)
+        response_detail = {"download_info": message_detail["download_info"]}
+        self._send_archiver_archive(mission_uuid, "archive_request", response_detail)
+        response_detail = {"size": message_detail["update_size"]}
+        self._send_universal_speed(mission_uuid, "change", response_detail)
 
     def _do_with_delete_request(self, mission_uuid, message_detail):
         self._send_archiver_archive(mission_uuid, "delete_request", message_detail)
