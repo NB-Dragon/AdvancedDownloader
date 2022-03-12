@@ -75,7 +75,23 @@
   "mission_uuid": "",
   "message_type": "process_update",
   "detail": {
+    "update_size": 0,
     "download_info": null
+  }
+}
+```
+
+- Response
+```json
+{
+  "receiver": "thread-transform",
+  "value": {
+    "mission_uuid": "",
+    "message_type": "update_request",
+    "detail": {
+      "update_size": 0,
+      "download_info": null
+    }
   }
 }
 ```
@@ -98,6 +114,20 @@
   "message_type": "process_finish",
   "detail": {
     "delete_file": false
+  }
+}
+```
+
+- Response
+```json
+{
+  "receiver": "thread-transform",
+  "value": {
+    "mission_uuid": "",
+    "message_type": "delete_request",
+    "detail": {
+      "delete_file": false
+    }
   }
 }
 ```

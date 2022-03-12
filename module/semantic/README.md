@@ -141,13 +141,14 @@
     "mission_uuid": "",
     "message_type": "update_request",
     "detail": {
+      "update_size": 0,
       "download_info": null
     }
   }
 }
 ```
 
-- Response
+- Response: Archive
 ```json
 {
   "receiver": "thread-archive",
@@ -156,6 +157,20 @@
     "message_type": "archive_request",
     "detail": {
       "download_info": null
+    }
+  }
+}
+```
+
+- Response: Speed
+```json
+{
+  "receiver": "thread-speed",
+  "value": {
+    "mission_uuid": "",
+    "message_type": "change",
+    "detail": {
+      "size": 0
     }
   }
 }
