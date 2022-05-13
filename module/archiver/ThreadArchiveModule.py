@@ -21,7 +21,7 @@ class ThreadArchiveModule(threading.Thread):
         self._mission_dict = self._load_local_progress()
 
     def run(self) -> None:
-        self._start_all_mission()
+        self._recover_mission()
         while self._should_thread_continue_to_execute():
             message_dict = self._message_queue.get()
             if message_dict is None: continue
@@ -93,11 +93,13 @@ class ThreadArchiveModule(threading.Thread):
     def _update_mission_progress(self):
         self._module_tool["progress"].set_download_progress(self._mission_dict)
 
-    def _start_all_mission(self):
-        if self._global_config["auto_start"]:
-            response_detail = {"success": True}
-            for mission_uuid in self._mission_dict.keys():
-                self._send_semantic_transform(mission_uuid, "archive_response", response_detail)
+    def _recover_mission(self):
+        for mission_uuid in self._mission_dict.keys():
+            if self._mission_dict["mission_state"] == "running":
+                self._send_worker_control(mission_uuid, "mission_start", None)
+            if self._mission_dict["mission_state"] == "analyzing":
+                response_detail = {"analyze_count": 0, "mission_info": self._mission_dict[mission_uuid]}
+                self._send_analyzer_analyze(mission_uuid, "analyze_request", response_detail)
 
     def _delete_mission_file(self, mission_uuid, delete_file):
         if delete_file is True:
@@ -109,6 +111,16 @@ class ThreadArchiveModule(threading.Thread):
 
     def _send_semantic_transform(self, mission_uuid, message_type, message_detail):
         message_dict = self._generate_action_signal_template("thread-transform")
+        message_dict["value"] = self._generate_signal_value(mission_uuid, message_type, message_detail)
+        self._switch_message.append_message(message_dict)
+
+    def _send_worker_control(self, mission_uuid, message_type, message_detail):
+        message_dict = self._generate_action_signal_template("thread-control")
+        message_dict["value"] = self._generate_signal_value(mission_uuid, message_type, message_detail)
+        self._switch_message.append_message(message_dict)
+
+    def _send_analyzer_analyze(self, mission_uuid, message_type, message_detail):
+        message_dict = self._generate_action_signal_template("thread-analyze")
         message_dict["value"] = self._generate_signal_value(mission_uuid, message_type, message_detail)
         self._switch_message.append_message(message_dict)
 

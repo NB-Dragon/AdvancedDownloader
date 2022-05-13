@@ -10,7 +10,6 @@
     }
   },
   "global": {
-    "auto_start": true,
     "timeout": 5,
     "retry": 3
   }
