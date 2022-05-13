@@ -40,7 +40,7 @@ class CommandHelper(object):
         parser_args = self._parse_helper.get_runtime_arguments(command_arg)
         if parser_args:
             mission_detail = self._generate_mission_detail(parser_args)
-            mission_uuid, message_detail = mission_detail["mission_uuid"], mission_detail["detail"]
+            mission_uuid, message_detail = mission_detail["mission_uuid"], mission_detail["message_detail"]
             response_message = self._send_semantic_transform(mission_uuid, "create_command", message_detail)
             return {"success": True, "message": response_message}
         else:
@@ -81,7 +81,7 @@ class CommandHelper(object):
         mission_uuid = str(uuid.uuid1())
         mission_info = self._get_default_mission_info(input_args)
         response_detail = {"mission_info": mission_info}
-        return {"mission_uuid": mission_uuid, "detail": response_detail}
+        return {"mission_uuid": mission_uuid, "message_detail": response_detail}
 
     def _get_default_mission_info(self, mission_parameter):
         standard_mission_info = dict()
@@ -114,4 +114,4 @@ class CommandHelper(object):
 
     @staticmethod
     def _generate_signal_value(mission_uuid, message_type, message_detail) -> dict:
-        return {"mission_uuid": mission_uuid, "message_type": message_type, "detail": message_detail}
+        return {"mission_uuid": mission_uuid, "message_type": message_type, "message_detail": message_detail}

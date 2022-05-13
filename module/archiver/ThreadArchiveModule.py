@@ -104,11 +104,11 @@ class ThreadArchiveModule(threading.Thread):
         self._module_tool["progress"].set_download_progress(self._mission_dict)
 
     def _recover_mission(self):
-        for mission_uuid in self._mission_dict.keys():
-            if self._mission_dict["mission_state"] == "running":
+        for mission_uuid, mission_item in self._mission_dict.items():
+            if mission_item["mission_state"] == "running":
                 self._send_worker_control(mission_uuid, "mission_start", None)
-            if self._mission_dict["mission_state"] == "analyzing":
-                response_detail = {"analyze_count": 0, "mission_info": self._mission_dict[mission_uuid]}
+            if mission_item["mission_state"] == "analyzing":
+                response_detail = {"analyze_count": 0, "mission_info": mission_item["mission_info"]}
                 self._send_analyzer_analyze(mission_uuid, "analyze_request", response_detail)
 
     def _delete_mission_file(self, mission_uuid, delete_file):

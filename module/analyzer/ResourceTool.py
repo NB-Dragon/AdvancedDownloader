@@ -98,4 +98,4 @@ class ResourceTool(object):
 
     @staticmethod
     def _generate_signal_value(mission_uuid, message_type, message_detail) -> dict:
-        return {"mission_uuid": mission_uuid, "message_type": message_type, "detail": message_detail}
+        return {"mission_uuid": mission_uuid, "message_type": message_type, "message_detail": message_detail}
