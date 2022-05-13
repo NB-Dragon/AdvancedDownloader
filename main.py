@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Create Time: 2022/01/01 00:00
-from helper.CommandHelper import CommandHelper
+from command.CommandHelper import CommandHelper
 from helper.ProjectHelper import ProjectHelper
 from module.message.ThreadMessageModule import ThreadMessageModule
 

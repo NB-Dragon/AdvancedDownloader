@@ -7,8 +7,9 @@ import threading
 
 
 class ThreadInteractModule(threading.Thread):
-    def __init__(self):
+    def __init__(self, switch_message):
         super().__init__()
+        self._switch_message = switch_message
         self._message_queue = queue.Queue()
         self._run_status = True
 
@@ -32,6 +33,9 @@ class ThreadInteractModule(threading.Thread):
     def _handle_message_detail(self, message_type, message_detail):
         if message_type == "table":
             self._print_interactive_content(self._generate_table_content(message_detail))
+        else:
+            abnormal_message = "Unknown message type of \"{}\"".format(message_type)
+            self._send_universal_log(None, "file", abnormal_message)
 
     def _generate_table_content(self, message_detail):
         content_list = list()
@@ -88,3 +92,17 @@ class ThreadInteractModule(threading.Thread):
     def _print_interactive_content(content):
         if content is not None:
             print(content)
+
+    def _send_universal_log(self, mission_uuid, message_type, content):
+        message_dict = self._generate_action_signal_template("thread-log")
+        message_detail = {"sender": "ThreadOpenModule", "content": content}
+        message_dict["value"] = self._generate_signal_value(mission_uuid, message_type, message_detail)
+        self._switch_message.append_message(message_dict)
+
+    @staticmethod
+    def _generate_action_signal_template(receiver):
+        return {"receiver": receiver, "value": {}}
+
+    @staticmethod
+    def _generate_signal_value(mission_uuid, message_type, message_detail) -> dict:
+        return {"mission_uuid": mission_uuid, "message_type": message_type, "message_detail": message_detail}

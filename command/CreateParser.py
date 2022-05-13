@@ -8,7 +8,7 @@ import time
 from core.util.HTTPHeaderGenerator import HTTPHeaderGenerator
 
 
-class ParserHelper(object):
+class CreateParser(object):
     def __init__(self, version_name):
         self._version_name = version_name
         self._header_generator = HTTPHeaderGenerator(version_name)
