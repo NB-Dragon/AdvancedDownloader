@@ -55,6 +55,8 @@ class ThreadArchiveModule(threading.Thread):
             self._do_with_delete_request(mission_uuid, message_detail)
         elif message_type == "state_request":
             self._do_with_state_request(mission_uuid, message_detail)
+        elif message_type == "show_request":
+            self._do_with_show_request(message_detail)
         else:
             abnormal_message = "Unknown message type of \"{}\"".format(message_type)
             self._send_universal_log(mission_uuid, "file", abnormal_message)
@@ -87,6 +89,14 @@ class ThreadArchiveModule(threading.Thread):
             if mission_state in ["sleeping", "analyzing", "running"]:
                 self._mission_dict[mission_uuid]["mission_state"] = mission_state
 
+    def _do_with_show_request(self, message_detail):
+        if message_detail["mission_uuid"]:
+            response_detail = {"rows": self._generate_table_mission_detail(message_detail["mission_uuid"])}
+            self._send_universal_interact("table", response_detail)
+        else:
+            response_detail = {"rows": self._generate_table_summary_detail()}
+            self._send_universal_interact("table", response_detail)
+
     def _load_local_progress(self):
         return self._module_tool["progress"].get_download_progress()
 
@@ -109,6 +119,19 @@ class ThreadArchiveModule(threading.Thread):
             elif os.path.isdir(mission_file_path):
                 shutil.rmtree(mission_file_path)
 
+    def _generate_table_summary_detail(self):
+        result_list = [["mission_uuid", "mission_state"]]
+        for mission_uuid in self._mission_dict.keys():
+            result_list.append([mission_uuid, self._mission_dict[mission_uuid]["mission_state"]])
+        return result_list
+
+    def _generate_table_mission_detail(self, mission_uuid):
+        result_list = [["mission_uuid", "mission_info", "download_info"]]
+        mission_item = self._mission_dict[mission_uuid]
+        mission_info, download_info = mission_item["mission_info"], mission_item["download_info"]
+        result_list.append([mission_uuid, json.dumps(mission_info), json.dumps(download_info)])
+        return result_list
+
     def _send_semantic_transform(self, mission_uuid, message_type, message_detail):
         message_dict = self._generate_action_signal_template("thread-transform")
         message_dict["value"] = self._generate_signal_value(mission_uuid, message_type, message_detail)
@@ -130,6 +153,11 @@ class ThreadArchiveModule(threading.Thread):
         message_dict["value"] = self._generate_signal_value(mission_uuid, message_type, message_detail)
         self._switch_message.append_message(message_dict)
 
+    def _send_universal_interact(self, message_type, message_detail):
+        message_dict = self._generate_action_signal_template("thread-interact")
+        message_dict["value"] = self._generate_signal_value_without_uuid(message_type, message_detail)
+        self._switch_message.append_message(message_dict)
+
     @staticmethod
     def _generate_action_signal_template(receiver):
         return {"receiver": receiver, "value": {}}
@@ -137,3 +165,7 @@ class ThreadArchiveModule(threading.Thread):
     @staticmethod
     def _generate_signal_value(mission_uuid, message_type, message_detail) -> dict:
         return {"mission_uuid": mission_uuid, "message_type": message_type, "message_detail": message_detail}
+
+    @staticmethod
+    def _generate_signal_value_without_uuid(message_type, message_detail) -> dict:
+        return {"message_type": message_type, "message_detail": message_detail}

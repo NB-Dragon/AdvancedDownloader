@@ -98,3 +98,18 @@
   }
 }
 ```
+
+## Show Request
+- Request
+```json
+{
+  "receiver": "thread-archive",
+  "value": {
+    "mission_uuid": null,
+    "message_type": "show_request",
+    "message_detail": {
+      "mission_uuid": null
+    }
+  }
+}
+```
