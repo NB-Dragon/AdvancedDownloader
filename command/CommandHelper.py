@@ -61,8 +61,8 @@ class CommandHelper(object):
     def _generate_query_message(self, command_arg: list):
         parser_args = self._module_tool["universal_parser"].get_runtime_arguments(command_arg)
         if parser_args:
-            if parser_args.all or parser_args.detail:
-                mission_uuid = None if parser_args.all else parser_args.detail
+            if parser_args.all or parser_args.mission_uuid:
+                mission_uuid = None if parser_args.all else parser_args.mission_uuid
                 message_detail = {"mission_uuid": mission_uuid}
                 response_message = self._send_semantic_transform(None, "query_command", message_detail)
             else:
@@ -74,8 +74,8 @@ class CommandHelper(object):
     def _generate_start_message(self, command_arg: list):
         parser_args = self._module_tool["universal_parser"].get_runtime_arguments(command_arg)
         if parser_args:
-            if parser_args.all or parser_args.detail:
-                mission_uuid = None if parser_args.all else parser_args.detail
+            if parser_args.all or parser_args.mission_uuid:
+                mission_uuid = None if parser_args.all else parser_args.mission_uuid
                 message_detail = {"mission_uuid": mission_uuid}
                 response_message = self._send_semantic_transform(None, "start_command", message_detail)
             else:
@@ -87,8 +87,8 @@ class CommandHelper(object):
     def _generate_pause_message(self, command_arg: list):
         parser_args = self._module_tool["universal_parser"].get_runtime_arguments(command_arg)
         if parser_args:
-            if parser_args.all or parser_args.detail:
-                mission_uuid = None if parser_args.all else parser_args.detail
+            if parser_args.all or parser_args.mission_uuid:
+                mission_uuid = None if parser_args.all else parser_args.mission_uuid
                 message_detail = {"mission_uuid": mission_uuid}
                 response_message = self._send_semantic_transform(None, "pause_command", message_detail)
             else:
@@ -100,8 +100,8 @@ class CommandHelper(object):
     def _generate_delete_message(self, command_arg: list):
         parser_args = self._module_tool["delete_parser"].get_runtime_arguments(command_arg)
         if parser_args:
-            if parser_args.all or parser_args.detail:
-                mission_uuid = None if parser_args.all else parser_args.detail
+            if parser_args.all or parser_args.mission_uuid:
+                mission_uuid = None if parser_args.all else parser_args.mission_uuid
                 message_detail = {"mission_uuid": mission_uuid, "delete_file": parser_args.delete}
                 response_message = self._send_semantic_transform(None, "delete_command", message_detail)
             else:
