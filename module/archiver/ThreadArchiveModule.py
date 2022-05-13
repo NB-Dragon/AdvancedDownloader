@@ -25,8 +25,8 @@ class ThreadArchiveModule(threading.Thread):
         while self._should_thread_continue_to_execute():
             message_dict = self._message_queue.get()
             if message_dict is None: continue
-            mission_uuid, message_type = message_dict["mission_uuid"], message_dict["message_type"]
-            self._handle_message_detail(mission_uuid, message_type, message_dict["detail"])
+            message_type, message_detail = message_dict["message_type"], message_dict["message_detail"]
+            self._handle_message_detail(message_dict["mission_uuid"], message_type, message_detail)
             self._update_mission_progress()
 
     def append_message(self, message):
@@ -53,6 +53,8 @@ class ThreadArchiveModule(threading.Thread):
             self._do_with_query_request(mission_uuid, message_detail)
         elif message_type == "delete_request":
             self._do_with_delete_request(mission_uuid, message_detail)
+        elif message_type == "state_request":
+            self._do_with_state_request(mission_uuid, message_detail)
         else:
             abnormal_message = "Unknown message type of \"{}\"".format(message_type)
             self._send_universal_log(mission_uuid, "file", abnormal_message)
@@ -62,13 +64,12 @@ class ThreadArchiveModule(threading.Thread):
         mission_info = json.loads(json.dumps(message_detail["mission_info"]))
         self._mission_dict[mission_uuid]["mission_info"] = mission_info
         self._mission_dict[mission_uuid]["download_info"] = None
+        self._mission_dict[mission_uuid]["mission_state"] = "sleeping"
 
     def _do_with_archive_request(self, mission_uuid, message_detail):
         if mission_uuid in self._mission_dict:
-            response_detail = {"success": mission_uuid in self._mission_dict}
-            download_info = json.loads(json.dumps(message_detail["download_info"]))
-            self._mission_dict[mission_uuid]["download_info"] = download_info
-            self._send_semantic_transform(mission_uuid, "archive_response", response_detail)
+            self._mission_dict[mission_uuid]["download_info"] = message_detail["download_info"]
+            self._send_semantic_transform(mission_uuid, "archive_response", None)
 
     def _do_with_query_request(self, mission_uuid, message_detail):
         if mission_uuid in self._mission_dict:
@@ -79,6 +80,12 @@ class ThreadArchiveModule(threading.Thread):
         if mission_uuid in self._mission_dict:
             self._delete_mission_file(mission_uuid, message_detail["delete_file"])
             self._mission_dict.pop(mission_uuid)
+
+    def _do_with_state_request(self, mission_uuid, message_detail):
+        if mission_uuid in self._mission_dict:
+            mission_state = message_detail["mission_state"]
+            if mission_state in ["sleeping", "analyzing", "running"]:
+                self._mission_dict[mission_uuid]["mission_state"] = mission_state
 
     def _load_local_progress(self):
         return self._module_tool["progress"].get_download_progress()
@@ -117,4 +124,4 @@ class ThreadArchiveModule(threading.Thread):
 
     @staticmethod
     def _generate_signal_value(mission_uuid, message_type, message_detail) -> dict:
-        return {"mission_uuid": mission_uuid, "message_type": message_type, "detail": message_detail}
+        return {"mission_uuid": mission_uuid, "message_type": message_type, "message_detail": message_detail}

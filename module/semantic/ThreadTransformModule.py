@@ -19,8 +19,8 @@ class ThreadTransformModule(threading.Thread):
         while self._should_thread_continue_to_execute():
             message_dict = self._message_queue.get()
             if message_dict is None: continue
-            mission_uuid, message_type = message_dict["mission_uuid"], message_dict["message_type"]
-            self._handle_message_detail(mission_uuid, message_type, message_dict["detail"])
+            message_type, message_detail = message_dict["message_type"], message_dict["message_detail"]
+            self._handle_message_detail(message_dict["mission_uuid"], message_type, message_detail)
 
     def append_message(self, message):
         self._message_queue.put(message)
@@ -99,8 +99,7 @@ class ThreadTransformModule(threading.Thread):
             self._send_archiver_archive(mission_uuid, "archive_request", response_detail)
 
     def _do_with_archive_response(self, mission_uuid, message_detail):
-        if message_detail["success"] is True:
-            self._send_worker_control(mission_uuid, "mission_start", None)
+        self._send_worker_control(mission_uuid, "mission_start", None)
 
     def _do_with_query_response(self, mission_uuid, message_detail):
         mission_info, download_info = message_detail["mission_info"], message_detail["download_info"]
@@ -145,4 +144,4 @@ class ThreadTransformModule(threading.Thread):
 
     @staticmethod
     def _generate_signal_value(mission_uuid, message_type, message_detail) -> dict:
-        return {"mission_uuid": mission_uuid, "message_type": message_type, "detail": message_detail}
+        return {"mission_uuid": mission_uuid, "message_type": message_type, "message_detail": message_detail}

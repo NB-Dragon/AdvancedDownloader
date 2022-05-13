@@ -24,8 +24,8 @@ class ThreadSpeedModule(threading.Thread):
         while self._should_thread_continue_to_execute():
             message_dict = self._message_queue.get()
             if message_dict is None: continue
-            mission_uuid, message_type = message_dict["mission_uuid"], message_dict["message_type"]
-            self._handle_message_detail(mission_uuid, message_type, message_dict["detail"])
+            message_type, message_detail = message_dict["message_type"], message_dict["message_detail"]
+            self._handle_message_detail(message_dict["mission_uuid"], message_type, message_detail)
             self._broadcast_speed_content()
 
     def append_message(self, message):
@@ -110,4 +110,4 @@ class ThreadSpeedModule(threading.Thread):
 
     @staticmethod
     def _generate_signal_value(mission_uuid, message_type, message_detail) -> dict:
-        return {"mission_uuid": mission_uuid, "message_type": message_type, "detail": message_detail}
+        return {"mission_uuid": mission_uuid, "message_type": message_type, "message_detail": message_detail}

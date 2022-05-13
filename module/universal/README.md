@@ -1,3 +1,18 @@
+# Thread Interact Module: thread-interact
+## Table
+- Request
+```json
+{
+  "receiver": "thread-interact",
+  "value": {
+    "message_type": "table",
+    "message_detail": {
+      "rows": [[], [], []]
+    }
+  }
+}
+```
+
 # Thread Log Module: thread-log
 ## Console
 - Request
@@ -7,7 +22,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "console",
-    "detail": {
+    "message_detail": {
       "sender": "ClassName",
       "content": "str"
     }
@@ -23,7 +38,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "file",
-    "detail": {
+    "message_detail": {
       "sender": "ClassName",
       "content": "str"
     }
@@ -40,7 +55,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "open",
-    "detail": {
+    "message_detail": {
       "path": "absolute_path"
     }
   }
@@ -56,7 +71,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "register",
-    "detail": {
+    "message_detail": {
       "download_info": null
     }
   }
@@ -71,7 +86,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "change",
-    "detail": {
+    "message_detail": {
       "size": 0
     }
   }
@@ -86,7 +101,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "delete",
-    "detail": null
+    "message_detail": null
   }
 }
 ```

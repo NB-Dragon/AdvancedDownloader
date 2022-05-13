@@ -7,7 +7,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "create_request",
-    "detail": {
+    "message_detail": {
       "mission_info": null
     }
   }
@@ -22,7 +22,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "archive_request",
-    "detail": {
+    "message_detail": {
       "download_info": null
     }
   }
@@ -36,9 +36,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "archive_response",
-    "detail": {
-      "success": true
-    }
+    "message_detail": null
   }
 }
 ```
@@ -51,7 +49,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "query_request",
-    "detail": null
+    "message_detail": null
   }
 }
 ```
@@ -63,7 +61,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "query_response",
-    "detail": {
+    "message_detail": {
       "mission_info": null,
       "download_info": null
     }
@@ -79,8 +77,23 @@
   "value": {
     "mission_uuid": "",
     "message_type": "delete_request",
-    "detail": {
+    "message_detail": {
       "delete_file": false
+    }
+  }
+}
+```
+
+## State Request
+- Request
+```json
+{
+  "receiver": "thread-archive",
+  "value": {
+    "mission_uuid": "",
+    "message_type": "state_request",
+    "message_detail": {
+      "mission_state": "sleeping/analyzing/running"
     }
   }
 }

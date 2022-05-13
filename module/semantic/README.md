@@ -7,7 +7,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "create_command",
-    "detail": {
+    "message_detail": {
       "mission_info": null
     }
   }
@@ -21,7 +21,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "create_request",
-    "detail": {
+    "message_detail": {
       "mission_info": null
     }
   }
@@ -36,7 +36,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "start_command",
-    "detail": null
+    "message_detail": null
   }
 }
 ```
@@ -48,7 +48,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "mission_start",
-    "detail": null
+    "message_detail": null
   }
 }
 ```
@@ -61,7 +61,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "pause_command",
-    "detail": null
+    "message_detail": null
   }
 }
 ```
@@ -73,7 +73,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "mission_pause",
-    "detail": null
+    "message_detail": null
   }
 }
 ```
@@ -86,7 +86,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "delete_command",
-    "detail": {
+    "message_detail": {
       "delete_file": false
     }
   }
@@ -100,7 +100,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "mission_delete",
-    "detail": {
+    "message_detail": {
       "delete_file": false
     }
   }
@@ -115,7 +115,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "data_request",
-    "detail": null
+    "message_detail": null
   }
 }
 ```
@@ -127,7 +127,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "query_request",
-    "detail": null
+    "message_detail": null
   }
 }
 ```
@@ -140,8 +140,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "update_request",
-    "detail": {
-      "update_size": 0,
+    "message_detail": {
       "download_info": null
     }
   }
@@ -155,7 +154,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "archive_request",
-    "detail": {
+    "message_detail": {
       "download_info": null
     }
   }
@@ -184,7 +183,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "delete_request",
-    "detail": {
+    "message_detail": {
       "delete_file": false
     }
   }
@@ -198,7 +197,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "delete_request",
-    "detail": {
+    "message_detail": {
       "delete_file": false
     }
   }
@@ -212,7 +211,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "delete",
-    "detail": null
+    "message_detail": null
   }
 }
 ```
@@ -225,7 +224,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "analyze_response",
-    "detail": {
+    "message_detail": {
       "analyze_count": 0,
       "mission_info": null,
       "download_info": null
@@ -241,7 +240,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "data_response",
-    "detail": {
+    "message_detail": {
       "mission_info": null,
       "download_info": null
     }
@@ -256,7 +255,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "archive_request",
-    "detail": {
+    "message_detail": {
       "download_info": null
     }
   }
@@ -271,7 +270,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "archive_response",
-    "detail": {
+    "message_detail": {
       "success": true
     }
   }
@@ -285,7 +284,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "mission_start",
-    "detail": null
+    "message_detail": null
   }
 }
 ```
@@ -298,7 +297,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "query_response",
-    "detail": {
+    "message_detail": {
       "mission_info": null,
       "download_info": null
     }
@@ -313,7 +312,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "analyze_request",
-    "detail": {
+    "message_detail": {
       "analyze_count": 0,
       "mission_info": null
     }
@@ -328,7 +327,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "data_response",
-    "detail": {
+    "message_detail": {
       "mission_info": null,
       "download_info": null
     }

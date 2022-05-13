@@ -7,6 +7,7 @@ import threading
 from module.analyzer.ThreadAnalyzeModule import ThreadAnalyzeModule
 from module.archiver.ThreadArchiveModule import ThreadArchiveModule
 from module.semantic.ThreadTransformModule import ThreadTransformModule
+from module.universal.ThreadInteractModule import ThreadInteractModule
 from module.universal.ThreadLogModule import ThreadLogModule
 from module.universal.ThreadOpenModule import ThreadOpenModule
 from module.universal.ThreadSpeedModule import ThreadSpeedModule
@@ -40,6 +41,7 @@ class ThreadMessageModule(threading.Thread):
 
     def _init_all_module(self):
         self._all_module = dict()
+        self._all_module["thread-interact"] = ThreadInteractModule()
         self._all_module["thread-log"] = ThreadLogModule(self._project_helper.get_project_path("log"))
         self._all_module["thread-open"] = ThreadOpenModule(self)
         self._all_module["thread-speed"] = ThreadSpeedModule(self)
@@ -86,4 +88,4 @@ class ThreadMessageModule(threading.Thread):
 
     @staticmethod
     def _generate_signal_value(mission_uuid, message_type, message_detail) -> dict:
-        return {"mission_uuid": mission_uuid, "message_type": message_type, "detail": message_detail}
+        return {"mission_uuid": mission_uuid, "message_type": message_type, "message_detail": message_detail}
