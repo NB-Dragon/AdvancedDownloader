@@ -1,4 +1,18 @@
 # Thread Interact Module: thread-interact
+## Normal
+- Request
+```json
+{
+  "receiver": "thread-interact",
+  "value": {
+    "message_type": "normal",
+    "message_detail": {
+      "content": ""
+    }
+  }
+}
+```
+
 ## Table
 - Request
 ```json
