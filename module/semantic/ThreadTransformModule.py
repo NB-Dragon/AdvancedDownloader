@@ -92,7 +92,7 @@ class ThreadTransformModule(threading.Thread):
 
     def _do_with_analyze_response(self, mission_uuid, message_detail):
         mission_info, download_info = message_detail["mission_info"], message_detail["download_info"]
-        if message_detail["download_info"] is None:
+        if download_info is None:
             if message_detail["analyze_count"] < self._global_config["retry"]:
                 response_detail = {"analyze_count": message_detail["analyze_count"] + 1, "mission_info": mission_info}
                 self._send_analyzer_analyze(mission_uuid, "analyze_request", response_detail)
