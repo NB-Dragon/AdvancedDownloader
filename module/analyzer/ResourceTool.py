@@ -46,6 +46,12 @@ class ResourceTool(object):
         else:
             return None
 
+    @staticmethod
+    def _calculate_total_size(download_info):
+        if isinstance(download_info, dict):
+            for value in download_info["section_info"].values():
+                download_info["total_size"] += value["section_size"] if value["section_size"] else 0
+
     def _generate_file_info_from_resource(self, mission_uuid, mission_info, resource_info):
         # Attempt to identify torrent information
         if "accept_range" in resource_info:
@@ -79,12 +85,6 @@ class ResourceTool(object):
             index += 1
             file_name = "{}-{}{}".format(name, index, postfix)
         return file_name
-
-    @staticmethod
-    def _calculate_total_size(download_info):
-        if isinstance(download_info, dict):
-            for value in download_info["section_info"].values():
-                download_info["total_size"] += value["section_size"] if value["section_size"] else 0
 
     def _send_universal_log(self, mission_uuid, message_type, content):
         message_dict = self._generate_action_signal_template("thread-log")

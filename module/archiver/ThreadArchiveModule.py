@@ -46,6 +46,8 @@ class ThreadArchiveModule(threading.Thread):
     def _handle_message_detail(self, mission_uuid, message_type, message_detail):
         if message_type == "create_request":
             self._do_with_create_request(mission_uuid, message_detail)
+        elif message_type == "update_request":
+            self._do_with_update_request(mission_uuid, message_detail)
         elif message_type == "archive_request":
             self._do_with_archive_request(mission_uuid, message_detail)
         elif message_type == "query_request":
@@ -68,6 +70,10 @@ class ThreadArchiveModule(threading.Thread):
         self._mission_dict[mission_uuid]["mission_state"] = "sleeping"
         response_detail = {"content": "create mission success. mission uuid is: {}".format(mission_uuid)}
         self._send_universal_interact("normal", response_detail)
+
+    def _do_with_update_request(self, mission_uuid, message_detail):
+        if mission_uuid in self._mission_dict:
+            self._module_tool["progress"].update_download_progress(self._mission_dict, mission_uuid, message_detail)
 
     def _do_with_archive_request(self, mission_uuid, message_detail):
         if mission_uuid in self._mission_dict:

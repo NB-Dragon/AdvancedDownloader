@@ -14,6 +14,23 @@
 }
 ```
 
+## Update Request
+- Request
+```json
+{
+  "receiver": "thread-archive",
+  "value": {
+    "mission_uuid": "",
+    "message_type": "update_request",
+    "message_detail": {
+      "section_uuid": "",
+      "write_position": 0,
+      "write_length": 0
+    }
+  }
+}
+```
+
 ## Archive Request
 - Request
 ```json
