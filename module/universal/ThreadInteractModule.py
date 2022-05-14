@@ -31,10 +31,10 @@ class ThreadInteractModule(threading.Thread):
         return self._run_status or self._message_queue.qsize()
 
     def _handle_message_detail(self, message_type, message_detail):
-        if message_type == "table":
-            self._print_interactive_content(self._generate_table_content(message_detail))
-        elif message_type == "normal":
+        if message_type == "normal":
             self._print_interactive_content(message_detail["content"])
+        elif message_type == "table":
+            self._print_interactive_content(self._generate_table_content(message_detail))
         else:
             abnormal_message = "Unknown message type of \"{}\"".format(message_type)
             self._send_universal_log(None, "file", abnormal_message)
