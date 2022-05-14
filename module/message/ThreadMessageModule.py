@@ -26,7 +26,6 @@ class ThreadMessageModule(threading.Thread):
         self._start_all_module()
         while self._should_thread_continue_to_execute():
             message_dict = self._message_queue.get()
-            print(message_dict)
             if message_dict is None: continue
             message_receiver, message_value = message_dict["receiver"], message_dict["value"]
             self._handle_message_value(message_receiver, message_value)

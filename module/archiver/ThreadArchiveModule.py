@@ -92,10 +92,9 @@ class ThreadArchiveModule(threading.Thread):
     def _do_with_show_request(self, message_detail):
         if message_detail["mission_uuid"]:
             response_detail = {"rows": self._generate_table_mission_detail(message_detail["mission_uuid"])}
-            self._send_universal_interact("table", response_detail)
         else:
             response_detail = {"rows": self._generate_table_summary_detail()}
-            self._send_universal_interact("table", response_detail)
+        self._send_universal_interact("table", response_detail)
 
     def _load_local_progress(self):
         return self._module_tool["progress"].get_download_progress()
@@ -147,15 +146,15 @@ class ThreadArchiveModule(threading.Thread):
         message_dict["value"] = self._generate_signal_value(mission_uuid, message_type, message_detail)
         self._switch_message.append_message(message_dict)
 
+    def _send_universal_interact(self, message_type, message_detail):
+        message_dict = self._generate_action_signal_template("thread-interact")
+        message_dict["value"] = self._generate_signal_value_without_uuid(message_type, message_detail)
+        self._switch_message.append_message(message_dict)
+
     def _send_universal_log(self, mission_uuid, message_type, content):
         message_dict = self._generate_action_signal_template("thread-log")
         message_detail = {"sender": "ThreadArchiveModule", "content": content}
         message_dict["value"] = self._generate_signal_value(mission_uuid, message_type, message_detail)
-        self._switch_message.append_message(message_dict)
-
-    def _send_universal_interact(self, message_type, message_detail):
-        message_dict = self._generate_action_signal_template("thread-interact")
-        message_dict["value"] = self._generate_signal_value_without_uuid(message_type, message_detail)
         self._switch_message.append_message(message_dict)
 
     @staticmethod
