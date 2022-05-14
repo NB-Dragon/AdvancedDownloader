@@ -103,7 +103,7 @@ class CommandHelper(object):
         if parser_args:
             if parser_args.all or parser_args.mission_uuid:
                 mission_uuid = None if parser_args.all else parser_args.mission_uuid
-                message_detail = {"mission_uuid": mission_uuid, "delete_file": parser_args.delete}
+                message_detail = {"mission_uuid": mission_uuid, "delete_file": parser_args.with_file}
                 response_message = self._send_semantic_transform(None, "delete_command", message_detail)
             else:
                 response_message = self._send_universal_log(None, "console", self._mode_error_tips)
