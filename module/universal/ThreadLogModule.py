@@ -8,10 +8,12 @@ import time
 
 
 class ThreadLogModule(threading.Thread):
-    def __init__(self, log_file_path, debug_mode=True):
+    def __init__(self, project_helper):
         super().__init__()
-        self._log_file_path = log_file_path
-        self._debug_mode = debug_mode
+        self._project_helper = project_helper
+        global_config = self._project_helper.get_project_config()["global"]
+        self._log_file_path = self._project_helper.get_project_path("log")
+        self._debug_mode = global_config["debug"]
         self._message_queue = queue.Queue()
         self._run_status = True
 

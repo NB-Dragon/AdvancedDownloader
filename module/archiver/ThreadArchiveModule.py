@@ -39,7 +39,6 @@ class ThreadArchiveModule(threading.Thread):
     def _init_module_tool(self):
         self._module_tool = dict()
         self._module_tool["progress"] = ProgressTool(self._project_helper)
-        self._global_config = self._project_helper.get_project_config()["global"]
 
     def _should_thread_continue_to_execute(self):
         return self._run_status or self._message_queue.qsize()

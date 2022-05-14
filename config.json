@@ -10,6 +10,7 @@
     }
   },
   "global": {
+    "debug": true,
     "timeout": 5,
     "retry": 3
   }

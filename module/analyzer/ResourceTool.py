@@ -26,7 +26,7 @@ class ResourceTool(object):
         self._network_tool = dict()
         static_cert_path = self._project_helper.get_static_cert_path()
         global_config = self._project_helper.get_project_config()["global"]
-        self._network_tool["detect"] = NetworkDetectHelper(static_cert_path, global_config)
+        self._network_tool["detect"] = NetworkDetectHelper(static_cert_path, global_config["timeout"])
         self._network_tool["info"] = NetworkInfoHelper()
 
     def _get_resource_simple_request(self, mission_uuid, mission_info):

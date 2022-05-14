@@ -42,7 +42,7 @@ class ThreadMessageModule(threading.Thread):
     def _init_all_module(self):
         self._all_module = dict()
         self._all_module["thread-interact"] = ThreadInteractModule(self)
-        self._all_module["thread-log"] = ThreadLogModule(self._project_helper.get_project_path("log"))
+        self._all_module["thread-log"] = ThreadLogModule(self._project_helper)
         self._all_module["thread-open"] = ThreadOpenModule(self)
         self._all_module["thread-speed"] = ThreadSpeedModule(self)
         self._all_module["thread-analyze"] = ThreadAnalyzeModule(self._project_helper, self)

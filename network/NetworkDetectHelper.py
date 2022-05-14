@@ -7,9 +7,9 @@ from network.NetworkRequestHelper import NetworkRequestHelper
 
 
 class NetworkDetectHelper(object):
-    def __init__(self, ca_cert_path, global_config):
+    def __init__(self, ca_cert_path, time_out):
         self._ca_cert_path = ca_cert_path
-        self._global_config = global_config
+        self._time_out = time_out
         self._init_detect_tool()
 
     def get_resource_simple_request(self, target_link, headers, proxy):
@@ -23,7 +23,7 @@ class NetworkDetectHelper(object):
             return {"client": None, "error": "Unknown request schema {}".format(schema_name)}
 
     def _init_detect_tool(self):
-        self._network_request_helper = NetworkRequestHelper(self._ca_cert_path, self._global_config["timeout"])
+        self._network_request_helper = NetworkRequestHelper(self._ca_cert_path, self._time_out)
 
     @staticmethod
     def _get_link_schema(target_link):
