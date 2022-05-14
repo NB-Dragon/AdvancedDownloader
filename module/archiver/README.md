@@ -14,18 +14,31 @@
 }
 ```
 
-## Update Request
+## Show Request
+- Request
+```json
+{
+  "receiver": "thread-archive",
+  "value": {
+    "mission_uuid": null,
+    "message_type": "show_request",
+    "message_detail": {
+      "mission_uuid": null
+    }
+  }
+}
+```
+
+## Delete Request
 - Request
 ```json
 {
   "receiver": "thread-archive",
   "value": {
     "mission_uuid": "",
-    "message_type": "update_request",
+    "message_type": "delete_request",
     "message_detail": {
-      "section_uuid": "",
-      "write_position": 0,
-      "write_length": 0
+      "delete_file": false
     }
   }
 }
@@ -86,16 +99,18 @@
 }
 ```
 
-## Delete Request
+## Update Request
 - Request
 ```json
 {
   "receiver": "thread-archive",
   "value": {
     "mission_uuid": "",
-    "message_type": "delete_request",
+    "message_type": "update_request",
     "message_detail": {
-      "delete_file": false
+      "section_uuid": "",
+      "write_position": 0,
+      "write_length": 0
     }
   }
 }
@@ -111,21 +126,6 @@
     "message_type": "state_request",
     "message_detail": {
       "mission_state": "sleeping/analyzing/running"
-    }
-  }
-}
-```
-
-## Show Request
-- Request
-```json
-{
-  "receiver": "thread-archive",
-  "value": {
-    "mission_uuid": null,
-    "message_type": "show_request",
-    "message_detail": {
-      "mission_uuid": null
     }
   }
 }

@@ -46,18 +46,18 @@ class ThreadArchiveModule(threading.Thread):
     def _handle_message_detail(self, mission_uuid, message_type, message_detail):
         if message_type == "create_request":
             self._do_with_create_request(mission_uuid, message_detail)
-        elif message_type == "update_request":
-            self._do_with_update_request(mission_uuid, message_detail)
+        elif message_type == "show_request":
+            self._do_with_show_request(message_detail)
+        elif message_type == "delete_request":
+            self._do_with_delete_request(mission_uuid, message_detail)
         elif message_type == "archive_request":
             self._do_with_archive_request(mission_uuid, message_detail)
         elif message_type == "query_request":
             self._do_with_query_request(mission_uuid, message_detail)
-        elif message_type == "delete_request":
-            self._do_with_delete_request(mission_uuid, message_detail)
+        elif message_type == "update_request":
+            self._do_with_update_request(mission_uuid, message_detail)
         elif message_type == "state_request":
             self._do_with_state_request(mission_uuid, message_detail)
-        elif message_type == "show_request":
-            self._do_with_show_request(message_detail)
         else:
             abnormal_message = "Unknown message type of \"{}\"".format(message_type)
             self._send_universal_log(mission_uuid, "file", abnormal_message)
@@ -71,9 +71,17 @@ class ThreadArchiveModule(threading.Thread):
         response_detail = {"content": "create mission success. mission uuid is: {}".format(mission_uuid)}
         self._send_universal_interact("normal", response_detail)
 
-    def _do_with_update_request(self, mission_uuid, message_detail):
+    def _do_with_show_request(self, message_detail):
+        if message_detail["mission_uuid"]:
+            response_detail = {"rows": self._generate_table_mission_detail(message_detail["mission_uuid"])}
+        else:
+            response_detail = {"rows": self._generate_table_summary_detail()}
+        self._send_universal_interact("table", response_detail)
+
+    def _do_with_delete_request(self, mission_uuid, message_detail):
         if mission_uuid in self._mission_dict:
-            self._module_tool["progress"].update_download_progress(self._mission_dict, mission_uuid, message_detail)
+            self._delete_mission_file(mission_uuid, message_detail["delete_file"])
+            self._mission_dict.pop(mission_uuid)
 
     def _do_with_archive_request(self, mission_uuid, message_detail):
         if mission_uuid in self._mission_dict:
@@ -85,23 +93,15 @@ class ThreadArchiveModule(threading.Thread):
             response_detail = json.loads(json.dumps(self._mission_dict[mission_uuid]))
             self._send_semantic_transform(mission_uuid, "query_response", response_detail)
 
-    def _do_with_delete_request(self, mission_uuid, message_detail):
+    def _do_with_update_request(self, mission_uuid, message_detail):
         if mission_uuid in self._mission_dict:
-            self._delete_mission_file(mission_uuid, message_detail["delete_file"])
-            self._mission_dict.pop(mission_uuid)
+            self._module_tool["progress"].update_download_progress(self._mission_dict, mission_uuid, message_detail)
 
     def _do_with_state_request(self, mission_uuid, message_detail):
         if mission_uuid in self._mission_dict:
             mission_state = message_detail["mission_state"]
             if mission_state in ["sleeping", "analyzing", "running"]:
                 self._mission_dict[mission_uuid]["mission_state"] = mission_state
-
-    def _do_with_show_request(self, message_detail):
-        if message_detail["mission_uuid"]:
-            response_detail = {"rows": self._generate_table_mission_detail(message_detail["mission_uuid"])}
-        else:
-            response_detail = {"rows": self._generate_table_summary_detail()}
-        self._send_universal_interact("table", response_detail)
 
     def _load_local_progress(self):
         return self._module_tool["progress"].get_download_progress()
