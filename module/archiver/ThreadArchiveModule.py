@@ -66,6 +66,8 @@ class ThreadArchiveModule(threading.Thread):
         self._mission_dict[mission_uuid]["mission_info"] = mission_info
         self._mission_dict[mission_uuid]["download_info"] = None
         self._mission_dict[mission_uuid]["mission_state"] = "sleeping"
+        response_detail = {"content": "create mission success. mission uuid is: {}".format(mission_uuid)}
+        self._send_universal_interact("normal", response_detail)
 
     def _do_with_archive_request(self, mission_uuid, message_detail):
         if mission_uuid in self._mission_dict:
