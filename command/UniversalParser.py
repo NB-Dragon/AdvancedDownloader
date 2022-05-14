@@ -7,14 +7,12 @@ import time
 
 
 class UniversalParser(object):
-    def __init__(self, version_name):
-        self._version_name = version_name
+    def __init__(self):
         self._continue_checking = True
 
     def get_runtime_arguments(self, argument_content=None):
         try:
             parser = argparse.ArgumentParser()
-            parser.add_argument("-v", "--version", action="version", version=self._version_name)
             parser.add_argument("--all", action="store_true", help="Show the mission summary information.")
             parser.add_argument("--mission_uuid", dest='mission_uuid', help="Perform action on specified tasks.")
             args = parser.parse_args(argument_content)

@@ -7,13 +7,14 @@ import urllib.parse
 from command.CreateParser import CreateParser
 from command.DeleteParser import DeleteParser
 from command.UniversalParser import UniversalParser
+from core.util.HTTPHeaderGenerator import HTTPHeaderGenerator
 from helper.ArgumentReader import ArgumentReader
 from helper.BashReader import BashReader
 
 
 class CommandHelper(object):
-    def __init__(self, project_helper):
-        self._project_helper = project_helper
+    def __init__(self, version_name):
+        self._version_name = version_name
         self._bash_reader = BashReader()
         self._argument_reader = ArgumentReader()
         self._param_error_tips = "The current parameters are incomplete. Please read the document."
@@ -22,9 +23,9 @@ class CommandHelper(object):
 
     def _init_module_tool(self):
         self._module_tool = dict()
-        self._module_tool["create_parser"] = CreateParser(self._project_helper.get_project_version())
-        self._module_tool["delete_parser"] = DeleteParser(self._project_helper.get_project_version())
-        self._module_tool["universal_parser"] = UniversalParser(self._project_helper.get_project_version())
+        self._module_tool["create_parser"] = CreateParser()
+        self._module_tool["delete_parser"] = DeleteParser()
+        self._module_tool["universal_parser"] = UniversalParser()
 
     def get_next_command_message(self):
         command_content = self._bash_reader.get_next_line()
@@ -121,13 +122,20 @@ class CommandHelper(object):
         response_detail = {"mission_info": mission_info}
         return {"mission_uuid": mission_uuid, "message_detail": response_detail}
 
+    def _generate_standard_headers(self, headers_content):
+        header_generator = HTTPHeaderGenerator(self._version_name)
+        if headers_content and len(headers_content):
+            return header_generator.generate_header_from_content(headers_content)
+        else:
+            return header_generator.generate_header_with_default_agent()
+
     def _get_default_mission_info(self, mission_parameter):
         standard_mission_info = dict()
         target_link = self._get_url_after_quote(mission_parameter.url)
         standard_mission_info["target_link"] = target_link
         standard_mission_info["save_path"] = mission_parameter.output
         standard_mission_info["thread_count"] = mission_parameter.thread
-        standard_mission_info["headers"] = mission_parameter.headers
+        standard_mission_info["headers"] = self._generate_standard_headers(mission_parameter.headers)
         standard_mission_info["proxy"] = mission_parameter.proxy
         return standard_mission_info
 

@@ -5,19 +5,15 @@
 import argparse
 import os
 import time
-from core.util.HTTPHeaderGenerator import HTTPHeaderGenerator
 
 
 class CreateParser(object):
-    def __init__(self, version_name):
-        self._version_name = version_name
-        self._header_generator = HTTPHeaderGenerator(version_name)
+    def __init__(self):
         self._continue_checking = True
 
     def get_runtime_arguments(self, argument_content=None):
         try:
             parser = argparse.ArgumentParser()
-            parser.add_argument("-v", "--version", action="version", version=self._version_name)
             parser.add_argument("--url", dest='url', required=True, help="URL to connect to the resource.")
             parser.add_argument("--output", dest='output', required=True, help="The path to save without file name.")
             parser.add_argument("--thread", dest='thread', default=1, type=int, help="The maximum number of threads.")
@@ -31,18 +27,11 @@ class CreateParser(object):
     def _check_input_args(self, args):
         if not self._check_output_path_write(args.output):
             self._send_error_message("The output path does not exist or cannot be written.")
-        args.headers = self._format_headers(args.headers)
         return self._continue_checking
 
     @staticmethod
     def _check_output_path_write(output_path):
         return os.access(output_path, os.F_OK) and os.access(output_path, os.W_OK)
-
-    def _format_headers(self, headers_content):
-        if headers_content and len(headers_content):
-            return self._header_generator.generate_header_from_content(headers_content)
-        else:
-            return self._header_generator.generate_header_with_default_agent()
 
     def _send_error_message(self, message):
         self._continue_checking = False

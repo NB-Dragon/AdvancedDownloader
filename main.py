@@ -7,7 +7,7 @@ from module.message.ThreadMessageModule import ThreadMessageModule
 
 if __name__ == "__main__":
     project_helper = ProjectHelper()
-    command_helper = CommandHelper(project_helper)
+    command_helper = CommandHelper(project_helper.get_project_version())
     thread_message_module = ThreadMessageModule(project_helper)
     thread_message_module.start()
     while True:
