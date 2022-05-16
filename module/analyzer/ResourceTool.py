@@ -42,10 +42,7 @@ class ResourceTool(object):
             network_info_tool = self._network_tool["info"]
             file_info = network_info_tool.get_download_file_info(mission_uuid, mission_info, resource_info)
             section_info = network_info_tool.get_download_section_info(mission_uuid, mission_info, resource_info)
-            if file_info and section_info:
-                return {"total_size": 0, "file_info": file_info, "section_info": section_info}
-            else:
-                return None
+            return {"total_size": 0, "file_info": file_info, "section_info": section_info}
         else:
             return None
 
