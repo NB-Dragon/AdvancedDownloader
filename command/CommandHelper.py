@@ -34,8 +34,8 @@ class CommandHelper(object):
             command_type = command_arg.pop(0)
             if command_type == "create":
                 return self._generate_create_message(command_arg)
-            elif command_type == "query":
-                return self._generate_query_message(command_arg)
+            elif command_type == "show":
+                return self._generate_show_message(command_arg)
             elif command_type == "start":
                 return self._generate_start_message(command_arg)
             elif command_type == "pause":
@@ -59,12 +59,12 @@ class CommandHelper(object):
             response_message = self._send_universal_log(None, "console", self._param_error_tips)
         return {"success": True, "message": response_message}
 
-    def _generate_query_message(self, command_arg: list):
+    def _generate_show_message(self, command_arg: list):
         parser_args = self._module_tool["universal_parser"].get_runtime_arguments(command_arg)
         if parser_args:
             if parser_args.all or parser_args.mission_uuid:
                 mission_uuid = None if parser_args.all else parser_args.mission_uuid
-                response_message = self._send_semantic_transform(mission_uuid, "query_command", None)
+                response_message = self._send_semantic_transform(mission_uuid, "show_command", None)
             else:
                 response_message = self._send_universal_log(None, "console", self._mode_error_tips)
         else:

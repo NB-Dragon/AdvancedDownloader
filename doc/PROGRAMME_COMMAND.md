@@ -21,15 +21,15 @@ create --url "https://github.com/NB-Dragon/AdvancedDownloader/archive/refs/heads
 create --url "https://github.com/NB-Dragon/AdvancedDownloader/archive/refs/heads/master.zip" --output "/tmp" --thread 8
 ```
 
-# Query: Query Download Mission
+# Show: Query Download Mission
 ## Show the summary of all missions
 ```Text
-query --all
+show --all
 ```
 
 ## Show the details of the specific mission
 ```Text
-query --mission_uuid mission_uuid
+show --mission-uuid mission_uuid
 ```
 
 # Start: Start Download Mission
@@ -40,7 +40,7 @@ start --all
 
 ## Start the specific mission
 ```Text
-start --mission_uuid mission_uuid
+start --mission-uuid mission_uuid
 ```
 
 # Pause: Pause Download Mission
@@ -51,7 +51,7 @@ pause --all
 
 ## Pause the specific mission
 ```Text
-pause --mission_uuid mission_uuid
+pause --mission-uuid mission_uuid
 ```
 
 # Delete: Delete Download Mission
@@ -62,7 +62,7 @@ delete --all [--with-file]
 
 ## Delete the specific mission
 ```Text
-delete --mission_uuid mission_uuid [--with-file]
+delete --mission-uuid mission_uuid [--with-file]
 ```
 
 # Exit: Programme Exit
