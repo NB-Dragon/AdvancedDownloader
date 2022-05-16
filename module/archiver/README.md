@@ -20,7 +20,7 @@
 {
   "receiver": "thread-archive",
   "value": {
-    "mission_uuid": null,
+    "mission_uuid": "",
     "message_type": "show_request",
     "message_detail": null
   }
@@ -36,7 +36,7 @@
     "mission_uuid": "",
     "message_type": "delete_request",
     "message_detail": {
-      "delete_file": false
+      "with_file": false
     }
   }
 }
@@ -123,7 +123,7 @@
     "mission_uuid": "",
     "message_type": "state_request",
     "message_detail": {
-      "mission_state": "sleeping/analyzing/running"
+      "mission_state": "sleeping|analyzing|running"
     }
   }
 }

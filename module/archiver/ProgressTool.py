@@ -19,9 +19,9 @@ class ProgressTool(object):
         json_content = json.dumps(mission_dict)
         self._set_file_content(progress_file_path, json_content)
 
-    def update_download_progress(self, mission_dict: dict, mission_uuid, update_settings: dict):
+    def update_download_progress(self, mission_detail: dict, update_settings: dict):
         section_uuid = update_settings["section_uuid"]
-        section_progress = mission_dict[mission_uuid]["section_info"][section_uuid]["current_progress"]
+        section_progress = mission_detail["section_info"][section_uuid]["current_progress"]
         write_position, write_length = update_settings["write_position"], update_settings["write_length"]
         match_section = self._pop_match_section(section_progress, write_position)
         if isinstance(match_section, list):

@@ -52,8 +52,8 @@ class CommandHelper(object):
     def _generate_create_message(self, command_arg: list):
         parser_args = self._module_tool["create_parser"].get_runtime_arguments(command_arg)
         if parser_args:
-            mission_detail = self._generate_mission_detail(parser_args)
-            mission_uuid, message_detail = mission_detail["mission_uuid"], mission_detail["message_detail"]
+            mission_uuid, mission_info = str(uuid.uuid1()), self._get_default_mission_info(parser_args)
+            message_detail = {"mission_info": mission_info}
             response_message = self._send_semantic_transform(mission_uuid, "create_command", message_detail)
         else:
             response_message = self._send_universal_log(None, "console", self._param_error_tips)
@@ -113,19 +113,6 @@ class CommandHelper(object):
         response_message = self._send_universal_log(None, "console", exception_tips)
         return {"success": True, "message": response_message}
 
-    def _generate_mission_detail(self, input_args):
-        mission_uuid = str(uuid.uuid1())
-        mission_info = self._get_default_mission_info(input_args)
-        response_detail = {"mission_info": mission_info}
-        return {"mission_uuid": mission_uuid, "message_detail": response_detail}
-
-    def _generate_standard_headers(self, headers_content):
-        header_generator = HTTPHeaderGenerator(self._version_name)
-        if headers_content and len(headers_content):
-            return header_generator.generate_header_from_content(headers_content)
-        else:
-            return header_generator.generate_header_with_default_agent()
-
     def _get_default_mission_info(self, mission_parameter):
         standard_mission_info = dict()
         target_link = self._get_url_after_quote(mission_parameter.url)
@@ -136,18 +123,25 @@ class CommandHelper(object):
         standard_mission_info["proxy"] = mission_parameter.proxy
         return standard_mission_info
 
+    def _generate_standard_headers(self, headers_content):
+        header_generator = HTTPHeaderGenerator(self._version_name)
+        if headers_content and len(headers_content):
+            return header_generator.generate_header_from_content(headers_content)
+        else:
+            return header_generator.generate_header_with_default_agent()
+
     @staticmethod
     def _get_url_after_quote(link):
         return urllib.parse.quote(link, safe=":/?#[]@!$&'()*+,;=%")
 
-    def _send_universal_log(self, mission_uuid, message_type, content):
-        message_dict = self._generate_action_signal_template("thread-log")
-        message_detail = {"sender": "CommandHelper", "content": content}
+    def _send_semantic_transform(self, mission_uuid, message_type, message_detail):
+        message_dict = self._generate_action_signal_template("thread-transform")
         message_dict["value"] = self._generate_signal_value(mission_uuid, message_type, message_detail)
         return message_dict
 
-    def _send_semantic_transform(self, mission_uuid, message_type, message_detail):
-        message_dict = self._generate_action_signal_template("thread-transform")
+    def _send_universal_log(self, mission_uuid, message_type, content):
+        message_dict = self._generate_action_signal_template("thread-log")
+        message_detail = {"sender": "CommandHelper", "content": content}
         message_dict["value"] = self._generate_signal_value(mission_uuid, message_type, message_detail)
         return message_dict
 
