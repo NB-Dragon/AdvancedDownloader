@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 # Create Time: 2022/01/01 00:00
 # Create User: NB-Dragon
-import os
-import uuid
 from network.NetworkDetectHelper import NetworkDetectHelper
 from network.NetworkInfoHelper import NetworkInfoHelper
 
@@ -33,16 +31,21 @@ class ResourceTool(object):
         target_link, headers, proxy = mission_info["target_link"], mission_info["headers"], mission_info["proxy"]
         result_from_tool = self._network_tool["detect"].get_resource_simple_request(target_link, headers, proxy)
         if result_from_tool["client"] is not None:
-            return self._network_tool["info"].get_resource_simple_info(result_from_tool["client"], target_link)
+            network_info_tool = self._network_tool["info"]
+            return network_info_tool.get_resource_simple_info(target_link, result_from_tool["client"])
         else:
             self._send_universal_log(mission_uuid, "file", result_from_tool["error"])
             return None
 
     def _generate_final_download_info(self, mission_uuid, mission_info, resource_info):
         if resource_info:
-            file_info = self._generate_file_info_from_resource(mission_uuid, mission_info, resource_info)
-            section_info = self._generate_section_info_from_resource(mission_uuid, resource_info)
-            return {"total_size": 0, "file_info": file_info, "section_info": section_info}
+            network_info_tool = self._network_tool["info"]
+            file_info = network_info_tool.get_download_file_info(mission_uuid, mission_info, resource_info)
+            section_info = network_info_tool.get_download_section_info(mission_uuid, mission_info, resource_info)
+            if file_info and section_info:
+                return {"total_size": 0, "file_info": file_info, "section_info": section_info}
+            else:
+                return None
         else:
             return None
 
@@ -51,40 +54,6 @@ class ResourceTool(object):
         if isinstance(download_info, dict):
             for value in download_info["section_info"].values():
                 download_info["total_size"] += value["section_size"] if value["section_size"] else 0
-
-    def _generate_file_info_from_resource(self, mission_uuid, mission_info, resource_info):
-        # Attempt to identify torrent information
-        if "accept_range" in resource_info:
-            file_uuid = str(uuid.uuid3(uuid.UUID(mission_uuid), "file-1"))
-            file_size = resource_info["file_size"]
-            save_path = self._generate_not_exists_file_name(mission_info, resource_info["file_name"])
-            section_uuid = str(uuid.uuid3(uuid.UUID(mission_uuid), "section-1"))
-            section_detail = {section_uuid: [0, 0, resource_info["file_size"]]}
-            file_detail = {"file_size": file_size, "save_path": save_path, "section_detail": section_detail}
-            return {file_uuid: file_detail}
-        else:
-            return resource_info["file_info"]
-
-    @staticmethod
-    def _generate_section_info_from_resource(mission_uuid, resource_info):
-        # Attempt to identify torrent information
-        if "accept_range" in resource_info:
-            section_uuid = str(uuid.uuid3(uuid.UUID(mission_uuid), "section-1"))
-            section_size = resource_info["file_size"]
-            current_progress = [[0, resource_info["file_size"] - 1]] if resource_info["accept_range"] else [[0]]
-            section_detail = {"section_hash": None, "section_size": section_size, "current_progress": current_progress}
-            return {section_uuid: section_detail}
-        else:
-            return resource_info["section_info"]
-
-    @staticmethod
-    def _generate_not_exists_file_name(mission_info, file_name):
-        root_path, index = mission_info["save_path"], 0
-        name, postfix = os.path.splitext(file_name)
-        while os.path.exists(os.path.join(root_path, file_name)):
-            index += 1
-            file_name = "{}-{}{}".format(name, index, postfix)
-        return file_name
 
     def _send_universal_log(self, mission_uuid, message_type, content):
         message_dict = self._generate_action_signal_template("thread-log")
