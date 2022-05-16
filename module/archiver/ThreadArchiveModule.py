@@ -46,10 +46,10 @@ class ThreadArchiveModule(threading.Thread):
     def _handle_message_detail(self, mission_uuid, message_type, message_detail):
         if message_type == "create_request":
             self._do_with_create_request(mission_uuid, message_detail)
-        elif message_type == "show_request":
-            self._do_with_show_request(mission_uuid, message_detail)
         elif message_type == "delete_request":
             self._do_with_delete_request(mission_uuid, message_detail)
+        elif message_type == "show_request":
+            self._do_with_show_request(mission_uuid, message_detail)
         elif message_type == "archive_request":
             self._do_with_archive_request(mission_uuid, message_detail)
         elif message_type == "query_request":
@@ -64,24 +64,28 @@ class ThreadArchiveModule(threading.Thread):
 
     def _do_with_create_request(self, mission_uuid, message_detail):
         self._mission_dict[mission_uuid] = dict()
-        mission_info = json.loads(json.dumps(message_detail["mission_info"]))
-        self._mission_dict[mission_uuid]["mission_info"] = mission_info
+        self._mission_dict[mission_uuid]["mission_info"] = message_detail["mission_info"]
         self._mission_dict[mission_uuid]["download_info"] = None
         self._mission_dict[mission_uuid]["mission_state"] = "sleeping"
-        response_detail = {"content": "Mission create successfully. The mission uuid is: {}".format(mission_uuid)}
+        response_detail = {"content": "Mission was created successfully. Mission uuid: {}".format(mission_uuid)}
         self._send_universal_interact("normal", response_detail)
 
+    def _do_with_delete_request(self, mission_uuid, message_detail):
+        mission_uuid_list = self._generate_actionable_mission_uuid(mission_uuid)
+        for mission_uuid_item in mission_uuid_list:
+            if message_detail["with_file"]:
+                self._delete_mission_file(self._mission_dict[mission_uuid_item])
+            self._mission_dict.pop(mission_uuid_item)
+            response_detail = {"content": "Mission was deleted successfully. Mission uuid: {}".format(mission_uuid)}
+            self._send_universal_interact("normal", response_detail)
+
     def _do_with_show_request(self, mission_uuid, message_detail):
-        if mission_uuid in self._mission_dict:
+        mission_uuid_list = self._generate_actionable_mission_uuid(mission_uuid)
+        if len(mission_uuid_list) == 1:
             response_detail = {"rows": self._generate_table_mission_detail(mission_uuid)}
         else:
             response_detail = {"rows": self._generate_table_summary_detail()}
         self._send_universal_interact("table", response_detail)
-
-    def _do_with_delete_request(self, mission_uuid, message_detail):
-        if mission_uuid in self._mission_dict:
-            self._delete_mission_file(mission_uuid, message_detail["delete_file"])
-            self._mission_dict.pop(mission_uuid)
 
     def _do_with_archive_request(self, mission_uuid, message_detail):
         if mission_uuid in self._mission_dict:
@@ -95,7 +99,8 @@ class ThreadArchiveModule(threading.Thread):
 
     def _do_with_update_request(self, mission_uuid, message_detail):
         if mission_uuid in self._mission_dict:
-            self._module_tool["progress"].update_download_progress(self._mission_dict, mission_uuid, message_detail)
+            mission_detail = self._mission_dict[mission_uuid]
+            self._module_tool["progress"].update_download_progress(mission_detail, message_detail)
 
     def _do_with_state_request(self, mission_uuid, message_detail):
         if mission_uuid in self._mission_dict:
@@ -117,13 +122,22 @@ class ThreadArchiveModule(threading.Thread):
                 response_detail = {"analyze_count": 0, "mission_info": mission_item["mission_info"]}
                 self._send_analyzer_analyze(mission_uuid, "analyze_request", response_detail)
 
-    def _delete_mission_file(self, mission_uuid, delete_file):
-        if delete_file is True:
-            mission_file_path = self._mission_dict[mission_uuid]["save_path"]
-            if os.path.isfile(mission_file_path):
-                os.remove(mission_file_path)
-            elif os.path.isdir(mission_file_path):
-                shutil.rmtree(mission_file_path)
+    def _delete_mission_file(self, mission_item):
+        mission_info, download_info = mission_item["mission_info"], mission_item["download_info"]
+        associate_file_list = self._generate_associate_file_list(mission_info["save_path"], download_info)
+        for associate_file in associate_file_list:
+            if os.path.isfile(associate_file):
+                os.remove(associate_file)
+            elif os.path.isdir(associate_file):
+                shutil.rmtree(associate_file)
+
+    def _generate_actionable_mission_uuid(self, mission_uuid):
+        if mission_uuid in self._mission_dict:
+            return [mission_uuid]
+        elif mission_uuid is None:
+            return list(self._mission_dict.keys())
+        else:
+            return []
 
     def _generate_table_summary_detail(self):
         result_list = [["mission_uuid", "mission_state"]]
@@ -136,6 +150,17 @@ class ThreadArchiveModule(threading.Thread):
         mission_item = self._mission_dict[mission_uuid]
         mission_info, download_info = mission_item["mission_info"], mission_item["download_info"]
         result_list.append([mission_uuid, json.dumps(mission_info), json.dumps(download_info)])
+        return result_list
+
+    def _generate_associate_file_list(self, mission_save_path, download_info):
+        result_list = []
+        if download_info:
+            section_uuid_list = list(download_info["section_info"].keys())
+            for section_uuid_item in section_uuid_list:
+                result_list.append(self._project_helper.get_cache_section_path(section_uuid_item))
+            file_uuid_list = list(download_info["file_info"].keys())
+            file_root_path = file_uuid_list[0].split("/")[0]
+            result_list.append(os.path.join(mission_save_path, file_root_path))
         return result_list
 
     def _send_semantic_transform(self, mission_uuid, message_type, message_detail):
