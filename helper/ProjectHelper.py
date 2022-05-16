@@ -12,6 +12,7 @@ class ProjectHelper(object):
     def __init__(self):
         self._code_entrance_path = os.path.split(os.path.abspath(sys.argv[0]))[0]
         self._cache_directory = os.path.join(self._code_entrance_path, ".cache")
+        self._section_directory = os.path.join(self._code_entrance_path, ".cache", "section")
         self._static_directory = os.path.join(self._code_entrance_path, "static")
         self._setup_cache_directory()
         self._project_path = self._init_project_path()
@@ -21,6 +22,8 @@ class ProjectHelper(object):
     def _setup_cache_directory(self):
         if not os.path.exists(self._cache_directory):
             os.mkdir(self._cache_directory)
+        if not os.path.exists(self._section_directory):
+            os.mkdir(self._section_directory)
 
     def _init_project_path(self):
         result_dict = dict()
@@ -45,6 +48,9 @@ class ProjectHelper(object):
 
     def get_project_version(self):
         return self._project_version
+
+    def get_cache_section_path(self, section_uuid):
+        return os.path.join(self._section_directory, section_uuid)
 
     def get_static_donate_path(self):
         return os.path.join(self._static_directory, "image", "Payment.png")
