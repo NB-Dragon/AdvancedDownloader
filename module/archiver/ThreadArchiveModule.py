@@ -46,10 +46,10 @@ class ThreadArchiveModule(threading.Thread):
     def _handle_message_detail(self, mission_uuid, message_type, message_detail):
         if message_type == "create_request":
             self._do_with_create_request(mission_uuid, message_detail)
-        elif message_type == "delete_request":
-            self._do_with_delete_request(mission_uuid, message_detail)
         elif message_type == "show_request":
             self._do_with_show_request(mission_uuid, message_detail)
+        elif message_type == "delete_request":
+            self._do_with_delete_request(mission_uuid, message_detail)
         elif message_type == "archive_request":
             self._do_with_archive_request(mission_uuid, message_detail)
         elif message_type == "query_request":
@@ -70,6 +70,14 @@ class ThreadArchiveModule(threading.Thread):
         response_detail = {"content": "Mission was created successfully. Mission uuid: {}".format(mission_uuid)}
         self._send_universal_interact("normal", response_detail)
 
+    def _do_with_show_request(self, mission_uuid, message_detail):
+        mission_uuid_list = self._generate_actionable_mission_uuid(mission_uuid)
+        if len(mission_uuid_list) == 1:
+            response_detail = {"rows": self._generate_table_mission_detail(mission_uuid)}
+        else:
+            response_detail = {"rows": self._generate_table_summary_detail()}
+        self._send_universal_interact("table", response_detail)
+
     def _do_with_delete_request(self, mission_uuid, message_detail):
         mission_uuid_list = self._generate_actionable_mission_uuid(mission_uuid)
         for mission_uuid_item in mission_uuid_list:
@@ -78,14 +86,6 @@ class ThreadArchiveModule(threading.Thread):
             self._mission_dict.pop(mission_uuid_item)
             response_detail = {"content": "Mission was deleted successfully. Mission uuid: {}".format(mission_uuid)}
             self._send_universal_interact("normal", response_detail)
-
-    def _do_with_show_request(self, mission_uuid, message_detail):
-        mission_uuid_list = self._generate_actionable_mission_uuid(mission_uuid)
-        if len(mission_uuid_list) == 1:
-            response_detail = {"rows": self._generate_table_mission_detail(mission_uuid)}
-        else:
-            response_detail = {"rows": self._generate_table_summary_detail()}
-        self._send_universal_interact("table", response_detail)
 
     def _do_with_archive_request(self, mission_uuid, message_detail):
         if mission_uuid in self._mission_dict:

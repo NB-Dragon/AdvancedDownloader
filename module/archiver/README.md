@@ -14,6 +14,19 @@
 }
 ```
 
+## Show Request
+- Request
+```json
+{
+  "receiver": "thread-archive",
+  "value": {
+    "mission_uuid": "",
+    "message_type": "show_request",
+    "message_detail": null
+  }
+}
+```
+
 ## Delete Request
 - Request
 ```json
@@ -25,19 +38,6 @@
     "message_detail": {
       "with_file": false
     }
-  }
-}
-```
-
-## Show Request
-- Request
-```json
-{
-  "receiver": "thread-archive",
-  "value": {
-    "mission_uuid": "",
-    "message_type": "show_request",
-    "message_detail": null
   }
 }
 ```
