@@ -22,9 +22,7 @@
   "value": {
     "mission_uuid": null,
     "message_type": "show_request",
-    "message_detail": {
-      "mission_uuid": null
-    }
+    "message_detail": null
   }
 }
 ```

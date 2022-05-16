@@ -47,7 +47,7 @@ class ThreadArchiveModule(threading.Thread):
         if message_type == "create_request":
             self._do_with_create_request(mission_uuid, message_detail)
         elif message_type == "show_request":
-            self._do_with_show_request(message_detail)
+            self._do_with_show_request(mission_uuid, message_detail)
         elif message_type == "delete_request":
             self._do_with_delete_request(mission_uuid, message_detail)
         elif message_type == "archive_request":
@@ -71,9 +71,9 @@ class ThreadArchiveModule(threading.Thread):
         response_detail = {"content": "create mission success. mission uuid is: {}".format(mission_uuid)}
         self._send_universal_interact("normal", response_detail)
 
-    def _do_with_show_request(self, message_detail):
-        if message_detail["mission_uuid"]:
-            response_detail = {"rows": self._generate_table_mission_detail(message_detail["mission_uuid"])}
+    def _do_with_show_request(self, mission_uuid, message_detail):
+        if mission_uuid in self._mission_dict:
+            response_detail = {"rows": self._generate_table_mission_detail(mission_uuid)}
         else:
             response_detail = {"rows": self._generate_table_summary_detail()}
         self._send_universal_interact("table", response_detail)
