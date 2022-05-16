@@ -76,8 +76,7 @@ class CommandHelper(object):
         if parser_args:
             if parser_args.all or parser_args.mission_uuid:
                 mission_uuid = None if parser_args.all else parser_args.mission_uuid
-                message_detail = {"mission_uuid": mission_uuid}
-                response_message = self._send_semantic_transform(None, "start_command", message_detail)
+                response_message = self._send_semantic_transform(mission_uuid, "start_command", None)
             else:
                 response_message = self._send_universal_log(None, "console", self._mode_error_tips)
         else:
@@ -89,8 +88,7 @@ class CommandHelper(object):
         if parser_args:
             if parser_args.all or parser_args.mission_uuid:
                 mission_uuid = None if parser_args.all else parser_args.mission_uuid
-                message_detail = {"mission_uuid": mission_uuid}
-                response_message = self._send_semantic_transform(None, "pause_command", message_detail)
+                response_message = self._send_semantic_transform(mission_uuid, "pause_command", None)
             else:
                 response_message = self._send_universal_log(None, "console", self._mode_error_tips)
         else:
@@ -102,8 +100,8 @@ class CommandHelper(object):
         if parser_args:
             if parser_args.all or parser_args.mission_uuid:
                 mission_uuid = None if parser_args.all else parser_args.mission_uuid
-                message_detail = {"mission_uuid": mission_uuid, "delete_file": parser_args.with_file}
-                response_message = self._send_semantic_transform(None, "delete_command", message_detail)
+                message_detail = {"with_file": parser_args.with_file}
+                response_message = self._send_semantic_transform(mission_uuid, "delete_command", message_detail)
             else:
                 response_message = self._send_universal_log(None, "console", self._mode_error_tips)
         else:
