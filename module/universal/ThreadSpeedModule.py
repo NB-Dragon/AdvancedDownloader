@@ -48,7 +48,7 @@ class ThreadSpeedModule(threading.Thread):
         elif message_type == "change":
             self._do_with_action_change(mission_uuid, message_detail)
         elif message_type == "delete":
-            self._do_with_action_delete(mission_uuid)
+            self._do_with_action_delete(mission_uuid, message_detail)
         else:
             abnormal_message = "Unknown message type of \"{}\"".format(message_type)
             self._send_universal_log(mission_uuid, "file", abnormal_message)
@@ -67,7 +67,7 @@ class ThreadSpeedModule(threading.Thread):
             self._mission_dict[mission_uuid]["update_size"] += length
             self._mission_dict[mission_uuid]["current_size"] += length
 
-    def _do_with_action_delete(self, mission_uuid):
+    def _do_with_action_delete(self, mission_uuid, message_detail):
         if mission_uuid in self._mission_dict:
             self._mission_dict.pop(mission_uuid)
 
