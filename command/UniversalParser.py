@@ -14,7 +14,7 @@ class UniversalParser(object):
         try:
             parser = argparse.ArgumentParser()
             parser.add_argument("--all", action="store_true", help="Show the mission summary information.")
-            parser.add_argument("--mission_uuid", dest='mission_uuid', help="Perform action on specified tasks.")
+            parser.add_argument("--mission-uuid", type=str, help="Perform action on specified tasks.")
             args = parser.parse_args(argument_content)
             return args if self._check_input_args(args) else None
         except SystemExit:

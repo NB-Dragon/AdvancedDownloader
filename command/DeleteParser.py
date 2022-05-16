@@ -14,7 +14,7 @@ class DeleteParser(object):
         try:
             parser = argparse.ArgumentParser()
             parser.add_argument("--all", action="store_true", help="Show the mission summary information.")
-            parser.add_argument("--mission_uuid", dest='mission_uuid', help="Show the specific mission info.")
+            parser.add_argument("--mission-uuid", type=str, help="Show the specific mission info.")
             parser.add_argument("--with-file", action="store_true", help="Change to true if you want to delete file.")
             args = parser.parse_args(argument_content)
             return args if self._check_input_args(args) else None
