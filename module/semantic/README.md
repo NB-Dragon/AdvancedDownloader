@@ -28,6 +28,31 @@
 }
 ```
 
+## Show Command
+- Request
+```json
+{
+  "receiver": "thread-transform",
+  "value": {
+    "mission_uuid": "",
+    "message_type": "show_command",
+    "message_detail": null
+  }
+}
+```
+
+- Response
+```json
+{
+  "receiver": "thread-archive",
+  "value": {
+    "mission_uuid": "",
+    "message_type": "show_request",
+    "message_detail": null
+  }
+}
+```
+
 ## Start Command
 - Request
 ```json
@@ -141,7 +166,9 @@
     "mission_uuid": "",
     "message_type": "update_request",
     "message_detail": {
-      "download_info": null
+      "section_uuid": "",
+      "write_position": 0,
+      "write_length": 0
     }
   }
 }
@@ -153,9 +180,11 @@
   "receiver": "thread-archive",
   "value": {
     "mission_uuid": "",
-    "message_type": "archive_request",
+    "message_type": "update_request",
     "message_detail": {
-      "download_info": null
+      "section_uuid": "",
+      "write_position": 0,
+      "write_length": 0
     }
   }
 }
@@ -168,7 +197,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "change",
-    "detail": {
+    "message_detail": {
       "size": 0
     }
   }
@@ -270,9 +299,7 @@
   "value": {
     "mission_uuid": "",
     "message_type": "archive_response",
-    "message_detail": {
-      "success": true
-    }
+    "message_detail": null
   }
 }
 ```
@@ -320,7 +347,7 @@
 }
 ```
 
-- Response Success
+- Response Success: Control
 ```json
 {
   "receiver": "thread-control",
@@ -329,6 +356,20 @@
     "message_type": "data_response",
     "message_detail": {
       "mission_info": null,
+      "download_info": null
+    }
+  }
+}
+```
+
+- Response Success: Speed
+```json
+{
+  "receiver": "thread-speed",
+  "value": {
+    "mission_uuid": "",
+    "message_type": "register",
+    "message_detail": {
       "download_info": null
     }
   }

@@ -69,20 +69,19 @@ class ThreadTransformModule(threading.Thread):
         self._send_archiver_archive(mission_uuid, "show_request", message_detail)
 
     def _do_with_start_command(self, mission_uuid, message_detail):
-        self._send_worker_control(mission_uuid, "mission_start", None)
+        self._send_worker_control(mission_uuid, "mission_start", message_detail)
 
     def _do_with_pause_command(self, mission_uuid, message_detail):
-        self._send_worker_control(mission_uuid, "mission_pause", None)
+        self._send_worker_control(mission_uuid, "mission_pause", message_detail)
 
     def _do_with_delete_command(self, mission_uuid, message_detail):
         self._send_worker_control(mission_uuid, "mission_delete", message_detail)
 
     def _do_with_data_request(self, mission_uuid, message_detail):
-        self._send_archiver_archive(mission_uuid, "query_request", None)
+        self._send_archiver_archive(mission_uuid, "query_request", message_detail)
 
     def _do_with_update_request(self, mission_uuid, message_detail):
-        response_detail = {"download_info": message_detail["download_info"]}
-        self._send_archiver_archive(mission_uuid, "archive_request", response_detail)
+        self._send_archiver_archive(mission_uuid, "update_request", message_detail)
         response_detail = {"size": message_detail["update_size"]}
         self._send_universal_speed(mission_uuid, "change", response_detail)
 
@@ -104,7 +103,7 @@ class ThreadTransformModule(threading.Thread):
             self._send_archiver_archive(mission_uuid, "archive_request", response_detail)
 
     def _do_with_archive_response(self, mission_uuid, message_detail):
-        self._send_worker_control(mission_uuid, "mission_start", None)
+        self._send_worker_control(mission_uuid, "mission_start", message_detail)
 
     def _do_with_query_response(self, mission_uuid, message_detail):
         mission_info, download_info = message_detail["mission_info"], message_detail["download_info"]
