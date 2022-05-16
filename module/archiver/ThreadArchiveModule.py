@@ -17,6 +17,8 @@ class ThreadArchiveModule(threading.Thread):
         self._switch_message = switch_message
         self._message_queue = queue.Queue()
         self._run_status = True
+        self._create_success_template = "Mission was created successfully. Mission uuid: {}."
+        self._delete_success_template = "Mission was deleted successfully. Mission uuid: {}."
         self._init_module_tool()
         self._mission_dict = self._load_local_progress()
 
@@ -67,12 +69,11 @@ class ThreadArchiveModule(threading.Thread):
         self._mission_dict[mission_uuid]["mission_info"] = message_detail["mission_info"]
         self._mission_dict[mission_uuid]["download_info"] = None
         self._mission_dict[mission_uuid]["mission_state"] = "sleeping"
-        response_detail = {"content": "Mission was created successfully. Mission uuid: {}".format(mission_uuid)}
+        response_detail = {"content": self._create_success_template.format(mission_uuid)}
         self._send_universal_interact("normal", response_detail)
 
     def _do_with_show_request(self, mission_uuid, message_detail):
-        mission_uuid_list = self._generate_actionable_mission_uuid(mission_uuid)
-        if len(mission_uuid_list) == 1:
+        if mission_uuid in self._mission_dict:
             response_detail = {"rows": self._generate_table_mission_detail(mission_uuid)}
         else:
             response_detail = {"rows": self._generate_table_summary_detail()}
@@ -84,7 +85,7 @@ class ThreadArchiveModule(threading.Thread):
             if message_detail["with_file"]:
                 self._delete_mission_file(self._mission_dict[mission_uuid_item])
             self._mission_dict.pop(mission_uuid_item)
-            response_detail = {"content": "Mission was deleted successfully. Mission uuid: {}".format(mission_uuid)}
+            response_detail = {"content": self._delete_success_template.format(mission_uuid_item)}
             self._send_universal_interact("normal", response_detail)
 
     def _do_with_archive_request(self, mission_uuid, message_detail):
