@@ -63,7 +63,7 @@ class ThreadSpeedModule(threading.Thread):
 
     def _do_with_action_change(self, mission_uuid, message_detail):
         if mission_uuid in self._mission_dict:
-            length = message_detail["length"]
+            length = message_detail["size"]
             self._mission_dict[mission_uuid]["update_size"] += length
             self._mission_dict[mission_uuid]["current_size"] += length
 
