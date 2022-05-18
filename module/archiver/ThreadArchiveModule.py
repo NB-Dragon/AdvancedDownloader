@@ -67,10 +67,8 @@ class ThreadArchiveModule(threading.Thread):
             self._send_universal_log(mission_uuid, "file", abnormal_message)
 
     def _do_with_mission_create(self, mission_uuid, message_detail):
-        self._mission_dict[mission_uuid] = dict()
-        self._mission_dict[mission_uuid]["mission_info"] = message_detail["mission_info"]
-        self._mission_dict[mission_uuid]["download_info"] = None
-        self._mission_dict[mission_uuid]["mission_state"] = "sleeping"
+        self._mission_dict[mission_uuid] = self._generate_standard_mission_item(message_detail["mission_info"])
+        self._send_data_sync_message(mission_uuid)
         response_detail = {"content": self._create_success_template.format(mission_uuid)}
         self._send_universal_interact("normal", response_detail)
 
@@ -122,6 +120,7 @@ class ThreadArchiveModule(threading.Thread):
 
     def _recover_mission(self):
         for mission_uuid, mission_item in self._mission_dict.items():
+            self._send_data_sync_message(mission_uuid)
             if mission_item["mission_state"] == "running":
                 self._send_worker_control(mission_uuid, "mission_start", None)
             if mission_item["mission_state"] == "analyzing":
@@ -136,6 +135,14 @@ class ThreadArchiveModule(threading.Thread):
                 os.remove(associate_file)
             elif os.path.isdir(associate_file):
                 shutil.rmtree(associate_file)
+
+    @staticmethod
+    def _generate_standard_mission_item(mission_info):
+        result_dict = dict()
+        result_dict["mission_info"] = mission_info
+        result_dict["download_info"] = None
+        result_dict["mission_state"] = "sleeping"
+        return result_dict
 
     def _generate_actionable_mission_uuid(self, mission_uuid):
         if mission_uuid in self._mission_dict:
@@ -168,6 +175,10 @@ class ThreadArchiveModule(threading.Thread):
             file_root_path = file_uuid_list[0].split("/")[0]
             result_list.append(os.path.join(mission_save_path, file_root_path))
         return result_list
+
+    def _send_data_sync_message(self, mission_uuid):
+        response_detail = json.loads(json.dumps(self._mission_dict[mission_uuid]))
+        self._send_worker_control(mission_uuid, "data_sync", response_detail)
 
     def _send_semantic_transform(self, mission_uuid, message_type, message_detail):
         message_dict = self._generate_action_signal_template("thread-transform")
