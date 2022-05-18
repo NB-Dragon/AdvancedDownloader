@@ -1,4 +1,20 @@
 # Thread Control Module: thread-control
+## Data Sync
+- Request
+```json
+{
+  "receiver": "thread-control",
+  "value": {
+    "mission_uuid": "",
+    "message_type": "data_sync",
+    "message_detail": {
+      "mission_info": null,
+      "download_info": null
+    }
+  }
+}
+```
+
 ## Data Response
 - Request
 ```json
@@ -8,7 +24,6 @@
     "mission_uuid": "",
     "message_type": "data_response",
     "message_detail": {
-      "mission_info": null,
       "download_info": null
     }
   }
@@ -88,8 +103,9 @@
     "mission_uuid": "",
     "message_type": "update_request",
     "message_detail": {
-      "update_size": 0,
-      "download_info": null
+      "section_uuid": "",
+      "write_position": 0,
+      "write_length": 0
     }
   }
 }

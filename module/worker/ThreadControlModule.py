@@ -41,7 +41,9 @@ class ThreadControlModule(threading.Thread):
         return self._run_status or self._message_queue.qsize()
 
     def _handle_message_detail(self, mission_uuid, message_type, message_detail):
-        if message_type == "data_response":
+        if message_type == "data_sync":
+            self._do_with_data_sync(mission_uuid, message_detail)
+        elif message_type == "data_response":
             self._do_with_data_response(mission_uuid, message_detail)
         elif message_type == "mission_start":
             self._do_with_mission_start(mission_uuid, message_detail)
@@ -59,19 +61,25 @@ class ThreadControlModule(threading.Thread):
             abnormal_message = "Unknown message type of \"{}\"".format(message_type)
             self._send_universal_log(mission_uuid, "file", abnormal_message)
 
+    def _do_with_data_sync(self, mission_uuid, message_detail):
+        mission_info, download_info = message_detail["mission_info"], message_detail["download_info"]
+        self._mission_dict[mission_uuid] = {"mission_info": mission_info, "download_info": download_info}
+
     def _do_with_data_response(self, mission_uuid, message_detail):
-        if message_detail["download_info"] is None:
-            self._send_universal_log(mission_uuid, "console", "Analyze failed. Please retry.")
-        else:
-            self._mission_dict[mission_uuid] = message_detail
+        if isinstance(message_detail["download_info"], dict):
+            self._mission_dict[mission_uuid]["download_info"] = message_detail["download_info"]
             self._create_download_process(mission_uuid)
+        else:
+            self._send_universal_log(mission_uuid, "console", "Analyze failed. Please retry.")
 
     def _do_with_mission_start(self, mission_uuid, message_detail):
-        if mission_uuid in self._mission_dict:
-            if mission_uuid not in self._process_dict:
-                self._create_download_process(mission_uuid)
-        else:
-            self._send_semantic_transform(mission_uuid, "data_request", None)
+        mission_uuid_list = self._generate_actionable_mission_uuid(mission_uuid)
+        for mission_uuid_item in mission_uuid_list:
+            if isinstance(self._mission_dict[mission_uuid_item]["download_info"], dict):
+                if mission_uuid_item not in self._process_dict:
+                    self._create_download_process(mission_uuid_item)
+            else:
+                self._send_semantic_transform(mission_uuid_item, "data_request", None)
 
     def _do_with_mission_pause(self, mission_uuid, message_detail):
         if mission_uuid in self._process_dict:
@@ -113,6 +121,23 @@ class ThreadControlModule(threading.Thread):
     def _stop_all_process(self):
         for mission_uuid in self._process_dict.keys():
             self._pause_download_process(mission_uuid)
+
+    def _generate_actionable_mission_uuid(self, mission_uuid):
+        if mission_uuid in self._mission_dict:
+            return [mission_uuid]
+        elif mission_uuid is None:
+            return list(self._mission_dict.keys())
+        else:
+            return []
+
+    def _send_state_modify_message(self, mission_uuid, mission_state):
+        response_detail = {"mission_state": mission_state}
+        self._send_archiver_archive(mission_uuid, "state_request", response_detail)
+
+    def _send_archiver_archive(self, mission_uuid, message_type, message_detail):
+        message_dict = self._generate_action_signal_template("thread-archive")
+        message_dict["value"] = self._generate_signal_value(mission_uuid, message_type, message_detail)
+        self._switch_message.append_message(message_dict)
 
     def _send_semantic_transform(self, mission_uuid, message_type, message_detail):
         message_dict = self._generate_action_signal_template("thread-transform")
