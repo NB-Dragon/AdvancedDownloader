@@ -95,13 +95,13 @@ class ThreadTransformModule(threading.Thread):
             if message_detail["analyze_count"] < self._global_config["retry"]:
                 self._send_analyze_message(mission_uuid, message_detail["analyze_count"] + 1, mission_info)
             else:
-                self._send_data_done_message(mission_uuid, mission_info, download_info)
+                self._send_data_done_message(mission_uuid, download_info)
         else:
             response_detail = {"download_info": download_info}
             self._send_archiver_archive(mission_uuid, "archive_request", response_detail)
 
     def _do_with_archive_response(self, mission_uuid, message_detail):
-        self._modify_archive_state(mission_uuid, "sleeping")
+        self._send_state_modify_message(mission_uuid, "sleeping")
         self._send_worker_control(mission_uuid, "mission_start", message_detail)
 
     def _do_with_query_response(self, mission_uuid, message_detail):
@@ -111,19 +111,19 @@ class ThreadTransformModule(threading.Thread):
         else:
             response_detail = {"download_info": download_info}
             self._send_universal_speed(mission_uuid, "register", response_detail)
-            self._send_data_done_message(mission_uuid, mission_info, download_info)
+            self._send_data_done_message(mission_uuid, download_info)
 
     def _send_analyze_message(self, mission_uuid, current_count, mission_info):
-        self._modify_archive_state(mission_uuid, "analyzing")
+        self._send_state_modify_message(mission_uuid, "analyzing")
         response_detail = {"analyze_count": current_count, "mission_info": mission_info}
         self._send_analyzer_analyze(mission_uuid, "analyze_request", response_detail)
 
-    def _send_data_done_message(self, mission_uuid, mission_info, download_info):
-        self._modify_archive_state(mission_uuid, "sleeping")
-        response_detail = {"mission_info": mission_info, "download_info": download_info}
+    def _send_data_done_message(self, mission_uuid, download_info):
+        self._send_state_modify_message(mission_uuid, "sleeping")
+        response_detail = {"download_info": download_info}
         self._send_worker_control(mission_uuid, "data_response", response_detail)
 
-    def _modify_archive_state(self, mission_uuid, mission_state):
+    def _send_state_modify_message(self, mission_uuid, mission_state):
         response_detail = {"mission_state": mission_state}
         self._send_archiver_archive(mission_uuid, "state_request", response_detail)
 

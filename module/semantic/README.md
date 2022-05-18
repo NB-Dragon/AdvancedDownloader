@@ -270,7 +270,6 @@
     "mission_uuid": "",
     "message_type": "data_response",
     "message_detail": {
-      "mission_info": null,
       "download_info": null
     }
   }
@@ -355,7 +354,6 @@
     "mission_uuid": "",
     "message_type": "data_response",
     "message_detail": {
-      "mission_info": null,
       "download_info": null
     }
   }
