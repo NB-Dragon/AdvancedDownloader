@@ -83,12 +83,11 @@ class ThreadArchiveModule(threading.Thread):
         self._send_universal_interact("table", response_detail)
 
     def _do_with_delete_request(self, mission_uuid, message_detail):
-        mission_uuid_list = self._generate_actionable_mission_uuid(mission_uuid)
-        for mission_uuid_item in mission_uuid_list:
+        if mission_uuid in self._mission_dict:
             if message_detail["with_file"]:
-                self._delete_mission_file(self._mission_dict[mission_uuid_item])
-            self._mission_dict.pop(mission_uuid_item)
-            response_detail = {"content": self._delete_success_template.format(mission_uuid_item)}
+                self._delete_mission_file(self._mission_dict[mission_uuid])
+            self._mission_dict.pop(mission_uuid)
+            response_detail = {"content": self._delete_success_template.format(mission_uuid)}
             self._send_universal_interact("normal", response_detail)
 
     def _do_with_archive_request(self, mission_uuid, message_detail):
@@ -143,14 +142,6 @@ class ThreadArchiveModule(threading.Thread):
         result_dict["download_info"] = None
         result_dict["mission_state"] = "sleeping"
         return result_dict
-
-    def _generate_actionable_mission_uuid(self, mission_uuid):
-        if mission_uuid in self._mission_dict:
-            return [mission_uuid]
-        elif mission_uuid is None:
-            return list(self._mission_dict.keys())
-        else:
-            return []
 
     def _generate_table_summary_detail(self):
         result_list = [["mission_uuid", "mission_state"]]

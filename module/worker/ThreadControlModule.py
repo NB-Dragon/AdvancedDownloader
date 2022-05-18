@@ -82,14 +82,18 @@ class ThreadControlModule(threading.Thread):
                 self._send_semantic_transform(mission_uuid_item, "data_request", None)
 
     def _do_with_mission_pause(self, mission_uuid, message_detail):
-        if mission_uuid in self._process_dict:
-            self._pause_download_process(mission_uuid)
+        mission_uuid_list = self._generate_actionable_mission_uuid(mission_uuid)
+        for mission_uuid_item in mission_uuid_list:
+            if mission_uuid_item in self._process_dict:
+                self._pause_download_process(mission_uuid)
 
     def _do_with_mission_delete(self, mission_uuid, message_detail):
-        if mission_uuid in self._process_dict:
-            self._delete_download_process(mission_uuid, message_detail)
-        else:
-            self._do_with_process_finish(mission_uuid, message_detail)
+        mission_uuid_list = self._generate_actionable_mission_uuid(mission_uuid)
+        for mission_uuid_item in mission_uuid_list:
+            if mission_uuid_item in self._process_dict:
+                self._delete_download_process(mission_uuid_item, message_detail)
+            else:
+                self._do_with_process_finish(mission_uuid_item, message_detail)
 
     def _do_with_process_update(self, mission_uuid, message_detail):
         self._send_semantic_transform(mission_uuid, "update_request", message_detail)
