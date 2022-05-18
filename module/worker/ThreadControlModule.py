@@ -99,14 +99,13 @@ class ThreadControlModule(threading.Thread):
         self._send_semantic_transform(mission_uuid, "update_request", message_detail)
 
     def _do_with_process_pause(self, mission_uuid, message_detail):
-        if mission_uuid in self._process_dict:
-            self._process_dict.pop(mission_uuid)
+        self._send_state_modify_message(mission_uuid, "sleeping")
+        self._remove_process(mission_uuid)
 
     def _do_with_process_finish(self, mission_uuid, message_detail):
-        if mission_uuid in self._mission_dict:
-            self._mission_dict.pop(mission_uuid)
-        if mission_uuid in self._process_dict:
-            self._process_dict.pop(mission_uuid)
+        self._send_state_modify_message(mission_uuid, "sleeping")
+        self._remove_mission(mission_uuid)
+        self._remove_process(mission_uuid)
         self._send_semantic_transform(mission_uuid, "delete_request", message_detail)
 
     def _create_download_process(self, mission_uuid):
@@ -125,6 +124,14 @@ class ThreadControlModule(threading.Thread):
     def _stop_all_process(self):
         for mission_uuid in self._process_dict.keys():
             self._pause_download_process(mission_uuid)
+
+    def _remove_mission(self, mission_uuid):
+        if mission_uuid in self._mission_dict:
+            self._mission_dict.pop(mission_uuid)
+
+    def _remove_process(self, mission_uuid):
+        if mission_uuid in self._process_dict:
+            self._process_dict.pop(mission_uuid)
 
     def _generate_actionable_mission_uuid(self, mission_uuid):
         if mission_uuid in self._mission_dict:

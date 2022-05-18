@@ -89,9 +89,11 @@
 {
   "mission_uuid": "",
   "message_type": "process_update",
-  "message_detail": {
-    "download_info": null
-  }
+    "message_detail": {
+      "section_uuid": "",
+      "write_position": 0,
+      "write_length": 0
+    }
 }
 ```
 
