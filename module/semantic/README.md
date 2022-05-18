@@ -20,10 +20,35 @@
   "receiver": "thread-archive",
   "value": {
     "mission_uuid": "",
-    "message_type": "create_request",
+    "message_type": "mission_create",
     "message_detail": {
       "mission_info": null
     }
+  }
+}
+```
+
+## Start Command
+- Request
+```json
+{
+  "receiver": "thread-transform",
+  "value": {
+    "mission_uuid": "",
+    "message_type": "start_command",
+    "message_detail": null
+  }
+}
+```
+
+- Response
+```json
+{
+  "receiver": "thread-archive",
+  "value": {
+    "mission_uuid": "",
+    "message_type": "mission_start",
+    "message_detail": null
   }
 }
 ```
@@ -48,31 +73,6 @@
   "value": {
     "mission_uuid": "",
     "message_type": "show_request",
-    "message_detail": null
-  }
-}
-```
-
-## Start Command
-- Request
-```json
-{
-  "receiver": "thread-transform",
-  "value": {
-    "mission_uuid": "",
-    "message_type": "start_command",
-    "message_detail": null
-  }
-}
-```
-
-- Response
-```json
-{
-  "receiver": "thread-control",
-  "value": {
-    "mission_uuid": "",
-    "message_type": "mission_start",
     "message_detail": null
   }
 }

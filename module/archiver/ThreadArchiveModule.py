@@ -17,8 +17,8 @@ class ThreadArchiveModule(threading.Thread):
         self._switch_message = switch_message
         self._message_queue = queue.Queue()
         self._run_status = True
-        self._create_success_template = "Mission was created successfully. Mission uuid: {}."
-        self._delete_success_template = "Mission was deleted successfully. Mission uuid: {}."
+        self._create_success_template = "Mission was created successfully. Mission uuid is: {}."
+        self._delete_success_template = "Mission was deleted successfully. Mission uuid is: {}."
         self._init_module_tool()
         self._mission_dict = self._load_local_progress()
 
@@ -46,8 +46,10 @@ class ThreadArchiveModule(threading.Thread):
         return self._run_status or self._message_queue.qsize()
 
     def _handle_message_detail(self, mission_uuid, message_type, message_detail):
-        if message_type == "create_request":
-            self._do_with_create_request(mission_uuid, message_detail)
+        if message_type == "mission_create":
+            self._do_with_mission_create(mission_uuid, message_detail)
+        elif message_type == "mission_start":
+            self._do_with_mission_start(mission_uuid, message_detail)
         elif message_type == "show_request":
             self._do_with_show_request(mission_uuid, message_detail)
         elif message_type == "delete_request":
@@ -64,13 +66,16 @@ class ThreadArchiveModule(threading.Thread):
             abnormal_message = "Unknown message type of \"{}\"".format(message_type)
             self._send_universal_log(mission_uuid, "file", abnormal_message)
 
-    def _do_with_create_request(self, mission_uuid, message_detail):
+    def _do_with_mission_create(self, mission_uuid, message_detail):
         self._mission_dict[mission_uuid] = dict()
         self._mission_dict[mission_uuid]["mission_info"] = message_detail["mission_info"]
         self._mission_dict[mission_uuid]["download_info"] = None
         self._mission_dict[mission_uuid]["mission_state"] = "sleeping"
         response_detail = {"content": self._create_success_template.format(mission_uuid)}
         self._send_universal_interact("normal", response_detail)
+
+    def _do_with_mission_start(self, mission_uuid, message_detail):
+        self._send_worker_control(mission_uuid, "mission_start", message_detail)
 
     def _do_with_show_request(self, mission_uuid, message_detail):
         if mission_uuid in self._mission_dict:

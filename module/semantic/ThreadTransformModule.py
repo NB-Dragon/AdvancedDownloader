@@ -38,10 +38,10 @@ class ThreadTransformModule(threading.Thread):
     def _handle_message_detail(self, mission_uuid, message_type, message_detail):
         if message_type == "create_command":
             self._do_with_create_command(mission_uuid, message_detail)
-        elif message_type == "show_command":
-            self._do_with_show_command(mission_uuid, message_detail)
         elif message_type == "start_command":
             self._do_with_start_command(mission_uuid, message_detail)
+        elif message_type == "show_command":
+            self._do_with_show_command(mission_uuid, message_detail)
         elif message_type == "pause_command":
             self._do_with_pause_command(mission_uuid, message_detail)
         elif message_type == "delete_command":
@@ -63,13 +63,13 @@ class ThreadTransformModule(threading.Thread):
             self._send_universal_log(mission_uuid, "file", abnormal_message)
 
     def _do_with_create_command(self, mission_uuid, message_detail):
-        self._send_archiver_archive(mission_uuid, "create_request", message_detail)
+        self._send_archiver_archive(mission_uuid, "mission_create", message_detail)
+
+    def _do_with_start_command(self, mission_uuid, message_detail):
+        self._send_archiver_archive(mission_uuid, "mission_start", message_detail)
 
     def _do_with_show_command(self, mission_uuid, message_detail):
         self._send_archiver_archive(mission_uuid, "show_request", message_detail)
-
-    def _do_with_start_command(self, mission_uuid, message_detail):
-        self._send_worker_control(mission_uuid, "mission_start", message_detail)
 
     def _do_with_pause_command(self, mission_uuid, message_detail):
         self._send_worker_control(mission_uuid, "mission_pause", message_detail)

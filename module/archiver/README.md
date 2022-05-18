@@ -1,15 +1,40 @@
 # Thread Archive Module: thread-archive
-## Create Request
+## Mission Create
 - Request
 ```json
 {
   "receiver": "thread-archive",
   "value": {
     "mission_uuid": "",
-    "message_type": "create_request",
+    "message_type": "mission_create",
     "message_detail": {
       "mission_info": null
     }
+  }
+}
+```
+
+## Mission Start
+- Request
+```json
+{
+  "receiver": "thread-archive",
+  "value": {
+    "mission_uuid": "",
+    "message_type": "mission_start",
+    "message_detail": null
+  }
+}
+```
+
+- Response
+```json
+{
+  "receiver": "thread-control",
+  "value": {
+    "mission_uuid": "",
+    "message_type": "mission_start",
+    "message_detail": null
   }
 }
 ```
