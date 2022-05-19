@@ -51,7 +51,7 @@ class ProgressTool(object):
     @staticmethod
     def _update_match_section(match_section, position, length):
         if len(match_section) == 1:
-            return [[match_section[0] + length]] if match_section[0] == position else []
+            return [[match_section[0] + length]] if match_section[0] == position else [[length]]
         else:
             result_list = []
             if match_section[0] <= position - 1:
