@@ -129,6 +129,7 @@ class ThreadArchiveModule(threading.Thread):
     def _delete_mission_file(self, mission_item):
         mission_info, download_info = mission_item["mission_info"], mission_item["download_info"]
         associate_file_list = self._generate_associate_file_list(mission_info["save_path"], download_info)
+        associate_file_list = [item for item in associate_file_list if not item.endswith(os.path.sep)]
         for associate_file in associate_file_list:
             if os.path.isfile(associate_file):
                 os.remove(associate_file)
@@ -163,7 +164,7 @@ class ThreadArchiveModule(threading.Thread):
             for section_uuid_item in section_uuid_list:
                 result_list.append(self._project_helper.get_cache_section_path(section_uuid_item))
             file_uuid_list = list(download_info["file_info"].keys())
-            file_root_path = file_uuid_list[0].split("/")[0]
+            file_root_path = file_uuid_list[0]["save_path"].split("/")[0]
             result_list.append(os.path.join(mission_save_path, file_root_path))
         return result_list
 
