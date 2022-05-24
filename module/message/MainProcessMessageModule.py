@@ -39,10 +39,10 @@ class MainProcessMessageModule(threading.Thread):
 
     def _init_all_module(self):
         self._all_module = dict()
-        self._all_module["thread-interact"] = ThreadInteractModule(self._message_queue)
         self._all_module["thread-log"] = ThreadLogModule(self._project_helper)
         self._all_module["thread-open"] = ThreadOpenModule(self._message_queue)
         self._all_module["thread-speed"] = ThreadSpeedModule(self._message_queue)
+        self._all_module["thread-interact"] = ThreadInteractModule(self._message_queue)
         self._all_module["thread-analyze"] = ThreadAnalyzeModule(self._project_helper, self._message_queue)
         self._all_module["thread-archive"] = ThreadArchiveModule(self._project_helper, self._message_queue)
         self._all_module["thread-transform"] = ThreadTransformModule(self._project_helper, self._message_queue)

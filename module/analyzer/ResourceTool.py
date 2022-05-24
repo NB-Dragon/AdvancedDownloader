@@ -20,6 +20,9 @@ class ResourceTool(object):
         self._send_universal_log(mission_uuid, "console", "Analyzing done")
         return download_info
 
+    def _apply_forward_message(self, response_message):
+        self._switch_message.put(response_message)
+
     def _init_network_tool(self):
         self._network_tool = dict()
         static_cert_path = self._project_helper.get_static_cert_path()
@@ -53,15 +56,16 @@ class ResourceTool(object):
                 download_info["total_size"] += value["section_size"] if value["section_size"] else 0
 
     def _send_universal_log(self, mission_uuid, message_type, content):
-        message_dict = self._generate_action_signal_template("thread-log")
+        message_dict = self._generate_signal_template("thread-log")
         message_detail = {"sender": "ResourceTool", "content": content}
-        message_dict["value"] = self._generate_signal_value(mission_uuid, message_type, message_detail)
-        self._switch_message.append_message(message_dict)
+        message_dict["value"] = self._generate_execute_detail(mission_uuid, message_type, message_detail)
+        self._apply_forward_message(message_dict)
 
     @staticmethod
-    def _generate_action_signal_template(receiver):
-        return {"receiver": receiver, "value": {}}
+    def _generate_signal_template(receiver):
+        return {"handle": "resend", "receiver": receiver, "content": {}}
 
     @staticmethod
-    def _generate_signal_value(mission_uuid, message_type, message_detail) -> dict:
-        return {"mission_uuid": mission_uuid, "message_type": message_type, "message_detail": message_detail}
+    def _generate_execute_detail(mission_uuid, message_type, message_detail) -> dict:
+        signal_detail = {"mission_uuid": mission_uuid, "message_type": message_type, "message_detail": message_detail}
+        return {"signal_type": "execute", "signal_detail": signal_detail}
