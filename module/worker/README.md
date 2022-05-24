@@ -3,13 +3,17 @@
 - Request
 ```json
 {
+  "handle": "resend",
   "receiver": "thread-control",
-  "value": {
-    "mission_uuid": "",
-    "message_type": "data_sync",
-    "message_detail": {
-      "mission_info": null,
-      "download_info": null
+  "content": {
+    "signal_type": "execute",
+    "signal_detail": {
+      "mission_uuid": "",
+      "message_type": "data_sync",
+      "message_detail": {
+        "mission_info": null,
+        "download_info": null
+      }
     }
   }
 }
@@ -19,12 +23,16 @@
 - Request
 ```json
 {
+  "handle": "resend",
   "receiver": "thread-control",
-  "value": {
-    "mission_uuid": "",
-    "message_type": "data_response",
-    "message_detail": {
-      "download_info": null
+  "content": {
+    "signal_type": "execute",
+    "signal_detail": {
+      "mission_uuid": "",
+      "message_type": "data_response",
+      "message_detail": {
+        "download_info": null
+      }
     }
   }
 }
@@ -34,11 +42,15 @@
 - Request
 ```json
 {
+  "handle": "resend",
   "receiver": "thread-control",
-  "value": {
-    "mission_uuid": "",
-    "message_type": "mission_start",
-    "message_detail": null
+  "content": {
+    "signal_type": "execute",
+    "signal_detail": {
+      "mission_uuid": "",
+      "message_type": "mission_start",
+      "message_detail": null
+    }
   }
 }
 ```
@@ -46,11 +58,15 @@
 - Response Fail
 ```json
 {
+  "handle": "resend",
   "receiver": "thread-transform",
-  "value": {
-    "mission_uuid": "",
-    "message_type": "data_request",
-    "message_detail": null
+  "content": {
+    "signal_type": "execute",
+    "signal_detail": {
+      "mission_uuid": "",
+      "message_type": "data_request",
+      "message_detail": null
+    }
   }
 }
 ```
@@ -59,11 +75,15 @@
 - Request
 ```json
 {
+  "handle": "resend",
   "receiver": "thread-control",
-  "value": {
-    "mission_uuid": "",
-    "message_type": "mission_pause",
-    "message_detail": null
+  "content": {
+    "signal_type": "execute",
+    "signal_detail": {
+      "mission_uuid": "",
+      "message_type": "mission_pause",
+      "message_detail": null
+    }
   }
 }
 ```
@@ -72,12 +92,16 @@
 - Request
 ```json
 {
+  "handle": "resend",
   "receiver": "thread-control",
-  "value": {
-    "mission_uuid": "",
-    "message_type": "mission_delete",
-    "message_detail": {
-      "delete_file": false
+  "content": {
+    "signal_type": "execute",
+    "signal_detail": {
+      "mission_uuid": "",
+      "message_type": "mission_delete",
+      "message_detail": {
+        "delete_file": false
+      }
     }
   }
 }
@@ -87,27 +111,34 @@
 - Request
 ```json
 {
-  "mission_uuid": "",
-  "message_type": "process_update",
+  "signal_type": "execute",
+  "signal_detail": {
+    "mission_uuid": "",
+    "message_type": "process_update",
     "message_detail": {
       "section_uuid": "",
       "write_position": 0,
       "write_length": 0
     }
+  }
 }
 ```
 
 - Response
 ```json
 {
+  "handle": "resend",
   "receiver": "thread-transform",
-  "value": {
-    "mission_uuid": "",
-    "message_type": "update_request",
-    "message_detail": {
-      "section_uuid": "",
-      "write_position": 0,
-      "write_length": 0
+  "content": {
+    "signal_type": "execute",
+    "signal_detail": {
+      "mission_uuid": "",
+      "message_type": "update_request",
+      "message_detail": {
+        "section_uuid": "",
+        "write_position": 0,
+        "write_length": 0
+      }
     }
   }
 }
@@ -117,9 +148,12 @@
 - Request
 ```json
 {
-  "mission_uuid": "",
-  "message_type": "process_finish",
-  "message_detail": null
+  "signal_type": "execute",
+  "signal_detail": {
+    "mission_uuid": "",
+    "message_type": "process_finish",
+    "message_detail": null
+  }
 }
 ```
 
@@ -127,10 +161,13 @@
 - Request
 ```json
 {
-  "mission_uuid": "",
-  "message_type": "process_finish",
-  "message_detail": {
-    "delete_file": false
+  "signal_type": "execute",
+  "signal_detail": {
+    "mission_uuid": "",
+    "message_type": "process_finish",
+    "message_detail": {
+      "delete_file": false
+    }
   }
 }
 ```
@@ -138,12 +175,16 @@
 - Response
 ```json
 {
+  "handle": "resend",
   "receiver": "thread-transform",
-  "value": {
-    "mission_uuid": "",
-    "message_type": "delete_request",
-    "message_detail": {
-      "delete_file": false
+  "content": {
+    "signal_type": "execute",
+    "signal_detail": {
+      "mission_uuid": "",
+      "message_type": "delete_request",
+      "message_detail": {
+        "delete_file": false
+      }
     }
   }
 }
