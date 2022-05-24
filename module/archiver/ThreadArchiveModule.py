@@ -49,8 +49,8 @@ class ThreadArchiveModule(threading.Thread):
     def _handle_all_kind_of_message(self, message_dict):
         signal_type, signal_detail = message_dict["signal_type"], message_dict["signal_detail"]
         if signal_type == "execute":
-            message_type, message_detail = message_dict["message_type"], message_dict["message_detail"]
-            self._handle_message_detail(message_dict["mission_uuid"], message_type, message_detail)
+            message_type, message_detail = signal_detail["message_type"], signal_detail["message_detail"]
+            self._handle_message_detail(signal_detail["mission_uuid"], message_type, message_detail)
         elif signal_type == "stop":
             self._run_status = False
         else:
@@ -186,28 +186,28 @@ class ThreadArchiveModule(threading.Thread):
 
     def _send_semantic_transform(self, mission_uuid, message_type, message_detail):
         message_dict = self._generate_signal_template("thread-transform")
-        message_dict["value"] = self._generate_execute_detail(mission_uuid, message_type, message_detail)
+        message_dict["content"] = self._generate_execute_detail(mission_uuid, message_type, message_detail)
         self._apply_forward_message(message_dict)
 
     def _send_worker_control(self, mission_uuid, message_type, message_detail):
         message_dict = self._generate_signal_template("thread-control")
-        message_dict["value"] = self._generate_execute_detail(mission_uuid, message_type, message_detail)
+        message_dict["content"] = self._generate_execute_detail(mission_uuid, message_type, message_detail)
         self._apply_forward_message(message_dict)
 
     def _send_analyzer_analyze(self, mission_uuid, message_type, message_detail):
         message_dict = self._generate_signal_template("thread-analyze")
-        message_dict["value"] = self._generate_execute_detail(mission_uuid, message_type, message_detail)
+        message_dict["content"] = self._generate_execute_detail(mission_uuid, message_type, message_detail)
         self._apply_forward_message(message_dict)
 
     def _send_universal_interact(self, message_type, message_detail):
         message_dict = self._generate_signal_template("thread-interact")
-        message_dict["value"] = self._generate_execute_detail_without_uuid(message_type, message_detail)
+        message_dict["content"] = self._generate_execute_detail_without_uuid(message_type, message_detail)
         self._apply_forward_message(message_dict)
 
     def _send_universal_log(self, mission_uuid, message_type, content):
         message_dict = self._generate_signal_template("thread-log")
         message_detail = {"sender": "ThreadArchiveModule", "content": content}
-        message_dict["value"] = self._generate_execute_detail(mission_uuid, message_type, message_detail)
+        message_dict["content"] = self._generate_execute_detail(mission_uuid, message_type, message_detail)
         self._apply_forward_message(message_dict)
 
     @staticmethod

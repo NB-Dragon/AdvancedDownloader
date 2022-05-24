@@ -136,13 +136,13 @@ class CommandHelper(object):
 
     def _send_semantic_transform(self, mission_uuid, message_type, message_detail):
         message_dict = self._generate_signal_template("thread-transform")
-        message_dict["value"] = self._generate_execute_detail(mission_uuid, message_type, message_detail)
+        message_dict["content"] = self._generate_execute_detail(mission_uuid, message_type, message_detail)
         return message_dict
 
     def _send_universal_log(self, mission_uuid, message_type, content):
         message_dict = self._generate_signal_template("thread-log")
         message_detail = {"sender": "CommandHelper", "content": content}
-        message_dict["value"] = self._generate_execute_detail(mission_uuid, message_type, message_detail)
+        message_dict["content"] = self._generate_execute_detail(mission_uuid, message_type, message_detail)
         return message_dict
 
     @staticmethod
