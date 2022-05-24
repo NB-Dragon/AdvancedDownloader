@@ -18,22 +18,34 @@ class ThreadTransformModule(threading.Thread):
     def run(self) -> None:
         while self._should_thread_continue_to_execute():
             message_dict = self._message_queue.get()
-            if message_dict is None: continue
-            message_type, message_detail = message_dict["message_type"], message_dict["message_detail"]
-            self._handle_message_detail(message_dict["mission_uuid"], message_type, message_detail)
+            self._handle_all_kind_of_message(message_dict)
 
-    def append_message(self, message):
-        self._message_queue.put(message)
+    def get_message_queue(self):
+        return self._message_queue
 
     def send_stop_state(self):
-        self._run_status = False
-        self.append_message(None)
+        stop_message = {"signal_type": "stop", "signal_detail": None}
+        self._message_queue.put(stop_message)
+
+    def _apply_forward_message(self, response_message):
+        self._switch_message.put(response_message)
 
     def _init_module_tool(self):
         self._global_config = self._project_helper.get_project_config()["global"]
 
     def _should_thread_continue_to_execute(self):
         return self._run_status or self._message_queue.qsize()
+
+    def _handle_all_kind_of_message(self, message_dict):
+        signal_type, signal_detail = message_dict["signal_type"], message_dict["signal_detail"]
+        if signal_type == "execute":
+            message_type, message_detail = message_dict["message_type"], message_dict["message_detail"]
+            self._handle_message_detail(message_dict["mission_uuid"], message_type, message_detail)
+        elif signal_type == "stop":
+            self._run_status = False
+        else:
+            abnormal_message = "Unknown signal type: {}".format(signal_type)
+            self._send_universal_log(None, "file", abnormal_message)
 
     def _handle_message_detail(self, mission_uuid, message_type, message_detail):
         if message_type == "create_command":
@@ -128,35 +140,36 @@ class ThreadTransformModule(threading.Thread):
         self._send_archiver_archive(mission_uuid, "state_request", response_detail)
 
     def _send_analyzer_analyze(self, mission_uuid, message_type, message_detail):
-        message_dict = self._generate_action_signal_template("thread-analyze")
-        message_dict["value"] = self._generate_signal_value(mission_uuid, message_type, message_detail)
-        self._switch_message.append_message(message_dict)
+        message_dict = self._generate_signal_template("thread-analyze")
+        message_dict["value"] = self._generate_execute_detail(mission_uuid, message_type, message_detail)
+        self._apply_forward_message(message_dict)
 
     def _send_archiver_archive(self, mission_uuid, message_type, message_detail):
-        message_dict = self._generate_action_signal_template("thread-archive")
-        message_dict["value"] = self._generate_signal_value(mission_uuid, message_type, message_detail)
-        self._switch_message.append_message(message_dict)
+        message_dict = self._generate_signal_template("thread-archive")
+        message_dict["value"] = self._generate_execute_detail(mission_uuid, message_type, message_detail)
+        self._apply_forward_message(message_dict)
 
     def _send_worker_control(self, mission_uuid, message_type, message_detail):
-        message_dict = self._generate_action_signal_template("thread-control")
-        message_dict["value"] = self._generate_signal_value(mission_uuid, message_type, message_detail)
-        self._switch_message.append_message(message_dict)
+        message_dict = self._generate_signal_template("thread-control")
+        message_dict["value"] = self._generate_execute_detail(mission_uuid, message_type, message_detail)
+        self._apply_forward_message(message_dict)
 
     def _send_universal_speed(self, mission_uuid, message_type, message_detail):
-        message_dict = self._generate_action_signal_template("thread-speed")
-        message_dict["value"] = self._generate_signal_value(mission_uuid, message_type, message_detail)
-        self._switch_message.append_message(message_dict)
+        message_dict = self._generate_signal_template("thread-speed")
+        message_dict["value"] = self._generate_execute_detail(mission_uuid, message_type, message_detail)
+        self._apply_forward_message(message_dict)
 
     def _send_universal_log(self, mission_uuid, message_type, content):
-        message_dict = self._generate_action_signal_template("thread-log")
+        message_dict = self._generate_signal_template("thread-log")
         message_detail = {"sender": "ThreadTransformModule", "content": content}
-        message_dict["value"] = self._generate_signal_value(mission_uuid, message_type, message_detail)
-        self._switch_message.append_message(message_dict)
+        message_dict["value"] = self._generate_execute_detail(mission_uuid, message_type, message_detail)
+        self._apply_forward_message(message_dict)
 
     @staticmethod
-    def _generate_action_signal_template(receiver):
-        return {"receiver": receiver, "value": {}}
+    def _generate_signal_template(receiver):
+        return {"handle": "resend", "receiver": receiver, "content": {}}
 
     @staticmethod
-    def _generate_signal_value(mission_uuid, message_type, message_detail) -> dict:
-        return {"mission_uuid": mission_uuid, "message_type": message_type, "message_detail": message_detail}
+    def _generate_execute_detail(mission_uuid, message_type, message_detail) -> dict:
+        signal_detail = {"mission_uuid": mission_uuid, "message_type": message_type, "message_detail": message_detail}
+        return {"signal_type": "execute", "signal_detail": signal_detail}
