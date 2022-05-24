@@ -87,10 +87,7 @@ class ThreadControlModule(threading.Thread):
     def _do_with_mission_start(self, mission_uuid, message_detail):
         mission_uuid_list = self._generate_actionable_mission_uuid(mission_uuid)
         for mission_uuid_item in mission_uuid_list:
-            if isinstance(self._mission_dict[mission_uuid_item]["download_info"], dict):
-                if mission_uuid_item not in self._process_dict:
-                    self._create_download_process(mission_uuid_item)
-            else:
+            if mission_uuid_item not in self._process_dict:
                 self._send_semantic_transform(mission_uuid_item, "data_request", None)
 
     def _do_with_mission_pause(self, mission_uuid, message_detail):
