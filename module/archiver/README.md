@@ -3,12 +3,16 @@
 - Request
 ```json
 {
+  "handle": "resend",
   "receiver": "thread-archive",
-  "value": {
-    "mission_uuid": "",
-    "message_type": "mission_create",
-    "message_detail": {
-      "mission_info": null
+  "content": {
+    "signal_type": "execute",
+    "signal_detail": {
+      "mission_uuid": "",
+      "message_type": "mission_create",
+      "message_detail": {
+        "mission_info": null
+      }
     }
   }
 }
@@ -18,11 +22,15 @@
 - Request
 ```json
 {
+  "handle": "resend",
   "receiver": "thread-archive",
-  "value": {
-    "mission_uuid": "",
-    "message_type": "mission_start",
-    "message_detail": null
+  "content": {
+    "signal_type": "execute",
+    "signal_detail": {
+      "mission_uuid": "",
+      "message_type": "mission_start",
+      "message_detail": null
+    }
   }
 }
 ```
@@ -30,11 +38,15 @@
 - Response
 ```json
 {
+  "handle": "resend",
   "receiver": "thread-control",
-  "value": {
-    "mission_uuid": "",
-    "message_type": "mission_start",
-    "message_detail": null
+  "content": {
+    "signal_type": "execute",
+    "signal_detail": {
+      "mission_uuid": "",
+      "message_type": "mission_start",
+      "message_detail": null
+    }
   }
 }
 ```
@@ -43,11 +55,15 @@
 - Request
 ```json
 {
+  "handle": "resend",
   "receiver": "thread-archive",
-  "value": {
-    "mission_uuid": "",
-    "message_type": "show_request",
-    "message_detail": null
+  "content": {
+    "signal_type": "execute",
+    "signal_detail": {
+      "mission_uuid": "",
+      "message_type": "show_request",
+      "message_detail": null
+    }
   }
 }
 ```
@@ -56,12 +72,16 @@
 - Request
 ```json
 {
+  "handle": "resend",
   "receiver": "thread-archive",
-  "value": {
-    "mission_uuid": "",
-    "message_type": "delete_request",
-    "message_detail": {
-      "with_file": false
+  "content": {
+    "signal_type": "execute",
+    "signal_detail": {
+      "mission_uuid": "",
+      "message_type": "delete_request",
+      "message_detail": {
+        "with_file": false
+      }
     }
   }
 }
@@ -71,12 +91,16 @@
 - Request
 ```json
 {
+  "handle": "resend",
   "receiver": "thread-archive",
-  "value": {
-    "mission_uuid": "",
-    "message_type": "archive_request",
-    "message_detail": {
-      "download_info": null
+  "content": {
+    "signal_type": "execute",
+    "signal_detail": {
+      "mission_uuid": "",
+      "message_type": "archive_request",
+      "message_detail": {
+        "download_info": null
+      }
     }
   }
 }
@@ -85,11 +109,15 @@
 - Response
 ```json
 {
+  "handle": "resend",
   "receiver": "thread-transform",
-  "value": {
-    "mission_uuid": "",
-    "message_type": "archive_response",
-    "message_detail": null
+  "content": {
+    "signal_type": "execute",
+    "signal_detail": {
+      "mission_uuid": "",
+      "message_type": "archive_response",
+      "message_detail": null
+    }
   }
 }
 ```
@@ -98,11 +126,15 @@
 - Request
 ```json
 {
+  "handle": "resend",
   "receiver": "thread-archive",
-  "value": {
-    "mission_uuid": "",
-    "message_type": "query_request",
-    "message_detail": null
+  "content": {
+    "signal_type": "execute",
+    "signal_detail": {
+      "mission_uuid": "",
+      "message_type": "query_request",
+      "message_detail": null
+    }
   }
 }
 ```
@@ -110,13 +142,17 @@
 - Response
 ```json
 {
+  "handle": "resend",
   "receiver": "thread-transform",
-  "value": {
-    "mission_uuid": "",
-    "message_type": "query_response",
-    "message_detail": {
-      "mission_info": null,
-      "download_info": null
+  "content": {
+    "signal_type": "execute",
+    "signal_detail": {
+      "mission_uuid": "",
+      "message_type": "query_response",
+      "message_detail": {
+        "mission_info": null,
+        "download_info": null
+      }
     }
   }
 }
@@ -126,14 +162,18 @@
 - Request
 ```json
 {
+  "handle": "resend",
   "receiver": "thread-archive",
-  "value": {
-    "mission_uuid": "",
-    "message_type": "update_request",
-    "message_detail": {
-      "section_uuid": "",
-      "write_position": 0,
-      "write_length": 0
+  "content": {
+    "signal_type": "execute",
+    "signal_detail": {
+      "mission_uuid": "",
+      "message_type": "update_request",
+      "message_detail": {
+        "section_uuid": "",
+        "write_position": 0,
+        "write_length": 0
+      }
     }
   }
 }
@@ -143,12 +183,16 @@
 - Request
 ```json
 {
+  "handle": "resend",
   "receiver": "thread-archive",
-  "value": {
-    "mission_uuid": "",
-    "message_type": "state_request",
-    "message_detail": {
-      "mission_state": "sleeping|analyzing|running"
+  "content": {
+    "signal_type": "execute",
+    "signal_detail": {
+      "mission_uuid": "",
+      "message_type": "state_request",
+      "message_detail": {
+        "mission_state": "sleeping|analyzing|running"
+      }
     }
   }
 }
