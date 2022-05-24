@@ -135,20 +135,21 @@ class CommandHelper(object):
         return urllib.parse.quote(link, safe=":/?#[]@!$&'()*+,;=%")
 
     def _send_semantic_transform(self, mission_uuid, message_type, message_detail):
-        message_dict = self._generate_action_signal_template("thread-transform")
-        message_dict["value"] = self._generate_signal_value(mission_uuid, message_type, message_detail)
+        message_dict = self._generate_signal_template("thread-transform")
+        message_dict["value"] = self._generate_execute_detail(mission_uuid, message_type, message_detail)
         return message_dict
 
     def _send_universal_log(self, mission_uuid, message_type, content):
-        message_dict = self._generate_action_signal_template("thread-log")
+        message_dict = self._generate_signal_template("thread-log")
         message_detail = {"sender": "CommandHelper", "content": content}
-        message_dict["value"] = self._generate_signal_value(mission_uuid, message_type, message_detail)
+        message_dict["value"] = self._generate_execute_detail(mission_uuid, message_type, message_detail)
         return message_dict
 
     @staticmethod
-    def _generate_action_signal_template(receiver):
-        return {"receiver": receiver, "value": {}}
+    def _generate_signal_template(receiver):
+        return {"handle": "resend", "receiver": receiver, "content": {}}
 
     @staticmethod
-    def _generate_signal_value(mission_uuid, message_type, message_detail) -> dict:
-        return {"mission_uuid": mission_uuid, "message_type": message_type, "message_detail": message_detail}
+    def _generate_execute_detail(mission_uuid, message_type, message_detail) -> dict:
+        signal_detail = {"mission_uuid": mission_uuid, "message_type": message_type, "message_detail": message_detail}
+        return {"signal_type": "execute", "signal_detail": signal_detail}
