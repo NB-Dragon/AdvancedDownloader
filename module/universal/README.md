@@ -3,11 +3,15 @@
 - Request
 ```json
 {
+  "handle": "resend",
   "receiver": "thread-interact",
-  "value": {
-    "message_type": "normal",
-    "message_detail": {
-      "content": ""
+  "content": {
+    "signal_type": "execute",
+    "signal_detail": {
+      "message_type": "normal",
+      "message_detail": {
+        "content": ""
+      }
     }
   }
 }
@@ -17,11 +21,15 @@
 - Request
 ```json
 {
+  "handle": "resend",
   "receiver": "thread-interact",
-  "value": {
-    "message_type": "table",
-    "message_detail": {
-      "rows": [[], [], []]
+  "content": {
+    "signal_type": "execute",
+    "signal_detail": {
+      "message_type": "table",
+      "message_detail": {
+        "rows": [[], [], []]
+      }
     }
   }
 }
@@ -32,13 +40,17 @@
 - Request
 ```json
 {
+  "handle": "resend",
   "receiver": "thread-log",
-  "value": {
-    "mission_uuid": "",
-    "message_type": "console",
-    "message_detail": {
-      "sender": "ClassName",
-      "content": "str"
+  "content": {
+    "signal_type": "execute",
+    "signal_detail": {
+      "mission_uuid": "",
+      "message_type": "console",
+      "message_detail": {
+        "sender": "ClassName",
+        "content": "str"
+      }
     }
   }
 }
@@ -48,13 +60,17 @@
 - Request
 ```json
 {
+  "handle": "resend",
   "receiver": "thread-log",
-  "value": {
-    "mission_uuid": "",
-    "message_type": "file",
-    "message_detail": {
-      "sender": "ClassName",
-      "content": "str"
+  "content": {
+    "signal_type": "execute",
+    "signal_detail": {
+      "mission_uuid": "",
+      "message_type": "file",
+      "message_detail": {
+        "sender": "ClassName",
+        "content": "str"
+      }
     }
   }
 }
@@ -65,12 +81,16 @@
 - Request
 ```json
 {
+  "handle": "resend",
   "receiver": "thread-open",
-  "value": {
-    "mission_uuid": "",
-    "message_type": "open",
-    "message_detail": {
-      "path": "absolute_path"
+  "content": {
+    "signal_type": "execute",
+    "signal_detail": {
+      "mission_uuid": "",
+      "message_type": "open",
+      "message_detail": {
+        "path": "absolute_path"
+      }
     }
   }
 }
@@ -81,12 +101,16 @@
 - Request
 ```json
 {
+  "handle": "resend",
   "receiver": "thread-speed",
-  "value": {
-    "mission_uuid": "",
-    "message_type": "register",
-    "message_detail": {
-      "download_info": null
+  "content": {
+    "signal_type": "execute",
+    "signal_detail": {
+      "mission_uuid": "",
+      "message_type": "register",
+      "message_detail": {
+        "download_info": null
+      }
     }
   }
 }
@@ -96,12 +120,16 @@
 - Request
 ```json
 {
+  "handle": "resend",
   "receiver": "thread-speed",
-  "value": {
-    "mission_uuid": "",
-    "message_type": "change",
-    "message_detail": {
-      "size": 0
+  "content": {
+    "signal_type": "execute",
+    "signal_detail": {
+      "mission_uuid": "",
+      "message_type": "change",
+      "message_detail": {
+        "size": 0
+      }
     }
   }
 }
@@ -111,11 +139,15 @@
 - Request
 ```json
 {
+  "handle": "resend",
   "receiver": "thread-speed",
-  "value": {
-    "mission_uuid": "",
-    "message_type": "delete",
-    "message_detail": null
+  "content": {
+    "signal_type": "execute",
+    "signal_detail": {
+      "mission_uuid": "",
+      "message_type": "delete",
+      "message_detail": null
+    }
   }
 }
 ```
