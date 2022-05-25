@@ -11,8 +11,7 @@
       "mission_uuid": "",
       "message_type": "data_sync",
       "message_detail": {
-        "mission_info": null,
-        "download_info": null
+        "mission_info": null
       }
     }
   }

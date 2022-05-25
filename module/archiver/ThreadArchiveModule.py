@@ -181,7 +181,7 @@ class ThreadArchiveModule(threading.Thread):
         return result_list
 
     def _send_data_sync_message(self, mission_uuid):
-        response_detail = json.loads(json.dumps(self._mission_dict[mission_uuid]))
+        response_detail = {"mission_info": self._mission_dict[mission_uuid]["mission_info"]}
         self._send_worker_control(mission_uuid, "data_sync", response_detail)
 
     def _send_semantic_transform(self, mission_uuid, message_type, message_detail):

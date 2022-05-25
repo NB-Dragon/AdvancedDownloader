@@ -74,8 +74,8 @@ class ThreadControlModule(threading.Thread):
             self._send_universal_log(mission_uuid, "file", abnormal_message)
 
     def _do_with_data_sync(self, mission_uuid, message_detail):
-        mission_info, download_info = message_detail["mission_info"], message_detail["download_info"]
-        self._mission_dict[mission_uuid] = {"mission_info": mission_info, "download_info": download_info}
+        mission_detail = {"mission_info": message_detail["mission_info"], "download_info": None}
+        self._mission_dict[mission_uuid] = mission_detail
 
     def _do_with_data_response(self, mission_uuid, message_detail):
         if isinstance(message_detail["download_info"], dict):
@@ -113,8 +113,8 @@ class ThreadControlModule(threading.Thread):
 
     def _do_with_process_finish(self, mission_uuid, message_detail):
         self._send_state_modify_message(mission_uuid, "sleeping")
-        self._remove_mission(mission_uuid)
         self._remove_process(mission_uuid)
+        self._remove_mission(mission_uuid)
         self._send_semantic_transform(mission_uuid, "delete_request", message_detail)
 
     def _create_download_process(self, mission_uuid):
