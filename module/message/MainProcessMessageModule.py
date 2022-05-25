@@ -49,8 +49,8 @@ class MainProcessMessageModule(threading.Thread):
         self._all_module["thread-control"] = ThreadControlModule(self._project_helper, self._message_queue)
 
     def _start_all_module(self):
-        for listener in self._all_module.values():
-            listener.start()
+        for module in self._all_module.values():
+            module.start()
 
     def _should_thread_continue_to_execute(self):
         return self._run_status or self._message_queue.qsize()
@@ -75,8 +75,8 @@ class MainProcessMessageModule(threading.Thread):
             self._send_universal_log(None, "console", message_content)
 
     def _stop_all_message(self):
-        for listener in self._all_module.values():
-            listener.send_stop_state()
+        for module in self._all_module.values():
+            module.send_stop_state()
 
     def _handle_message_content(self, message_receiver, message_content):
         if message_receiver in self._all_module:

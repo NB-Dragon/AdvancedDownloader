@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Create Time: 2022/03/01 20:00
+# Create Time: 2022/05/01 20:00
 # Create User: NB-Dragon
 import queue
 import threading
@@ -34,8 +34,8 @@ class SubProcessMessageModule(threading.Thread):
         self._all_module["thread-log"] = ThreadLogModule(self._project_helper)
 
     def _start_all_module(self):
-        for listener in self._all_module.values():
-            listener.start()
+        for module in self._all_module.values():
+            module.start()
 
     def _should_thread_continue_to_execute(self):
         return self._run_status or self._message_queue.qsize()
@@ -51,8 +51,8 @@ class SubProcessMessageModule(threading.Thread):
             self._send_universal_log(None, "file", abnormal_message)
 
     def _stop_all_message(self):
-        for listener in self._all_module.values():
-            listener.send_stop_state()
+        for module in self._all_module.values():
+            module.send_stop_state()
 
     def _handle_message_content(self, message_receiver, message_content):
         if message_receiver in self._all_module:
