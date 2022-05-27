@@ -150,7 +150,7 @@
   "signal_type": "execute",
   "signal_detail": {
     "mission_uuid": "",
-    "message_type": "process_finish",
+    "message_type": "process_pause",
     "message_detail": null
   }
 }
