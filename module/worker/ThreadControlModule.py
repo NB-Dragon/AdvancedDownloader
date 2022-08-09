@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # Create Time: 2022/01/01 00:00
 # Create User: NB-Dragon
-import queue
+import multiprocessing
 import threading
 from module.archiver.ProgressTool import ProgressTool
 
@@ -12,7 +12,7 @@ class ThreadControlModule(threading.Thread):
         super().__init__()
         self._project_helper = project_helper
         self._switch_message = switch_message
-        self._message_queue = queue.Queue()
+        self._message_queue = multiprocessing.Queue()
         self._run_status = True
         self._init_module_tool()
         self._mission_dict = dict()
