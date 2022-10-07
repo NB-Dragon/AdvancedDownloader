@@ -22,7 +22,7 @@ Project link: [https://github.com/NB-Dragon/AdvancedDownloader](https://github.c
 All systems which support Python3.
 
 # License
-GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
+GNU AFFERO GENERAL PUBLIC LICENSE Version 3, 19 November 2007
 
 # Download effect Test
 <p align=center><img alt="下载速度测试" src="static/image/SpeedListener.png"></p>
